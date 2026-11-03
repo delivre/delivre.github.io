@@ -956,8 +956,8 @@ const pawn=(body,head,h=.36)=>{const g=new THREE.Group();g.add(at(mesh(new THREE
  // escaliers qui montent entre les gradins
  [-.5,0,.5].forEach(a=>{for(let k=0;k<4;k++){const st=mesh(new THREE.BoxGeometry(.06,.02,.12),M.terra);const r=.49+k*.14;st.position.set(Math.cos(Math.PI/2+a)*r,.09+k*.08,-Math.sin(Math.PI/2+a)*r);st.rotation.y=a;g.add(st)}});
  // l'orchestra (le cercle de danse) et la scène
- g.add(at(mesh(new THREE.CylinderGeometry(.4,.42,.04,40),M.sandC),0,.02,0));
- g.add(at(mesh(new THREE.BoxGeometry(1.3,.12,.32),M.marbleD),0,.06,.52));
+ g.add(at(mesh(new THREE.CylinderGeometry(.4,.42,.08,40),M.sandC),0,0,0));
+ g.add(at(mesh(new THREE.BoxGeometry(1.3,.16,.32),M.marbleD),0,.04,.52));
  g.add(at(mesh(new THREE.BoxGeometry(1.3,.16,.05),M.terra),0,.2,.67));
  [-.5,-.25,0,.25,.5].forEach(x=>{g.add(at(mesh(new THREE.CylinderGeometry(.035,.04,.36,12),M.marbleP),x,.3,.6));g.add(at(mesh(new THREE.BoxGeometry(.09,.03,.09),M.marbleP),x,.49,.6))});
  g.add(at(mesh(new THREE.BoxGeometry(1.36,.05,.14),M.marbleP),0,.52,.6));
@@ -1019,7 +1019,7 @@ if(PAPER){const g=new THREE.Group();const stoneC=plastic('#cbbfa6');
  tp(-.14,0,0,.62,0);tp(.14,0,0,.62,1);
  g.children.forEach(o=>{if(o.isGroup)o.position.y+=.21});put(g,...PLACES[0])}
 else
-{const g=new THREE.Group();g.add(at(mesh(new THREE.CylinderGeometry(.85,.9,.06,40),M.marbleD),0,.03,0));
+{const g=new THREE.Group();g.add(at(mesh(new THREE.CylinderGeometry(.85,.9,.1,40),M.marbleD),0,.01,0));
  [0,1,2,3,4].forEach(i=>{const a=Math.PI*(.55+i*.225);const s=mesh(new THREE.BoxGeometry(.2,.55+i%2*.1,.13),M.stone);s.position.set(Math.cos(a)*.7,.3,Math.sin(a)*.7);s.rotation.y=-a;g.add(s)});
  [-.45,-.15,.15,.45].map(t=>t*Math.PI).forEach(a=>{g.add(at(mesh(new THREE.CylinderGeometry(.07,.08,.8,14),M.marbleP),Math.cos(a)*.66,.43,Math.sin(a)*.66))});
  const arch=mesh(new THREE.TorusGeometry(.66,.07,8,30,Math.PI*.9),M.marbleP);arch.rotation.set(Math.PI/2,0,-Math.PI*.45);arch.position.y=.86;g.add(arch);
@@ -1497,9 +1497,9 @@ function drawTab(c,T){if(!PAPER||!REVEAL[SCR.id]||!(TAB.need||TAB.rev))return;if
 const x=tabX(),y=296;
  // la bande de papier qui sort de derrière l'image : on voit qu'on tire un mécanisme, pas une étiquette qu'on arrache
  c.save();c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.fillRect(520,308,x-30-520+2,36);c.fillStyle='rgba(60,35,10,.22)';c.fillRect(520,308,x-30-520+2,3);c.fillRect(520,341,x-30-520+2,3);c.strokeStyle='rgba(120,80,40,.5)';c.setLineDash([5,6]);c.lineWidth=1.5;c.beginPath();c.moveTo(560,326);c.lineTo(x-44,326);c.stroke();c.restore();
- c.save();c.shadowColor='rgba(20,10,0,.45)';c.shadowBlur=8;c.shadowOffsetY=4;c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.beginPath();c.moveTo(x-30,y);c.lineTo(x+46,y);c.quadraticCurveTo(x+58,y+30,x+46,y+60);c.lineTo(x-30,y+60);c.closePath();c.fill();c.restore();
+ c.save();c.translate(x-30,y+30);c.scale(1.32,1.32);c.translate(-(x-30),-(y+30));c.save();c.shadowColor='rgba(20,10,0,.45)';c.shadowBlur=8;c.shadowOffsetY=4;c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.beginPath();c.moveTo(x-30,y);c.lineTo(x+46,y);c.quadraticCurveTo(x+58,y+30,x+46,y+60);c.lineTo(x-30,y+60);c.closePath();c.fill();c.restore();
  c.strokeStyle='rgba(120,80,40,.8)';c.lineWidth=2;c.beginPath();c.moveTo(x-30,y);c.lineTo(x+46,y);c.quadraticCurveTo(x+58,y+30,x+46,y+60);c.lineTo(x-30,y+60);c.stroke();
- c.font='700 26px Caveat, cursive';c.fillStyle='#5a3418';c.fillText('tirer',x-22,y+38);c.strokeStyle='#5a3418';c.lineWidth=3;c.beginPath();c.moveTo(x+22,y+30);c.lineTo(x+40,y+30);c.moveTo(x+32,y+22);c.lineTo(x+40,y+30);c.lineTo(x+32,y+38);c.stroke();
+ c.font='700 26px Caveat, cursive';c.fillStyle='#5a3418';c.fillText('tirer',x-22,y+38);c.strokeStyle='#5a3418';c.lineWidth=3;c.beginPath();c.moveTo(x+22,y+30);c.lineTo(x+40,y+30);c.moveTo(x+32,y+22);c.lineTo(x+40,y+30);c.lineTo(x+32,y+38);c.stroke();c.restore();
  if(!TAB.rev&&typeof drawHand==='function'){const k=(T*.6)%1,e=clamp((k-.2)/.5);drawHand(c,x+8+e*70,y+44,k>.15&&k<.75)}}
 function drawPieces(c,P,T,t){P.forEach((p,i)=>{const k=clamp((t-.15-i*.13)/.42),e=k<=0?0:easeBack(k);if(e<=0)return;const d=p.depth,dx=Math.sin(T*.55+d*1.3)*(1.5+d*1.6),dy=Math.cos(T*.4+d)*d*.6,piv=p.base||700;
   if(PAPER&&!p.vivid){const v=mkC(),vx=v.getContext('2d');vx.filter='saturate(1.45) brightness(1.05) contrast(1.04)';vx.drawImage(p.c,0,0);p.c=v;p.vivid=1}
@@ -1607,14 +1607,14 @@ function handBox(c,x,y,w,h){c.beginPath();const seg=(x0,y0,x1,y1,o)=>{c.moveTo(x
   seg(x-6,y,x+w+8,y+2,0);seg(x+w,y-6,x+w-2,y+h+7,9);seg(x+w+5,y+h,x-4,y+h-2,17);seg(x+2,y+h+6,x,y-7,27);c.stroke()}
 function drawJournal(c,T){c.save();c.textBaseline='alphabetic';
   if(JR.note){// Alice encadre l'essentiel au crayon, avec une petite étoile
-    const k=clamp((performance.now()-JR.note.t0)/700);let fz=40;for(;fz>=28;fz-=2){c.font=`600 ${fz}px Caveat, "Patrick Hand", cursive`;if(jLines(c,JR.note.text,520).length<=2)break}
+    const k=clamp((performance.now()-JR.note.t0)/700);let fz=46;for(;fz>=32;fz-=2){c.font=`600 ${fz}px Caveat, "Patrick Hand", cursive`;if(jLines(c,JR.note.text,520).length<=2)break}
     const ls=jLines(c,JR.note.text,520),bh=ls.length*fz*1.15+30,by=640-bh/2;c.strokeStyle='#22306e';c.lineWidth=2.6;c.globalAlpha=k;handBox(c,110,by,560,bh);
     // de temps en temps, un petit dessin au stylo à côté du cadre, jamais au même endroit
     const dk=(JR.noteN||0)%3;if(dk){const px=dk===1?660:120,py=dk===1?by-10:by+bh+6;c.save();c.translate(px,py);c.rotate(dk===1?.15:-.1);c.beginPath();
       if(dk===1){for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2,rr=i%2?6:14;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}c.closePath()}else{c.moveTo(-14,4);c.quadraticCurveTo(-4,-12,6,0);c.quadraticCurveTo(14,10,22,-6);c.moveTo(-14,10);c.quadraticCurveTo(-4,-6,6,6);c.quadraticCurveTo(14,16,22,0)}c.stroke();c.restore()}
     let y=by+fz*.95+12;ls.forEach(l=>{c.fillText(l,390-c.measureText(l).width/2,y);y+=fz*1.15});if(waitTap){c.fillStyle='#c8902a';c.globalAlpha=.5+.5*Math.sin(T*4);c.font='26px serif';c.fillText('▸',700,736)}c.restore();return}
-  let items=JR.items.slice(-2),fs=40,lines;const fit=()=>{for(fs=40;fs>=34;fs-=2){c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`;lines=0;items.forEach(it=>lines+=jLines(c,it.text,600).length);if(lines*(fs*1.15)<=(PAPER?150:190))return true}return false};
-  if(!fit()){items=JR.items.slice(-1);if(!fit()){fs=34;c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`}}
+  let items=JR.items.slice(-2),fs=40,lines;const fit=()=>{for(fs=44;fs>=38;fs-=2){c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`;lines=0;items.forEach(it=>lines+=jLines(c,it.text,600).length);if(lines*(fs*1.15)<=(PAPER?150:190))return true}return false};
+  if(!fit()){items=JR.items.slice(-1);if(!fit()){fs=38;c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`}}
   const lh=fs*1.15;let y=(PAPER?532:548)+lh*.85;items.forEach((it,i)=>{const old=i<items.length-1;c.fillStyle=INKC[it.who]||'#22306e';c.globalAlpha=old?.42:1;let n=jChars(it);for(const ln of jLines(c,it.text,600)){const s=ln.slice(0,Math.max(0,n));c.fillText(s,100,y);n-=ln.length+1;y+=lh}});
   c.globalAlpha=1;if(waitTap&&!jWriting()&&JR.items.length){c.fillStyle='#c8902a';c.globalAlpha=.5+.5*Math.sin(T*4);c.font='26px serif';c.fillText('▸',700,736)}c.restore()}
 
@@ -1788,42 +1788,43 @@ function mkTheatre(){const items=STORY.map(([n,s],i)=>({n,s,i,hx:150+i*156,hy:25
    [[200,'100',1],[384,'1 000',4],[568,'16 000',12]].forEach(([x,l,n],i)=>{const nn=i===2?Math.round(n+rv*9):n;pile(c,x,404,nn,false);if(i===2&&rv>0&&rv<1){c.save();c.globalCompositeOperation='lighter';blob(c,x,404-nn*15,70,'rgba(255,220,140,.4)');c.restore()}
     const sel=M.pick===i,good=M.state==='reveal'&&i===2,lift=sel?-10:0;c.save();c.translate(0,lift);tagBox(c,x-78,438,156,62,8);c.font='700 40px Caveat, cursive';c.fillStyle=good?'#2a6a2a':'#3a2410';c.textAlign='center';c.fillText(l,x+8,482);c.textAlign='start';c.restore();
     if(M.state==='predict'&&i===1){const k=(tutT()*.35)%1,u=.5-.5*Math.cos(k*Math.PI*2);drawHand(c,200+u*368+40,520,false)}});
-   if(M.state==='reveal'){txt(c,'16 000 vers',568,190-Math.round(rv*9)*0,40,'#ffd27a');txt(c,'toucher pour continuer',384,740,30,'#ffd27a')}else txt(c,'toucher une étiquette',384,740,28,'#fff3d6');return}
-  if(M.state==='predict'||M.state==='reveal'){c.drawImage(theatreNight,0,0);txt(c,'Combien de vers ?',384,190,48);[[220,'100',1],[384,'1 000',4],[548,'16 000',12]].forEach(([x,l,n],i)=>{pile(c,x,560,n,M.pick===i);txt(c,l,x,330,40,M.pick===i?'#ffd27a':'#fff3d6');if(M.state==='predict'){const pu=.5+.5*Math.sin(T*4+i);c.save();c.strokeStyle=`rgba(255,226,160,${.35+.4*pu})`;c.lineWidth=3;c.setLineDash([6,8]);c.beginPath();c.ellipse(x,450,78,170,0,0,7);c.stroke();c.restore()}});if(M.state==='predict')txt(c,'toucher une réponse',384,740,28,'#fff3d6');if(M.state==='reveal')txt(c,'toucher pour continuer',384,740,30,'#ffd27a');return}
+   if(M.state==='reveal'){txt(c,'16 000 vers',568,190-Math.round(rv*9)*0,40,'#ffd27a');txt(c,'toucher pour continuer',384,740,36,'#ffd27a')}else txt(c,'toucher une étiquette',384,740,34,'#fff3d6');return}
+  if(M.state==='predict'||M.state==='reveal'){c.drawImage(theatreNight,0,0);txt(c,'Combien de vers ?',384,190,48);[[220,'100',1],[384,'1 000',4],[548,'16 000',12]].forEach(([x,l,n],i)=>{pile(c,x,560,n,M.pick===i);txt(c,l,x,330,40,M.pick===i?'#ffd27a':'#fff3d6');if(M.state==='predict'){const pu=.5+.5*Math.sin(T*4+i);c.save();c.strokeStyle=`rgba(255,226,160,${.35+.4*pu})`;c.lineWidth=3;c.setLineDash([6,8]);c.beginPath();c.ellipse(x,450,78,170,0,0,7);c.stroke();c.restore()}});if(M.state==='predict')txt(c,'toucher une réponse',384,740,34,'#fff3d6');if(M.state==='reveal')txt(c,'toucher pour continuer',384,740,36,'#ffd27a');return}
   c.drawImage(theatreNight,0,0);
   if(M.state==='showA'||M.state==='darkA'||M.state==='recallA'||M.state==='scoreA'){const now=performance.now();
-   tagBox(c,40,8,688,96,10);c.save();c.font='600 30px Caveat, cursive';c.fillStyle='#3a2410';c.textAlign='center';
-   if(M.state==='showA'){c.fillText('D’abord, sans les lieux : l’aède chante le festin.',400,46);c.fillText('Retenir les quatre plats, dans l’ordre.',400,84)}
-   else{c.fillText('Le festin, dans l’ordre ?',400,64)}c.restore();
-   if(M.state==='showA'){FEAST.forEach((f,i)=>{const x=150+i*156,y=300;c.save();c.translate(x,y);c.scale(1.5,1.5);c.drawImage(f.s,-f.s.width/2,-f.s.height/2);c.restore();txt(c,f.n,x,y+82,26,'#fff3d6','center','600')});
-    tagBox(c,234,410,300,70,10);txt(c,'J’ai retenu',384,446,36,'#3a2410')}
+   tagBox(c,40,8,688,118,10);c.save();c.font='600 42px Caveat, cursive';c.fillStyle='#3a2410';c.textAlign='center';
+   if(M.state==='showA'){c.fillText('D’abord, une simple liste.',400,56);c.fillText('Retenir les plats, dans l’ordre.',400,104)}
+   else{c.fillText('Le festin, dans l’ordre ?',400,76)}c.restore();
+   if(M.state==='showA'){const e=now-M.tS,i=Math.floor(e/1400)%4,u=(e%1400)/1400,al=clamp(u*6)*clamp((1-u)*6),f=FEAST[i];
+    c.save();c.globalAlpha=al;c.translate(384,290);c.scale(1.9,1.9);c.drawImage(f.s,-f.s.width/2,-f.s.height/2);c.restore();c.save();c.globalAlpha=al;txt(c,f.n,384,400,40,'#fff3d6','center','600');c.restore();
+    if(e>5600){tagBox(c,234,436,300,76,10);txt(c,'J’ai retenu',384,476,40,'#3a2410')}}
    if(M.state==='recallA'||M.state==='scoreA'){shelfP(c,560);for(let k=0;k<4;k++){const x=150+k*156,f=M.lineA[k];if(f!=null){const o=FEAST[f];c.save();c.translate(x,500);c.scale(1.4,1.4);c.drawImage(o.s,-o.s.width/2,-o.s.height/2);c.restore();if(M.state==='scoreA'){txt(c,f===k?'✓':'✗',x,612,40,f===k?'#9fe0a0':'#f0a0a0')}}else{c.save();c.strokeStyle='rgba(255,231,168,.6)';c.setLineDash([6,6]);c.lineWidth=3;c.strokeRect(x-56,446,112,104);c.restore();txt(c,String(k+1),x,500,34,'#ffe7a8')}}
     if(M.state==='recallA')M.poolA.forEach((f,j)=>{if(M.lineA.includes(f))return;const x=150+j*156,y=270;c.save();c.translate(x,y);c.scale(1.4,1.4);c.drawImage(FEAST[f].s,-FEAST[f].s.width/2,-FEAST[f].s.height/2);c.restore()});
-    if(M.state==='scoreA')txt(c,`${M.scoreA} sur 4, sans les lieux`,384,300,44,'#ffd27a')}
+    if(M.state==='scoreA')txt(c,`${M.scoreA} sur 4, avec la liste`,384,300,44,'#ffd27a')}
    let k=0;if(M.state==='darkA')k=clamp((now-M.tA)/800);else if(M.state==='recallA'&&M.tA1)k=1-clamp((now-M.tA1)/800);if(PAPER)curtain(c,k,T);else if(k>0){c.fillStyle=`rgba(8,6,24,${.85*k})`;c.fillRect(0,0,MS,MS)}
    if(M.state==='darkA'&&k>.9)txt(c,'Le rideau tombe…',384,384,40,'#ffe7a8');drawConf(c);return}
-  if(M.state==='place'){if(PAPER)tagBox(c,40,8,688,96,10);else{c.fillStyle='rgba(10,8,30,.55)';c.fillRect(0,0,MS,104)}if(PAPER){c.save();c.font='600 30px Caveat, cursive';c.fillStyle='#3a2410';c.textAlign='center';c.fillText('L\u2019aède chante : le navire part sur la mer',400,46);c.fillText('couleur de vin, le héros affronte la tempête.',400,84);c.restore()}else{txt(c,'L\u2019aède chante : le navire part sur la mer',384,36,30);txt(c,'couleur de vin, le héros affronte la tempête.',384,76,30)}}
+  if(M.state==='place'){if(PAPER)tagBox(c,40,8,688,150,10);else{c.fillStyle='rgba(10,8,30,.55)';c.fillRect(0,0,MS,104)}if(PAPER){c.save();c.font='700 40px Caveat, cursive';c.fillStyle='#22306e';c.textAlign='center';c.fillText('Une histoire, posée sur des lieux :',400,52);c.font='600 38px Caveat, cursive';c.fillStyle='#3a2410';c.fillText('le navire part sur la mer couleur de vin,',400,96);c.fillText('le héros affronte la tempête.',400,136);c.restore()}else{txt(c,'L\u2019aède chante : le navire part sur la mer',384,36,30);txt(c,'couleur de vin, le héros affronte la tempête.',384,76,30)}}
   if(M.state==='place'||M.state==='recall'){SEATS.forEach(([sx,sy],k)=>{const occ=items.some(it=>it.seat===k&&it!==M.drag);if(PAPER){const hot=M.drag&&!occ&&Math.hypot(M.drag.x-sx,M.drag.y+36-sy)<120;seatDisc(c,sx,sy,occ?'':String(k+1),hot,T)}else{ringPlace(c,sx,sy,T,occ);if(!occ)txt(c,String(k+1),sx,sy+4,34,'#ffe7a8')}})}
   items.forEach(it=>{const show=M.state!=='dark'||it===M.drag;if(!show&&it.seat>=0)return;let tx=it.hx,ty=it.hy;if(it.seat>=0&&it!==M.drag){tx=SEATS[it.seat][0];ty=SEATS[it.seat][1]-36}if(it!==M.drag){it.x+=(tx-it.x)*.25;it.y+=(ty-it.y)*.25}
    if(M.state==='dark'&&it.seat>=0)return;const pe=it.popT?clamp((performance.now()-it.popT)/450):1,lift=(it===M.drag?1.75:(it.seat>=0?1.35:1.55))*(1+(pe<1?Math.sin(pe*Math.PI)*.28:0));dropShadow(c,it.x,it.y+30,34,10);c.save();c.translate(it.x,it.y);c.scale(lift,lift);c.drawImage(it.s,-it.s.width/2,-it.s.height/2);c.restore();
-   if(it.seat<0)txt(c,it.n==='la mer couleur de vin'?'la mer de vin':it.n,it.x,it.y+78,25,'#fff3d6','center','600')});
+   if(it.seat<0)txt(c,it.n==='la mer couleur de vin'?'la mer de vin':it.n,it.x,it.y+78,29,'#fff3d6','center','600')});
   if(M.state==='place'&&!M.drag&&!M.tut){const it=items.find(o=>o.seat<0);if(it){const k=(tutT()*.45)%1,[sx,sy]=SEATS.find((s,j)=>!items.some(o=>o.seat===j))||SEATS[0],u=clamp((k-.18)/.55),e=u*u*(3-2*u),hx=it.hx+(sx-it.hx)*e,hy=it.hy+(sy-36-it.hy)*e;
    if(k>.18&&k<.8){c.save();c.globalAlpha=.45;c.translate(hx,hy);c.scale(1.4,1.4);c.drawImage(it.s,-it.s.width/2,-it.s.height/2);c.restore()}drawHand(c,hx+6,hy+10,k>.1&&k<.75,k>.9?(1-k)*10:1)}}
   if(PAPER){const now=performance.now();let k=0;if(M.state==='dark')k=clamp((now-M.t0)/800);else if(M.state==='recall'&&M.t1)k=1-clamp((now-M.t1)/800);curtain(c,k,T);if(M.state==='dark'&&k>.9)txt(c,'La nuit tombe sur le théâtre…',384,384,40,'#ffe7a8')}else if(M.state==='dark'){c.fillStyle=`rgba(8,6,24,${Math.min(.85,(performance.now()-M.t0)/900)})`;c.fillRect(0,0,MS,MS);txt(c,'La nuit tombe sur le théâtre…',384,384,40)}
   drawConf(c);
-  if(M.state==='result'){tagBox(c,90,96,588,150,10);txt(c,`Sans les lieux : ${M.scoreA} sur 4`,384,140,40,'#5a3418');txt(c,`Avec les places : ${M.score} sur 4`,384,200,44,'#22306e')}},
+  if(M.state==='result'){tagBox(c,90,96,588,150,10);txt(c,`Une simple liste : ${M.scoreA} sur 4`,384,140,40,'#5a3418');txt(c,`Histoire + lieux : ${M.score} sur 4`,384,200,44,'#22306e')}},
  down(cx,cy){if(M.state==='predict'){const i=cx<292?0:cx<476?1:2;M.pick=i;M.state='reveal';M.rt=performance.now();if(PAPER)confetti(568,300,i===2?26:10);showHint(i===2?'« Oui : 16 000 vers. Et tu sais comment ? »':'« Bien plus : 16 000 vers. Et tu sais comment ? »');return}
-  if(M.state==='reveal'){M.state='showA';showHint('Maman : « Essayons d’abord sans les lieux. Regarde bien, puis touche « J’ai retenu ». »');return}
-  if(M.state==='showA'){if(cy>396&&cy<494){M.state='darkA';M.tA=performance.now();setTimeout(()=>{M.poolA=[0,1,2,3].sort(()=>Math.random()-.5);M.lineA=[null,null,null,null];M.state='recallA';M.tA1=performance.now();showHint('Toucher les plats dans l’ordre où l’aède les a chantés.')},1700)}return}
+  if(M.state==='reveal'){M.state='showA';M.tS=performance.now();showHint('Maman : « D’abord une simple liste, sans histoire ni lieux. Regarde bien, puis touche « J’ai retenu ». »');return}
+  if(M.state==='showA'){if(performance.now()-M.tS>5600&&cy>426&&cy<522){M.state='darkA';M.tA=performance.now();setTimeout(()=>{M.poolA=[0,1,2,3].sort(()=>Math.random()-.5);M.lineA=[null,null,null,null];M.state='recallA';M.tA1=performance.now();showHint('Toucher les plats dans l’ordre où l’aède les a chantés.')},1700)}return}
   if(M.state==='recallA'){const j=M.poolA.findIndex((f,j)=>!M.lineA.includes(f)&&Math.hypot(cx-(150+j*156),cy-270)<74);if(j<0)return;const k=M.lineA.indexOf(null);M.lineA[k]=M.poolA[j];sndPaper(.25,.2);
-   if(M.lineA.every(v=>v!=null)){M.scoreA=M.lineA.filter((f,k)=>f===k).length;M.state='scoreA';setTimeout(()=>{M.state='place';showHint('« Maintenant, comme les aèdes : range l’histoire sur les places du théâtre, dans l’ordre : 1, 2, 3, 4. » Faire glisser chaque image sur sa place.')},2400)}return}
+   if(M.lineA.every(v=>v!=null)){M.scoreA=M.lineA.filter((f,k)=>f===k).length;M.state='scoreA';setTimeout(()=>{M.state='place';showHint('« Maintenant, comme les aèdes : une histoire, et chaque moment posé sur un lieu du théâtre, dans l’ordre : 1, 2, 3, 4. » Faire glisser chaque image sur sa place.')},2400)}return}
   if(M.state==='scoreA'||M.state==='darkA')return;
   if(M.state!=='place'&&M.state!=='recall')return;const it=[...items].reverse().find(it=>Math.hypot(cx-it.x,cy-it.y)<76&&(M.state==='recall'?it.seat<0:true));if(it){M.drag=it;M.ox=cx-it.x;M.oy=cy-it.y;if(M.state==='place')it.seat=-1}},
  move(cx,cy){if(M.drag){M.drag.x=cx-M.ox;M.drag.y=cy-M.oy}},
  up(){const it=M.drag;if(!it)return;M.drag=null;let best=-1,bd=170;SEATS.forEach(([sx,sy],k)=>{const d=Math.hypot(it.x-sx,it.y+36-sy);if(d<bd&&!items.some(o=>o!==it&&o.seat===k)){bd=d;best=k}});if(M.state==='place'){const [qx,qy]=SEATS[it.i];if(Math.hypot(it.x-qx,it.y+36-qy)<210)best=it.i;else if(best>=0)best=-2}if(best===-2){best=-1;showHint('« Dans l’ordre de l’histoire : '+STORY[it.i][0]+' va sur la place '+(it.i+1)+'. »')}else if(best<0)showHint('« Sur un des cercles, Alice. »');it.seat=best;if(best>=0){M.tut=1;it.popT=performance.now();if(PAPER)confetti(SEATS[best][0],SEATS[best][1]-60,12)}
   if(M.state==='place'&&items.every(o=>o.seat>=0)){M.answer=items.map(o=>o.seat);M.state='dark';M.t0=performance.now();showHint('« Regarde bien où chaque image est rangée… »');
    setTimeout(()=>{items.forEach((o,k)=>{o.seat=-1;o.hx=150+[2,0,3,1][k]*156;o.hy=250;o.x=o.hx;o.y=o.hy});M.state='recall';M.t1=performance.now();showHint('« L’aède reprend son récit. Remets chaque image à sa place. » Faire glisser chaque image sur son cercle.')},2600)}
-  else if(M.state==='recall'&&items.every(o=>o.seat>=0)){M.score=items.filter((o,k)=>o.seat===M.answer[k]).length;M.state='result';if(PAPER)confetti(384,140,40);showHint(M.score>M.scoreA?'« Tu vois ? Avec les places, l’histoire revient toute seule. Les aèdes faisaient pareil… pour 16 000 vers. »':M.score===M.scoreA?'« Autant avec que sans, pour quatre images. Mais pour 16 000 vers, seules les places tiennent : c’est le chemin qui ramène le récit. »':'« Ce soir, la liste a mieux marché. Avec l’habitude, les places gagnent : c’est ainsi que les aèdes gardaient 16 000 vers. »');setTimeout(()=>M.done=true,3200)}},
+  else if(M.state==='recall'&&items.every(o=>o.seat>=0)){M.score=items.filter((o,k)=>o.seat===M.answer[k]).length;M.state='result';if(PAPER)confetti(384,140,40);showHint(M.score>M.scoreA?'« Tu vois ? Une histoire posée sur des lieux : tout revient, dans l’ordre. Les aèdes faisaient pareil… pour 16 000 vers. »':M.score===M.scoreA?'« Autant l’un que l’autre, pour quatre images. Mais pour 16 000 vers, une liste ne tient pas : il faut une histoire et des lieux, le chemin qui ramène le récit. »':'« Ce soir, la liste a mieux marché. Avec l’habitude, l’histoire et les lieux gagnent : c’est ainsi que les aèdes gardaient 16 000 vers. »');setTimeout(()=>M.done=true,3200)}},
  solve(){M.done=true}};return M}
 
 /* 2. Le papyrus de Thot : avoir la liste sous les yeux… puis la perdre */
@@ -1847,17 +1848,17 @@ function mkThot(){// le piège de l'écrit : le papyrus se relit à volonté… 
   c.save();c.translate(586,286);c.scale(1.2,1.2);c.drawImage(KING,-KING.width/2,-KING.height/2);c.restore();c.save();tagBox(c,514,96,144,46,10);c.restore();txt(c,'Thamus',586,121,36,'#3a1a08');
   const big=slots.length>8,sc=big?1.0:1.3;if(big&&PAPER)[0,1,2].forEach(r=>{const y=520+r*92+40;c.save();c.shadowColor='rgba(20,10,0,.5)';c.shadowBlur=8;c.shadowOffsetY=5;c.fillStyle='#8a5a34';c.fillRect(20,y,728,12);c.restore();c.fillStyle='#b07a45';c.fillRect(20,y,728,4)});
   slots.forEach(s=>{const o=OFFER[s.k];if(!big)dropShadow(c,s.x,s.y+34,30,8);const sh=s.shake?Math.max(0,1-(performance.now()-s.shake)/500):0;c.save();c.translate(s.x+Math.sin(sh*30)*8*sh,s.y-(s.sel?10:0));if(s.sel){c.save();c.globalCompositeOperation='lighter';blob(c,0,0,64,'rgba(255,210,122,.5)');c.restore()}c.scale(sc,sc);c.drawImage(o.s,-o.s.width/2,-o.s.height/2);c.restore()});
-  if(M.state==='look'){c.save();c.translate(220,slots.length>8?228:250);c.rotate(-.03);{const k=slots.length>8?.98:1.18;c.scale(k,k)}dropShadow(c,0,150,140,20);c.drawImage(sheet,-sheet.width/2,-sheet.height/2+20);c.restore();txt(c,'toucher pour commencer',586,470,28,'#fff3d6')}
+  if(M.state==='look'){c.save();c.translate(220,slots.length>8?228:250);c.rotate(-.03);{const k=slots.length>8?.98:1.18;c.scale(k,k)}dropShadow(c,0,150,140,20);c.drawImage(sheet,-sheet.width/2,-sheet.height/2+20);c.restore();txt(c,'toucher pour commencer',586,470,34,'#fff3d6')}
   if(M.state==='task'){
    if(M.open){c.save();c.translate(220,slots.length>8?228:250);c.rotate(-.03);{const k=slots.length>8?.98:1.18;c.scale(k,k)}dropShadow(c,0,150,140,20);c.drawImage(sheet,-sheet.width/2,-sheet.height/2+20);c.restore()}
    else{const pu=.5+.5*Math.sin(T*3);c.save();c.globalCompositeOperation='lighter';blob(c,190,260,90,`rgba(255,220,140,${.25+.2*pu})`);c.restore();c.save();c.translate(190,250);c.scale(1.7,1.7);c.drawImage(kidScroll,-kidScroll.width/2,-kidScroll.height/2);c.restore();
-     c.save();tagBox(c,70,330,240,92,14);c.restore();txt(c,'relire le papyrus',190,362,32,'#3a1a08');txt(c,M.reads<2?'lu une fois':`relu ${M.reads-1} fois`,190,400,28,'#7a4a10')}
-   c.save();tagBox(c,470,424,232,M.err?78:52,12);c.restore();txt(c,`${M.got} / ${N} apportées`,594,450,30,'#3a1a08');if(M.err)txt(c,M.err===1?'1 erreur':`${M.err} erreurs`,594,484,26,'#9a3a1a');
+     c.save();tagBox(c,70,330,240,92,14);c.restore();txt(c,'relire le papyrus',190,362,32,'#3a1a08');txt(c,M.reads<2?'lu une fois':`relu ${M.reads-1} fois`,190,400,34,'#7a4a10')}
+   c.save();tagBox(c,470,424,232,M.err?78:52,12);c.restore();txt(c,`${M.got} / ${N} apportées`,594,450,36,'#3a1a08');if(M.err)txt(c,M.err===1?'1 erreur':`${M.err} erreurs`,594,484,34,'#9a3a1a');
    if(M.got===0&&M.open){const s=slots.find(o=>o.k===list[0]);if(s){const k=(tutT()*.7)%1;drawHand(c,s.x+10,s.y+18,k<.5)}}
    if(M.got>=1&&M.reads===1&&!M.open){const k=(tutT()*.7)%1;drawHand(c,214,236,k<.5)}}
   if(M.state==='burn'){const k=Math.min(1,(performance.now()-M.t0)/900);c.save();c.globalAlpha=1-k;c.translate(220-k*320,slots.length>8?228:250);c.rotate(-k*.8);{const kk=slots.length>8?.98:1.18;c.scale(kk,kk)}c.drawImage(sheet,-sheet.width/2,-sheet.height/2+20);c.restore()}
   if(M.state==='recall'){if(PAPER)tagBox(c,30,34,708,108,10);else{c.fillStyle='rgba(251,243,223,.92)';c.fillRect(0,40,MS,96)}txt(c,'Thamus a jeté le papyrus.',384,80,38,'#3a1a08');txt(c,`Quelles étaient les ${N} offrandes ?`,384,122,40,'#3a1a08')}
-  if(M.state==='result'){if(PAPER)tagBox(c,30,170,708,230,10);else{c.fillStyle='rgba(251,243,223,.94)';c.fillRect(0,170,MS,230)}txt(c,M.err?`${N} offrandes apportées · ${M.err===1?'1 erreur':M.err+' erreurs'}`:`${N} offrandes apportées, sans erreur`,384,230,40,'#7a2a08');txt(c,M.reads<2?'et je ne l’avais lu qu’une fois':`et je l’avais relu ${M.reads-1} fois`,384,290,36,'#3a1a08');txt(c,'toucher pour continuer',384,360,26,'#7a4a10')}},
+  if(M.state==='result'){if(PAPER)tagBox(c,30,170,708,230,10);else{c.fillStyle='rgba(251,243,223,.94)';c.fillRect(0,170,MS,230)}txt(c,M.err?`${N} offrandes apportées · ${M.err===1?'1 erreur':M.err+' erreurs'}`:`${N} offrandes apportées, sans erreur`,384,230,40,'#7a2a08');txt(c,M.reads<2?'et je ne l’avais lu qu’une fois':`et je l’avais relu ${M.reads-1} fois`,384,290,36,'#3a1a08');txt(c,'toucher pour continuer',384,360,34,'#7a4a10')}},
  down(cx,cy){if(M.state==='result'){M.done=true;return}
   if(M.state==='look'){M.state='task';showHint('« Maintenant, apporte-les au roi. Et si tu as un doute, tu peux relire la liste. »');return}
   if(M.state==='task'&&!M.open&&Math.hypot(cx-190,cy-260)<110){M.open=true;M.reads++;sndPaper(.35,.25);return}
@@ -1928,11 +1929,11 @@ function mkPierres(){// le premier lieu : les piliers chantent une histoire ; on
    if(glow>0){c.globalCompositeOperation='lighter';blob(c,p.x,p.y,120,`rgba(255,220,140,${.7*glow})`);c.globalCompositeOperation='source-over'}c.restore()});
   if(M.big>=0&&!night){const k=Math.min(1,(performance.now()-M.bt)/220),b=BEASTS[P[M.big].a][1],s=1.9*k;c.save();c.translate(P[M.big].x,220);c.scale(s,s);c.drawImage(b,-b.width/2,-b.height/2);c.restore()}
   if(M.state==='input'||M.state==='show'){for(let k=0;k<M.len;k++){c.fillStyle=k<M.inp?'#ffd27a':'rgba(255,240,210,.35)';c.beginPath();c.arc(384+(k-(M.len-1)/2)*34,690,9,0,7);c.fill()}}
-  if(M.state==='intro'){txt(c,'toucher les pierres pour les écouter',384,690,30);const k=(tutT()*.7)%1;drawHand(c,P[1].x+14,P[1].y+10,k<.5)}
+  if(M.state==='intro'){txt(c,'toucher les pierres pour les écouter',384,690,36);const k=(tutT()*.7)%1;drawHand(c,P[1].x+14,P[1].y+10,k<.5)}
   if(M.state==='input'&&M.inp===0&&M.len===3){const k=(tutT()*.7)%1;drawHand(c,P[seq[0]].x+12,P[seq[0]].y+30,k<.5,.85)}
   if(M.state==='ask'||M.state==='end'){P.forEach((p,i)=>{const g=M.got.find(o=>o.i===i);c.save();c.setLineDash([8,8]);c.strokeStyle=g?(g.ok?'rgba(160,230,160,.9)':'rgba(255,170,120,.9)'):'rgba(255,240,210,.55)';c.lineWidth=4;c.beginPath();rrect(c,p.x-40,p.y-136,80,260,10);c.stroke();c.restore();
      if(g){txt(c,String(g.n),p.x,p.y-10,54,g.ok?'#bff0bf':'#ffc89a');if(M.state==='end'){const b=BEASTS[p.a][1];c.save();c.globalAlpha=.9;c.drawImage(b,p.x-b.width*.45,p.y+30,b.width*.9,b.height*.9);c.restore()}}});
-    txt(c,M.state==='end'?`${M.got.filter(o=>o.ok).length} sur 4, de mémoire`:'les pierres ont disparu',384,120,38,'#fff3d6');if(M.state==='end')txt(c,'toucher pour continuer',384,720,28,'#ffd27a')}},
+    txt(c,M.state==='end'?`${M.got.filter(o=>o.ok).length} sur 4, de mémoire`:'les pierres ont disparu',384,120,38,'#fff3d6');if(M.state==='end')txt(c,'toucher pour continuer',384,720,34,'#ffd27a')}},
  down(cx,cy){if(M.state==='intro'){M.show();return}
   if(M.state==='input'){const i=P.findIndex(p=>Math.abs(cx-p.x)<70&&cy>p.y-150&&cy<p.y+130);if(i<0)return;M.light(i,.8);
    if(i===seq[M.inp]){M.inp++;if(M.inp>=M.len){if(M.len===3){M.len=4;M.state='wait';showHint('« Bien ! Écoute la suite… »');setTimeout(()=>M.show(),1300)}else{M.state='wait';showHint('« Tu connais l’histoire des pierres. »');setTimeout(()=>{M.state='ask';M.inp=0;M.got=[];showHint('Puis papa éteignait la lumière. « Les pierres ont disparu. Touche leurs places, dans l’ordre de l’histoire. »')},1800)}}}
@@ -1990,7 +1991,7 @@ function mkPhares(){const boats=[0,1,2].map(i=>({x:90+i*250,ph:i*2,dir:1}));
   if(!M.opts)M.mk();const [q,a]=PQ[M.q];c.save();tagBox(c,24,404,720,356,18);
   c.font='700 42px Caveat, cursive';c.fillStyle='#22306e';const ls=jLines(c,q,670);ls.forEach((l,i)=>c.fillText(l,384-c.measureText(l).width/2,450+i*44));const by=ls.length>1?510:478;M.by=by;
   if(M.mode==='choose'){[['De mémoire','la lampe brillera fort'],['Relire le rouleau','la bibliothèque le sait']].forEach(([t,u],i)=>{const y=by+i*104;tagBox(c,48,y,672,88,14);c.fillStyle='#2a1a22';c.font='700 44px Caveat, cursive';c.fillText(t,384-c.measureText(t).width/2,y+46);c.font='600 30px Caveat, cursive';c.fillStyle='#7a5a3a';c.fillText(u,384-c.measureText(u).width/2,y+76)})}
-  else if(M.mode==='scroll'){c.save();c.translate(384,by+110);const w=560;c.fillStyle='#f2e2b0';c.fillRect(-w/2,-70,w,140);[-1,1].forEach(k=>{c.fillStyle='#d8bf86';c.beginPath();c.ellipse(k*w/2,0,14,76,0,0,7);c.fill()});c.font='700 44px Caveat, cursive';c.fillStyle='#5a3418';c.textAlign='center';c.fillText(a,0,14);c.restore();txt(c,'toucher pour continuer',384,by+230,26,'#7a5a3a')}
+  else if(M.mode==='scroll'){c.save();c.translate(384,by+110);const w=560;c.fillStyle='#f2e2b0';c.fillRect(-w/2,-70,w,140);[-1,1].forEach(k=>{c.fillStyle='#d8bf86';c.beginPath();c.ellipse(k*w/2,0,14,76,0,0,7);c.fill()});c.font='700 44px Caveat, cursive';c.fillStyle='#5a3418';c.textAlign='center';c.fillText(a,0,14);c.restore();txt(c,'toucher pour continuer',384,by+230,34,'#7a5a3a')}
   else{M.opts.forEach(([t,ok],i)=>{const y=by+i*78,sel=M.ans&&(M.ans.i===i||(!M.ans.ok&&ok));tagBox(c,48,y,672,68,14);if(sel){c.save();c.fillStyle=ok?'rgba(120,190,100,.35)':'rgba(220,110,90,.3)';c.beginPath();rrect(c,48,y,672,68,8);c.fill();c.restore()}c.fillStyle='#2a1a22';c.font='700 44px Caveat, cursive';c.fillText(t,384-c.measureText(t).width/2,y+48)})}
   c.restore()},
  down(cx,cy){if(M.q>=3||M.ans)return;
@@ -2104,7 +2105,7 @@ function drawSketch(T,al){mx.save();mx.globalAlpha=al;mx.translate(384,384);mx.r
  mx.save();mx.shadowColor='rgba(0,0,0,.4)';mx.shadowBlur=14;mx.fillStyle='#f7f1e1';mx.fillRect(24,24,720,720);mx.restore();
  mx.strokeStyle='rgba(90,130,200,.18)';mx.lineWidth=1;for(let u=24;u<744;u+=24){mx.beginPath();mx.moveTo(u,24);mx.lineTo(u,744);mx.stroke();mx.beginPath();mx.moveTo(24,u);mx.lineTo(744,u);mx.stroke()}
  mx.strokeStyle='rgba(210,80,80,.4)';mx.lineWidth=1.6;mx.beginPath();mx.moveTo(84,24);mx.lineTo(84,744);mx.stroke();mx.drawImage(PAPERG,0,0);
- mx.font='600 34px Caveat, cursive';mx.fillStyle='rgba(60,58,70,.75)';mx.fillText('Ma constellation',100,76);
+ mx.font='600 46px Caveat, cursive';mx.fillStyle='rgba(60,58,70,.8)';mx.fillText('Ma constellation',100,84);
  mx.lineCap='round';mx.setLineDash([3,12]);mx.strokeStyle='rgba(60,58,70,.35)';mx.lineWidth=2.5;LYRE_E.forEach(([p,q])=>{mx.beginPath();mx.moveTo(...STARS[p]);mx.lineTo(...STARS[q]);mx.stroke()});mx.setLineDash([]);
  STARS.forEach(([sx,sy],i)=>{if(i>=lit)return;mx.strokeStyle='rgba(60,58,70,.8)';mx.lineWidth=2.4;mx.beginPath();for(let k=0;k<10;k++){const a=k/10*Math.PI*2-Math.PI/2,r=k%2?6:15;mx.lineTo(sx+Math.cos(a)*r,sy+Math.sin(a)*r)}mx.closePath();mx.stroke();
   const ic=ICONS[i];mx.save();mx.globalAlpha=al*.45;mx.filter='grayscale(1) brightness(.4)';mx.drawImage(ic,sx-ic.width*.4,sy+20,ic.width*.8,ic.height*.8);mx.restore()});
@@ -2134,7 +2135,7 @@ function drawScreen(T){mx.setTransform(1,0,0,1,0,0);mx.clearRect(0,0,MS,MS);
     mx.lineCap='round';mx.shadowColor='rgba(255,220,150,.9)';mx.shadowBlur=10;mx.strokeStyle=`rgba(255,226,160,${.8*constel})`;mx.lineWidth=3;mx.beginPath();mx.moveTo(...A);
     for(let i=0;i<3;i++){const t=clamp(k1*3-i);if(t<=0)break;mx.lineTo(...L(ord[i],ord[i+1],t))}mx.stroke();
     if(k2>0){mx.shadowBlur=0;const cx=(A[0]+P[0]+S[0])/3,cy=(A[1]+P[1]+S[1])/3;mx.save();mx.globalAlpha=k2;mx.textAlign='center';
-      mx.font='600 34px Caveat, cursive';mx.fillStyle='rgba(255,236,190,.92)';mx.fillText('le Deltoton',(A[0]+S[0])/2,Math.min(A[1],S[1])-30);mx.restore()}
+      mx.font='600 42px Caveat, cursive';mx.fillStyle='rgba(255,236,190,.92)';mx.fillText('le Deltoton',(A[0]+S[0])/2,Math.min(A[1],S[1])-30);mx.restore()}
     const pu=1+.08*Math.sin(T*2.4);if(vegaA>.02){mx.save();mx.globalCompositeOperation='lighter';blob(mx,X[0],X[1],(30+90*vegaA)*pu,`rgba(255,220,150,${.6*vegaA})`);mx.restore();mx.save();mx.globalAlpha=vegaA;mx.strokeStyle='rgba(255,240,210,.9)';mx.lineWidth=1.5;for(let r=0;r<4;r++){const an=r*Math.PI/2+T*.2;mx.beginPath();mx.moveTo(X[0]+Math.cos(an)*10,X[1]+Math.sin(an)*10);mx.lineTo(X[0]+Math.cos(an)*(r%2?32:46),X[1]+Math.sin(an)*(r%2?32:46));mx.stroke()}mx.restore()}
     mx.restore()}
   vegaA+=(vegaT-vegaA)*(1-Math.pow(.15,DTG));
