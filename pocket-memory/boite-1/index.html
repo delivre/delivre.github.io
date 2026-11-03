@@ -1487,11 +1487,7 @@ const REVEAL=PAPER?{
    fp(x,'#2c2444',c=>c.ellipse(0,-40,30,11,0,0,7));
    x.strokeStyle='#14102a';x.lineWidth=4;x.lineCap='round';x.beginPath();x.moveTo(-18,-40);x.quadraticCurveTo(0,-34,18,-40);x.stroke();
    x.strokeStyle='rgba(255,255,255,.18)';x.lineWidth=2;x.beginPath();x.moveTo(-34,-30);x.quadraticCurveTo(-38,-10,-36,2);x.stroke();
-   x.restore()
-   x.strokeStyle='#c8b08a';x.lineWidth=2;x.beginPath();x.moveTo(262,206);x.lineTo(310,266);x.stroke();
-   x.save();x.translate(318,290);x.rotate(.38);fp(x,'#f3e6c4',c=>{c.moveTo(-14,-26);c.lineTo(14,-26);c.lineTo(22,-16);c.lineTo(22,30);c.lineTo(-22,30);c.lineTo(-22,-16);c.closePath()});
-   x.strokeStyle='rgba(120,90,60,.6)';x.lineWidth=1.5;x.stroke();fp(x,'#9a6a3a',c=>c.arc(0,-16,4,0,7));
-   x.save();x.rotate(-Math.PI/2);x.font='600 30px Caveat, cursive';x.fillStyle='#22306e';x.textAlign='center';x.fillText('Papa',-6,10);x.restore();x.restore()},{border:5,outline:0}),
+   x.restore()},{border:5,outline:0}),
  papa:()=>cut(x=>{x.save();x.translate(250,270);x.rotate(-.08);x.scale(1.75,1.75);fp(x,'#f6eedb',c=>{c.moveTo(-70,0);c.lineTo(0,6);c.lineTo(70,0);c.lineTo(70,-44);c.lineTo(0,-38);c.lineTo(-70,-44);c.closePath()});x.strokeStyle='rgba(120,90,60,.6)';x.lineWidth=1.5;x.beginPath();x.moveTo(0,6);x.lineTo(0,-38);x.stroke();
    x.font='600 19px Caveat, cursive';x.fillStyle='#22306e';x.fillText('pour Alice,',-62,-14);x.fillText('plus tard.',8,-12);x.restore()},{border:5,outline:1.4}),
  phare:()=>cut(x=>{const H=430;fp(x,'#1a1430',c=>{c.moveTo(186,H-2);c.lineTo(236,H-2);c.lineTo(228,H+8);c.lineTo(194,H+8);c.closePath()});fp(x,'#1a1430',c=>c.rect(209,H-34,3,32));fp(x,'#1a1430',c=>{c.moveTo(212,H-32);c.lineTo(232,H-10);c.lineTo(212,H-10);c.closePath()});fp(x,'#ffd27a',c=>c.arc(196,H-14,4,0,7))},{border:4,outline:0}),
@@ -2209,15 +2205,15 @@ function showCard([i,q,a]){q=nb(q);a=nb(a);say.className='line ask card';sayWho.
   say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=false}
 const SCRIPTS={
  // court, touchant, mystérieux. fil : une mémoire immense → une invention → une perte → une lumière
- intro:[{cam:'box'},{fn:()=>{if(PAPER)aliceSay('La boîte que j’ai faite avec papa… Je ne l’avais pas ouverte depuis longtemps.');showHint((PAPER?'':'« La boîte de papa. Je ne l’avais pas rouverte depuis… » ')+'Toucher le sol pour emmener Alice vers la lumière. Glisser pour tourner, pincer pour zoomer.')}}],
+ intro:[{cam:'box'},{fn:()=>{if(PAPER)aliceSay('Papa et Maman sont repartis, pour longtemps. J’ai rouvert notre boîte.');showHint((PAPER?'':'« La boîte de papa. Je ne l’avais pas rouverte depuis… » ')+'Toucher le sol pour emmener Alice vers la lumière. Glisser pour tourner, pincer pour zoomer.')}}],
  0:[{cam:'box'},{say:'lieu',t:'Göbekli Tepe, il y a plus de 11 000 ans. Des pierres levées, bien avant l’écriture.'},{cam:'lid'},{manip:mkPierres},
   {mem:'echo'},{say:'alice',t:'Ils chantaient tout bas. La pierre répondait.'},
-  {say:'alice',t:'Des années plus tard, j’y suis retournée seule. J’ai chanté tout bas. La pierre, elle, se souvenait.'},
+  {say:'alice',t:'Des années plus tard, j’y suis retournée seule. J’ai chanté tout bas. La pierre, elle, se souvenait.'},{say:'alice',t:'Maman dit qu’on peut tout oublier, sauf les chansons. Elle dit ça en regardant ailleurs.'},
   {note:'Avant l’écriture, chaque savoir avait sa place.'},{memoff:1},{reward:0},{cam:'box'}],
  1:[{cam:'box'},{say:'lieu',t:'La Grèce, bien plus tard. Un aède, un poète qui chante de mémoire, raconte une histoire immense, sans rien écrire.'},{cam:'lid'},{manip:mkTheatre},
   {mem:'maman'},{say:'maman',t:'Où en étions-nous ? Ah oui… le navire.'},
   {say:'alice',t:'Le livre restait ouvert. Elle ne le regardait jamais.'},
-  {note:'16 000 vers de mémoire, en 4 soirs.'},{memoff:1},{reward:1},{cam:'box'}],
+  {note:'16 000 vers de mémoire, en 4 soirs.'},{fn:()=>{JR.note=null}},{say:'alice',t:'Quand Papa partait, il laissait son chapeau. Pour qu’on sache qu’il revenait.'},{memoff:1},{reward:1},{cam:'box'}],
  2:[{cam:'box'},{say:'lieu',t:'Thèbes, en Égypte. Arrive l’écriture : Thot l’offre au roi Thamus. Le roi se méfie.'},{cam:'lid'},{manip:mkThot},
   {mem:'papa'},{say:'papa',t:'Écris tout. Mais ne le laisse pas se souvenir à ta place.'},
   {say:'alice',t:'Il remplissait des carnets entiers. Il n’en relisait jamais aucun.'},{say:'alice',t:'Il disait qu’écrire, c’était déjà retenir. Et que ses carnets, c’était pour plus tard.'},
