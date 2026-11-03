@@ -4,26 +4,41 @@ const A=RB,C=RB,TOP=.35,RW=RB,RD=RB,RR=RB;      // (noms communs aux autres modu
 const box=new THREE.Group();scene.add(box);
 // un tirage pseudo-aléatoire reproductible (pour que chaque cercle d'encre garde sa forme)
 const seeded=s=>{let a=(s*9301+49297)%233280||1;return()=>{a=(a*9301+49297)%233280;return a/233280}};
-/* le cercle d'encre : notre écriture, dans la manière des cercles du film (anneau au pinceau, renflements, éclaboussures, vrilles)
-   f : liste de « traits » posés sur l'anneau : {a:angle, k:'blob'|'spike'|'tendril'|'splash'|'hook'|'gap', s:taille, d:+1 dehors / -1 dedans} */
-function inkRing(x,cx,cy,r,o={}){const R=seeded(o.seed||7),col=o.col||'#141414',w0=(o.w||r*.085),f=o.f||[],a0=o.a0||0,gap=o.gap==null?.0:o.gap;
+/* le cercle d'encre : une tache, pas un trait. Un anneau au pinceau très chargé, d'épaisseur très inégale (des masses lourdes, des passages fins),
+   aux bords fumés, avec des éclaboussures, des coulures, des vrilles. f : traits posés sur l'anneau
+   {a:angle, k:'blob'|'spike'|'tendril'|'splash'|'hook', s:taille, d:+1 dehors / -1 dedans} */
+function inkRing(x,cx,cy,r,o={}){const R=seeded(o.seed||7),col=o.col||'#141414',w0=(o.w||r*.085),f=o.f||[],a0=o.a0||0,gap=o.gap==null?0:o.gap,soft=o.wash!==false;
+ const span=Math.PI*2-gap,N=Math.max(160,Math.round(r*3.2));
+ // bruit lisse le long de l'anneau : le rayon ondule, l'épaisseur gonfle et maigrit
+ const ph=[...Array(6)].map(()=>R()*6.283),nz=(a,k)=>Math.sin(a*2+ph[k])*.5+Math.sin(a*3.3+ph[k+1])*.3+Math.sin(a*7.1+ph[k+2])*.2;
+ const heavy=[...Array(3)].map(()=>({a:a0+R()*span,s:.8+R()*1.0}));
+ const near=(a,b)=>{const d=Math.atan2(Math.sin(a-b),Math.cos(a-b));return d};
+ const width=a=>{const q=nz(a,0)*.5+.5;let w=w0*(.45+1.15*q*q);heavy.concat(f.filter(t=>t.k==='blob'||t.k==='splash')).forEach(t=>{const d=near(a,t.a);w+=w0*(t.s||1)*1.0*Math.exp(-d*d/(.025*(t.s||1)))});
+  if(gap>0){const u=(a-a0)/span;w*=Math.min(1,u*5,(1-u)*5)}return Math.max(w0*.12,w)};
+ const rad=a=>r+r*.035*nz(a,3);
  x.save();x.fillStyle=col;x.strokeStyle=col;x.lineCap='round';x.lineJoin='round';
- // la bavure : un lavis très clair qui a coulé autour du trait
- if(o.wash!==false){x.save();x.globalAlpha=.07;for(let i=0;i<40;i++){const a=a0+R()*Math.PI*2,rr=r+(R()-.5)*w0*3;x.beginPath();x.ellipse(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,w0*(1+R()*2),w0*(.6+R()),a,0,7);x.fill()}x.restore()}
- const span=Math.PI*2-gap,N=Math.max(120,Math.round(r*2.2));
- const width=a=>{let w=w0*(.78+.22*Math.sin(a*3+R()*.01)+.12*Math.sin(a*7.3+1));f.forEach(t=>{if(t.k==='blob'||t.k==='splash'){const d=Math.atan2(Math.sin(a-t.a),Math.cos(a-t.a));w+=w0*(t.s||1)*1.3*Math.exp(-d*d/(.018*(t.s||1)))}});
-  if(gap>0){const u=(a-a0)/span;w*=Math.min(1,u*6,(1-u)*6)}return Math.max(.5,w)};
- for(let i=0;i<=N;i++){const a=a0+span*i/N,w=width(a),j=(R()-.5)*w0*.18;x.beginPath();x.arc(cx+Math.cos(a)*(r+j),cy+Math.sin(a)*(r+j),w/2,0,7);x.fill()}
- // le grain du pinceau : quelques poils plus clairs dans le trait
- x.save();x.globalCompositeOperation='destination-out';x.globalAlpha=.25;x.lineWidth=1.2;for(let i=0;i<N*.4;i++){const a=a0+span*R(),w=width(a),o2=(R()-.5)*w*.7;x.beginPath();x.arc(cx,cy,r+o2,a,a+.05+R()*.12);x.stroke()}x.restore();
- const tip=(px,py,ang,len,wd)=>{x.beginPath();x.moveTo(px+Math.cos(ang+Math.PI/2)*wd/2,py+Math.sin(ang+Math.PI/2)*wd/2);x.quadraticCurveTo(px+Math.cos(ang)*len*.6,py+Math.sin(ang)*len*.6,px+Math.cos(ang)*len,py+Math.sin(ang)*len);x.quadraticCurveTo(px+Math.cos(ang)*len*.6,py+Math.sin(ang)*len*.6,px+Math.cos(ang-Math.PI/2)*wd/2,py+Math.sin(ang-Math.PI/2)*wd/2);x.fill()};
- f.forEach(t=>{const s=t.s||1,d=t.d||1,px=cx+Math.cos(t.a)*r,py=cy+Math.sin(t.a)*r,out=t.a+(d>0?0:Math.PI);
-  if(t.k==='spike'||t.k==='splash'){const n=t.k==='splash'?7:3;for(let k=0;k<n;k++){const ang=out+(R()-.5)*(t.k==='splash'?1.6:.7),len=r*(.08+R()*.22)*s;tip(px,py,ang,len,w0*(.5+R()*.5));if(R()<.7){const dl=len*(1.15+R()*.4);x.beginPath();x.arc(px+Math.cos(ang)*dl,py+Math.sin(ang)*dl,w0*(.12+R()*.25),0,7);x.fill()}}}
-  if(t.k==='tendril'){x.lineWidth=w0*.28;let qx=px,qy=py,ang=out;x.beginPath();x.moveTo(qx,qy);for(let k=0;k<14;k++){ang+=(R()-.5)*.5+(t.c||0);qx+=Math.cos(ang)*r*.03*s;qy+=Math.sin(ang)*r*.03*s;x.lineTo(qx,qy)}x.stroke();x.beginPath();x.arc(qx,qy,w0*.22,0,7);x.fill()}
-  if(t.k==='hook'){x.lineWidth=w0*.55;const tg=t.a+Math.PI/2*(t.c||1);x.beginPath();x.moveTo(px,py);x.quadraticCurveTo(px+Math.cos(out)*r*.18*s,py+Math.sin(out)*r*.18*s,px+Math.cos(out)*r*.16*s+Math.cos(tg)*r*.12*s,py+Math.sin(out)*r*.16*s+Math.sin(tg)*r*.12*s);x.stroke()}
-  if(t.k==='blob'){for(let k=0;k<3;k++){const ang=out+(R()-.5)*1.2,dl=w0*(1.2+R()*1.6)*s;x.beginPath();x.arc(px+Math.cos(ang)*dl,py+Math.sin(ang)*dl,w0*(.1+R()*.2),0,7);x.fill()}}});
- // quelques gouttes perdues
- for(let i=0;i<(o.drops==null?10:o.drops);i++){const a=R()*Math.PI*2,dl=r+(R()<.5?-1:1)*w0*(1.5+R()*4);x.beginPath();x.arc(cx+Math.cos(a)*dl,cy+Math.sin(a)*dl,w0*(.05+R()*.14),0,7);x.fill()}
+ // la fumée : l'encre qui a diffusé autour du trait
+ if(soft){for(let p=0;p<2;p++){x.save();x.globalAlpha=.022;for(let i=0;i<=N/3;i++){const a=a0+span*i/(N/3),w=width(a)*(1.5+p*.6);x.beginPath();x.arc(cx+Math.cos(a)*rad(a),cy+Math.sin(a)*rad(a),w/2,0,7);x.fill()}x.restore()}
+  x.save();x.globalAlpha=.03;for(let i=0;i<40;i++){const a=a0+R()*span,rr=rad(a)+(R()-.5)*w0*2.2;x.beginPath();x.ellipse(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,w0*(1+R()*2.5),w0*(.4+R()*.8),a+Math.PI/2+(R()-.5),0,7);x.fill()}x.restore()}
+ // le corps : des touches de pinceau qui se chevauchent, orientées le long du cercle
+ for(let i=0;i<=N;i++){const a=a0+span*i/N,w=width(a),rr=rad(a),px=cx+Math.cos(a)*rr,py=cy+Math.sin(a)*rr;x.save();x.globalAlpha=.85+R()*.15;x.translate(px,py);x.rotate(a+Math.PI/2);x.beginPath();x.ellipse((R()-.5)*w*.08,(R()-.5)*w*.1,Math.max(r*span/N*2.2,w*.35),w/2*(.92+R()*.12),0,0,7);x.fill();x.restore()}
+ // le bord qui s'effiloche : des poils, de la poussière d'encre
+ for(let i=0;i<N*1.2;i++){const a=a0+R()*span,w=width(a),side=R()<.5?-1:1,rr=rad(a)+side*w*(.44+R()*.16);x.globalAlpha=.25+R()*.45;x.beginPath();x.arc(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,w0*(.02+R()*.07),0,7);x.fill()}
+ x.globalAlpha=1;
+ // le pinceau sec : des stries claires dans le trait
+ x.save();x.globalCompositeOperation='destination-out';for(let i=0;i<N*.5;i++){const a=a0+R()*span,w=width(a),o2=(R()-.5)*w*.75;x.globalAlpha=.12+R()*.25;x.lineWidth=.6+R()*1.4;x.beginPath();x.arc(cx,cy,rad(a)+o2,a,a+.04+R()*.18);x.stroke()}x.restore();
+ const tip=(px,py,ang,len,wd)=>{x.beginPath();x.moveTo(px+Math.cos(ang+Math.PI/2)*wd/2,py+Math.sin(ang+Math.PI/2)*wd/2);x.quadraticCurveTo(px+Math.cos(ang)*len*.55+Math.cos(ang+Math.PI/2)*wd*.15,py+Math.sin(ang)*len*.55+Math.sin(ang+Math.PI/2)*wd*.15,px+Math.cos(ang)*len,py+Math.sin(ang)*len);x.quadraticCurveTo(px+Math.cos(ang)*len*.55-Math.cos(ang+Math.PI/2)*wd*.15,py+Math.sin(ang)*len*.55-Math.sin(ang+Math.PI/2)*wd*.15,px+Math.cos(ang-Math.PI/2)*wd/2,py+Math.sin(ang-Math.PI/2)*wd/2);x.fill()};
+ const drop=(px,py,s)=>{x.beginPath();x.ellipse(px,py,s*(1+R()*.4),s*(.7+R()*.4),R()*3,0,7);x.fill()};
+ f.forEach(t=>{const s=t.s||1,d=t.d||1,rr=rad(t.a),px=cx+Math.cos(t.a)*rr,py=cy+Math.sin(t.a)*rr,out=t.a+(d>0?0:Math.PI),w=width(t.a);
+  if(t.k==='splash'||t.k==='spike'){const n=t.k==='splash'?9:4;for(let k=0;k<n;k++){const ang=out+(R()-.5)*(t.k==='splash'?1.8:.8),len=r*(.06+R()*.26)*s;tip(px,py,ang,len,w*(.35+R()*.45));
+     let dl=len*(1.1+R()*.3);const m=1+(R()*3|0);for(let j=0;j<m;j++){drop(px+Math.cos(ang)*dl,py+Math.sin(ang)*dl,w0*(.1+R()*.28)/(1+j*.6));dl+=w0*(.6+R()*.9)}}
+   // la pluie de gouttelettes autour de l'impact
+   for(let k=0;k<26*s;k++){const ang=out+(R()-.5)*2.6,dl=w*.6+R()*r*.32*s;x.globalAlpha=.5+R()*.5;drop(px+Math.cos(ang)*dl,py+Math.sin(ang)*dl,w0*(.03+R()*.12));x.globalAlpha=1}}
+  if(t.k==='tendril'){let qx=px,qy=py,ang=out,lw=w*.45;for(let k=0;k<18;k++){ang+=(R()-.5)*.45+(t.c||0);const nx=qx+Math.cos(ang)*r*.022*s,ny=qy+Math.sin(ang)*r*.022*s;x.lineWidth=lw;x.beginPath();x.moveTo(qx,qy);x.lineTo(nx,ny);x.stroke();qx=nx;qy=ny;lw*=.88}drop(qx,qy,w0*.18)}
+  if(t.k==='hook'){x.lineWidth=w*.5;const tg=t.a+Math.PI/2*(t.c||1);x.beginPath();x.moveTo(px,py);x.quadraticCurveTo(px+Math.cos(out)*r*.2*s,py+Math.sin(out)*r*.2*s,px+Math.cos(out)*r*.17*s+Math.cos(tg)*r*.13*s,py+Math.sin(out)*r*.17*s+Math.sin(tg)*r*.13*s);x.stroke();drop(px+Math.cos(out)*r*.17*s+Math.cos(tg)*r*.13*s,py+Math.sin(out)*r*.17*s+Math.sin(tg)*r*.13*s,w*.22)}
+  if(t.k==='blob'){for(let k=0;k<5;k++){const ang=out+(R()-.5)*1.4,dl=w*(.6+R()*1.2)*s;drop(px+Math.cos(ang)*dl,py+Math.sin(ang)*dl,w0*(.12+R()*.3))}}});
+ // des gouttes perdues, tout autour
+ for(let i=0;i<(o.drops==null?16:o.drops);i++){const a=R()*Math.PI*2,dl=r+(R()<.5?-1:1)*w0*(1.2+R()*5);x.globalAlpha=.5+R()*.5;drop(cx+Math.cos(a)*dl,cy+Math.sin(a)*dl,w0*(.04+R()*.16))}
  x.restore()}
 // des « mots » de cercle tout prêts : chaque graine donne un cercle reconnaissable
 const GLYPH=(seed,n=4)=>{const R=seeded(seed*17+3),K=['blob','spike','tendril','splash','hook'],f=[];for(let i=0;i<n;i++)f.push({a:R()*Math.PI*2,k:K[(R()*K.length)|0],s:.7+R()*.8,d:R()<.75?1:-1,c:(R()-.5)*.3});return{seed,f,a0:R()*6.28,gap:R()<.35?.25+R()*.3:0}};
@@ -87,10 +102,10 @@ const groundTex=canvasTex(GS,GS,(x,W)=>{
   for(let i=0;i<2600;i++){const a=rnd(0,6.283),r=rnd(LR+.25,RING-.25);dab(x,gx(SEA.x+Math.cos(a)*r),gz(SEA.z+Math.sin(a)*r),rnd(16,30),rnd(6,9),a+Math.PI/2+rnd(-.3,.3),rnd(68,88),rnd(18,30),rnd(60,72),rnd(.25,.45))}
   // le lac : ardoise, plus clair au bord, des reflets de ciel, et le reflet sombre de la coquille
   const coastPath=()=>{x.beginPath();COAST.forEach(([u,v],i)=>i?x.lineTo(gx(u),gz(v)):x.moveTo(gx(u),gz(v)));x.closePath()};
-  x.save();coastPath();x.clip();const lg=x.createRadialGradient(gx(SEA.x),gz(SEA.z),0,gx(SEA.x),gz(SEA.z),gx(LR)-gx(0));lg.addColorStop(0,'#2f4350');lg.addColorStop(.7,'#3f5664');lg.addColorStop(1,'#6f8590');x.fillStyle=lg;x.fillRect(0,0,W,W);
-  for(let i=0;i<1400;i++)dab(x,rnd(0,W),rnd(0,W),rnd(30,80),rnd(3,7),rnd(-.05,.05),rnd(200,215),rnd(10,20),rnd(30,46),rnd(.18,.35));
-  for(let k=0;k<40;k++){const t=k/40;dab(x,gx(SEA.x+rnd(-.12,.12)),gz(SEA.z-LR+.1+t*1.5),rnd(40,70),rnd(10,16),Math.PI/2+rnd(-.1,.1),210,10,22,.35*(1-t))}
-  for(let i=0;i<90;i++){x.strokeStyle=`rgba(230,236,236,${rnd(.15,.45)})`;x.lineWidth=rnd(1.5,3);const a=rnd(0,W),b=rnd(0,W),l=rnd(20,80);x.beginPath();x.moveTo(a,b);x.lineTo(a+l,b);x.stroke()}
+  x.save();coastPath();x.clip();const lg=x.createRadialGradient(gx(SEA.x),gz(SEA.z),0,gx(SEA.x),gz(SEA.z),gx(LR)-gx(0));lg.addColorStop(0,'#dfe4df');lg.addColorStop(.7,'#cfd7d3');lg.addColorStop(1,'#9fadad');x.fillStyle=lg;x.fillRect(0,0,W,W);
+  for(let i=0;i<1400;i++)dab(x,rnd(0,W),rnd(0,W),rnd(30,80),rnd(3,7),rnd(-.05,.05),rnd(170,210),rnd(6,14),rnd(74,90),rnd(.14,.3));
+  for(let k=0;k<40;k++){const t=k/40;dab(x,gx(SEA.x+rnd(-.12,.12)),gz(SEA.z-LR+.1+t*1.5),rnd(40,70),rnd(10,16),Math.PI/2+rnd(-.1,.1),210,8,30,.3*(1-t))}
+  for(let i=0;i<90;i++){x.strokeStyle=`rgba(255,255,255,${rnd(.2,.5)})`;x.lineWidth=rnd(1.5,3);const a=rnd(0,W),b=rnd(0,W),l=rnd(20,80);x.beginPath();x.moveTo(a,b);x.lineTo(a+l,b);x.stroke()}
   [[70,'rgba(140,156,162,.5)'],[34,'rgba(176,188,190,.6)'],[12,'rgba(214,220,216,.85)']].forEach(([lw,col])=>{x.strokeStyle=col;x.lineWidth=lw;x.lineJoin='round';coastPath();x.stroke()});x.restore();
   // une grève de galets clairs tout autour
   for(let k=0;k<COAST.length;k++){const[ax,az]=COAST[k],[bx,bz]=COAST[(k+1)%COAST.length],L=Math.hypot(bx-ax,bz-az),n=Math.ceil(L*80);for(let s=0;s<n;s++){const t=Math.random(),ox=rnd(-7,7),oy=rnd(-7,7);x.fillStyle=hsl(rnd(30,60),rnd(4,12),rnd(66,86),.85);x.beginPath();x.ellipse(gx(ax+(bx-ax)*t)+ox,gz(az+(bz-az)*t)+oy,rnd(2,5),rnd(1.5,3.5),rnd(0,3),0,7);x.fill()}}
@@ -121,7 +136,7 @@ const WATER={};
  const g=new THREE.ExtrudeGeometry(sh,{depth:SEAD,bevelEnabled:false,curveSegments:96});g.rotateX(-Math.PI/2);
  const land=mesh(g,[M.ground,M.edge],true,true);land.position.y=TOP-SEAD;box.add(land);
  // quelques rides découpées, posées sur le lac
- const crest=cutMat((x,W,H)=>{x.fillStyle='#5f7280';x.beginPath();x.moveTo(8,H-8);x.quadraticCurveTo(W*.3,H*.35,W*.55,H*.45);x.quadraticCurveTo(W*.75,H*.45,W-8,H-8);x.closePath();x.fill();x.fillStyle='rgba(214,222,222,.95)';x.beginPath();x.moveTo(W*.2,H*.7);x.quadraticCurveTo(W*.35,H*.42,W*.55,H*.45);x.quadraticCurveTo(W*.38,H*.5,W*.3,H*.72);x.closePath();x.fill()},256,128);
+ const crest=cutMat((x,W,H)=>{x.fillStyle='#aebbbb';x.beginPath();x.moveTo(8,H-8);x.quadraticCurveTo(W*.3,H*.35,W*.55,H*.45);x.quadraticCurveTo(W*.75,H*.45,W-8,H-8);x.closePath();x.fill();x.fillStyle='rgba(250,252,250,.95)';x.beginPath();x.moveTo(W*.2,H*.7);x.quadraticCurveTo(W*.35,H*.42,W*.55,H*.45);x.quadraticCurveTo(W*.38,H*.5,W*.3,H*.72);x.closePath();x.fill()},256,128);
  WATER.waves=[];let tries=0;while(WATER.waves.length<7&&tries<600){tries++;const x0=rnd(SEA.x-1.7,SEA.x+1.7),z0=rnd(SEA.z-1,SEA.z+1);if(!pip(x0,z0,COAST)||segD(x0,z0,COASTC)<.4||WATER.waves.some(m=>Math.hypot(m.userData.x-x0,m.position.z-z0)<.9))continue;
   const m=new THREE.Mesh(new THREE.PlaneGeometry(.36,.16),crest);m.customDepthMaterial=crest.userData.depth;m.castShadow=true;m.position.set(x0,TOP-SEAD+.08,z0);m.rotation.y=rnd(-.35,.35);m.userData={x:x0,row:WATER.waves.length};box.add(m);WATER.waves.push(m)}}
 
@@ -279,7 +294,7 @@ const BRIDGE={};const bridgeH=(x,z)=>{if(BRIDGE.L==null)return 0;const dx=x-BRID
 
 /* ---------- ce qui bouge : la coquille respire, l'hélicoptère tourne, les projecteurs balaient la brume, le cercle d'encre tourne sur le lac ---------- */
 {// le cercle d'encre, pâle comme de la brume, posé sur l'eau
- const t=canvasTex(1024,1024,(x,W)=>{x.clearRect(0,0,W,W);inkRing(x,W/2,W/2,330,{seed:1918,col:'#eef1ef',w:22,drops:30,wash:false,f:[{a:-.3,k:'splash',s:1.4},{a:.9,k:'tendril',s:1.5,c:.06},{a:1.6,k:'blob',s:1.2},{a:2.4,k:'spike',s:1.3,d:-1},{a:3.3,k:'splash',s:1.1},{a:4.1,k:'hook',s:1.3},{a:4.9,k:'tendril',s:1.2,d:-1,c:-.05},{a:5.6,k:'blob',s:.9}]})});
+ const t=canvasTex(1024,1024,(x,W)=>{x.clearRect(0,0,W,W);inkRing(x,W/2,W/2,330,{seed:1918,col:'#141414',w:30,drops:30,wash:false,f:[{a:-.3,k:'splash',s:1.4},{a:.9,k:'tendril',s:1.5,c:.06},{a:1.6,k:'blob',s:1.2},{a:2.4,k:'spike',s:1.3,d:-1},{a:3.3,k:'splash',s:1.1},{a:4.1,k:'hook',s:1.3},{a:4.9,k:'tendril',s:1.2,d:-1,c:-.05},{a:5.6,k:'blob',s:.9}]})});
  const m=new THREE.Mesh(new THREE.PlaneGeometry(2.9,2.9),new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:.55,depthWrite:false,toneMapped:false}));m.rotation.x=-Math.PI/2;m.position.set(SEA.x,TOP-.035,SEA.z);m.renderOrder=1;box.add(m);MAPFX.ink=m}
 {// la lueur sous la coquille, sur l'herbe et sur l'eau
  const t=canvasTex(256,256,(x,W)=>{const g=x.createRadialGradient(W/2,W/2,0,W/2,W/2,W/2);g.addColorStop(0,'rgba(230,236,240,.9)');g.addColorStop(.5,'rgba(200,214,224,.35)');g.addColorStop(1,'rgba(200,214,224,0)');x.fillStyle=g;x.fillRect(0,0,W,W)});
@@ -303,7 +318,7 @@ function mapTick(T){if(!MAPFX.heli)return;const on=phase!=='closed'&&phase!=='op
  // la coquille respire à peine
  SHELL.g.position.y=TOP+.06*Math.sin(T*.45);SHELL.g.rotation.y=.25+.04*Math.sin(T*.13);MAPFX.pool.material.opacity=.38+.12*Math.sin(T*.45);
  // le cercle d'encre tourne lentement sur le lac
- MAPFX.ink.rotation.z=T*.035;MAPFX.ink.material.opacity=.62+.12*Math.sin(T*.3);
+ MAPFX.ink.rotation.z=T*.035;MAPFX.ink.material.opacity=.86+.08*Math.sin(T*.3);
  // l'hélicoptère fait le tour de la vallée
  const h=MAPFX.heli,a=T*.16;h.visible=on;h.position.set(SEA.x+Math.cos(a)*4.1,TOP+2.5+.12*Math.sin(T*.9),SEA.z+Math.sin(a)*3.6-.3);h.rotation.set(.12*Math.sin(T*.5),-a-Math.PI,.1);h.userData.rot.rotation.y=T*28;MAPFX.heli0.userData.rot.rotation.y=0;
  // les projecteurs balaient la brume vers la coquille

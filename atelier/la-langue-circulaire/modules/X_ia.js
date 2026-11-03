@@ -31,39 +31,32 @@ const GPPAGE=(()=>{const o=document.createElement('canvas');o.width=440;o.height
  x.strokeStyle='rgba(90,130,200,.25)';for(let y=40;y<330;y+=30){x.beginPath();x.moveTo(0,y);x.lineTo(440,y);x.stroke()}
  const R=seeded(1937);x.strokeStyle='#2a2a4a';x.lineWidth=2.2;x.lineCap='round';for(let y=36;y<320;y+=30){let px=20+R()*10;while(px<410){const w=20+R()*50;x.beginPath();x.moveTo(px,y);for(let u=0;u<w;u+=3){x.lineTo(px+u,y-4-Math.abs(Math.sin(u*.6+R()*3))*10*(R()<.3?1.6:1))}x.stroke();if(R()<.2){x.beginPath();x.moveTo(px+w+3,y-14);x.lineTo(px+w+7,y-2);x.stroke()}px+=w+12+R()*8}}
  x.fillStyle='rgba(255,226,120,.35)';x.fillRect(16,126,330,36);return lifted(bordered(o,5))})();
-function mkEvid(){const M={state:'tari',place:[-1,-1,-1,-1],drag:null,tried:[],t0:performance.now(),done:false,
- hint:'Dans la salle des enregistrements, une voix de femme, très vieille, parle une langue d’Amazonie. Maman m’en avait parlé.',
- wantsTap:()=>['tari','mid','fin'].includes(M.state),
- card(i){return[34+(i%2)*360,138+(i/2|0)*262]},tag(j){return[34+j*180,684]},
- draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now();
-  if(M.state==='tari'){header(c,'En tariana, « l’alien l’a mordu »','se dit de cinq façons. Selon comment on le sait :');
-   TARI.forEach(([w,l],i)=>{const y=184+i*92;tagBox(c,40,y,688,78,8);txt(c,w,190,y+40,42,'#7a2a08');txt(c,l,500,y+42,36,'#22306e')});txt(c,'Un Français qui l’apprend passe pour un menteur.',384,664,36,'#3a2a20');tapLine(c,720);return}
-  if(M.state==='play'||M.state==='mid'){header(c,'La semaine d’Alice, dans une langue qui oblige à dire',M.state==='play'?'comment on sait. Glisser chaque marque sur sa phrase.':'comment on sait. Chaque phrase a sa marque.');
-   WEEK.forEach(([t],i)=>{const[x,y]=M.card(i);tagBox(c,x,y,340,244,10);c.drawImage(WEEKS[i],x+8,y+6,200,165);const ls=(()=>{c.font='600 38px Caveat, cursive';return jLines(c,t,316)})();ls.slice(0,2).forEach((l,k)=>txt(c,l,x+170,y+190+k*32,32,'#22306e'));
-    const j=M.place.indexOf(i);if(j>=0){drawGlyph(c,EV[j][1],x+276,y+70,42);txt(c,EV[j][0],x+276,y+140,30,'#7a2a08')}});
-   [0,1,2,3].forEach(j=>{if(M.place[j]>=0)return;let[x,y]=M.tag(j);if(M.drag&&M.drag.j===j){x=M.drag.x-80;y=M.drag.y-40}tagBox(c,x,y-40,164,100,10);drawGlyph(c,EV[j][1],x+82,y-6,24);txt(c,EV[j][0],x+82,y+40,30,'#7a2a08')});
-   if(M.state==='mid')tapLine(c,736,'toucher : le carnet de Grand-père');
-   else if(M.place.every(p=>p<0)&&!M.drag){const k=(tutT()*.6)%1,[tx,ty]=M.tag(0),[cx2,cy2]=M.card(0);drawHand(c,tx+80+(cx2+250-tx-80)*clamp(k*1.4),ty+(cy2+80-ty)*clamp(k*1.4),k<.8)}return}
-  if(M.state==='carnet'||M.state==='fin'){c.save();c.translate(384,250);c.rotate(-.02);c.drawImage(GPPAGE,-GPPAGE.width/2,-GPPAGE.height/2);c.restore();
-   if(M.state==='carnet'){txt(c,'Comment le savait-il ?',384,452,42,'#22306e');[['traducteur automatique',0],['chercher seule',1],['demander à quelqu’un',2]].forEach(([l,i])=>btn(c,30+i*244,500,224,84,l,M.tried.includes(i),i===0?26:32));
-    const last=M.tried[M.tried.length-1];if(last!=null){tagBox(c,40,604,688,120,10);
-     if(last===0){txt(c,'« Le jardin bleu court sous la montre. »',384,642,36,'#3a3a3a');txt(c,'traduction sûre à 97 %',384,690,30,'#9a3a1a','center','600',true)}
-     if(last===1){txt(c,'Un M. Une date, peut-être. Pas le sens.',384,646,36,'#3a2a20');txt(c,'Ses abréviations sont à lui.',384,692,32,'#5a4a3a','center','600',true)}
-     if(last===2){txt(c,'Il faudrait le lui demander.',384,646,38,'#22306e');txt(c,'À lui.',384,692,36,'#22306e')}}}
-   else{tagBox(c,40,450,688,280,12);txt(c,'Un écrit garde des mots,',384,500,40,'#22306e');txt(c,'pas la façon dont on les savait.',384,546,40,'#22306e');txt(c,'Quand une langue s’éteint, s’en va aussi',384,612,36,'#3a2a20');txt(c,'l’habitude de dire comment on sait.',384,654,36,'#3a2a20');tapLine(c,712)}}},
+function mkEvid(){const M={state:'tari',t0:performance.now(),pick:-1,tried:[],done:false,
+ hint:'Dans la salle des enregistrements, une voix très vieille parle une langue d’Amazonie, le tariana. Maman m’en avait parlé.',
+ wantsTap:()=>['tari','me2','fin'].includes(M.state),
+ draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now(),k=(now-M.t0)/1000;
+  if(M.state==='tari'){paper(c,24,118);bigLine(c,'En tariana, « l’alien l’a mordu »',64,42);bigLine(c,'se dit de cinq façons :',108,38,'#3a2a20');
+   TARI.forEach(([w,l],i)=>{const a=clamp(k*1.6-i*.6);if(a<=0)return;c.save();c.globalAlpha=a;const y=166+i*92;tagBox(c,40,y,688,78,8);txt(c,w,180,y+40,40,'#7a2a08');txt(c,l,500,y+42,36,'#22306e');c.restore()});
+   if(k>3.6){bigLine(c,'Le verbe dit toujours comment on sait.',650,40);tapLine(c,712)}return}
+  if(M.state==='me'||M.state==='me2'){paper(c,24,118);bigLine(c,'Et moi ? « Il a neigé cette nuit. »',64,42);bigLine(c,'En tariana, il faudrait choisir :',108,38,'#3a2a20');
+   ['je l’ai vu tomber','on me l’a dit','j’ai vu la neige ce matin'].forEach((l,i)=>btn(c,84,190+i*104,600,86,l,M.pick===i,40));
+   if(M.state==='me2'){paper(c,520,150);bigLine(c,'Impossible de ne pas choisir.',562,40,'#7a2a08');bigLine(c,'On prend l’habitude de se demander :',606,34,'#3a2a20');bigLine(c,'comment je le sais ?',646,38);tapLine(c,724)}return}
+  if(M.state==='carnet'||M.state==='fin'){c.save();c.translate(384,230);c.rotate(-.02);c.drawImage(GPPAGE,-GPPAGE.width/2,-GPPAGE.height/2);c.restore();
+   if(M.state==='carnet'){bigLine(c,'Grand-père. Comment le savait-il ?',438,42);[['traducteur automatique',0],['chercher seule',1],['demander à quelqu’un',2]].forEach(([l,i])=>btn(c,30+i*244,486,224,84,l,M.tried.includes(i),32));
+    const last=M.tried[M.tried.length-1];if(last!=null){paper(c,590,130);
+     if(last===0){bigLine(c,'« Le jardin bleu court sous la montre. »',632,36,'#3a3a3a');bigLine(c,'traduction sûre à 97 %',680,30,'#9a3a1a')}
+     if(last===1){bigLine(c,'Un M. Une date, peut-être. Pas le sens.',636,36,'#3a2a20');bigLine(c,'Ses abréviations sont à lui.',682,32,'#5a4a3a')}
+     if(last===2){bigLine(c,'Il faudrait le lui demander.',636,40);bigLine(c,'À lui.',684,38)}}}
+   else{paper(c,430,300);bigLine(c,'Un écrit garde des mots,',486,42);bigLine(c,'pas la façon dont on les savait.',536,42);bigLine(c,'Quand une langue s’éteint, s’en va aussi',604,36,'#3a2a20');bigLine(c,'l’habitude de dire comment on sait.',646,36,'#3a2a20');tapLine(c,712)}}},
  down(cx,cy){const now=performance.now();
-  if(M.state==='tari'){M.state='play';showHint('« À toi : raconte ta semaine. Mais dans cette langue-là, chaque phrase doit dire comment tu le sais. »');return}
-  if(M.state==='mid'){M.state='carnet';showHint('Puis j’ai ouvert le carnet de Grand-père. Une ligne, surtout. Comment le savait-il ?');return}
+  if(M.state==='tari'){if(now-M.t0<3600)return;M.state='me';showHint('« Et toi, si tu parlais tariana ? »');return}
+  if(M.state==='me'){[0,1,2].forEach(i=>{if(inR(cx,cy,[84,190+i*104,600,86])){M.pick=i;M.state='me2';sndPaper(.3,.2);showHint(['« Vu : la forme niwhãka, en quelque sorte. »','« Rapporté : la forme -pidaka. »','« Déduit, des traces : la forme -sika. »'][i])}});return}
+  if(M.state==='me2'){M.state='carnet';showHint('Puis j’ai ouvert le carnet de Grand-père. Une ligne surlignée. Comment le savait-il ?');return}
   if(M.state==='fin'){M.done=true;return}
-  if(M.state==='carnet'){[0,1,2].forEach(i=>{if(inR(cx,cy,[30+i*244,500,224,84])){if(!M.tried.includes(i))M.tried.push(i);else{M.tried=M.tried.filter(t=>t!==i);M.tried.push(i)}sndPaper(.3,.2);
+  if(M.state==='carnet'){[0,1,2].forEach(i=>{if(inR(cx,cy,[30+i*244,486,224,84])){M.tried=M.tried.filter(t=>t!==i);M.tried.push(i);sndPaper(.3,.2);
      showHint(i===0?'La machine répond tout de suite, et sûre d’elle. Mais ce sont ses mots à lui, ses abréviations.':i===1?'Je reconnais des lettres. Pas ce qu’il voulait dire.':'Maman dit qu’une langue ne s’apprend qu’en face de quelqu’un.');
-     if(M.tried.length===3&&i===2||M.tried.length===3)setTimeout(()=>{if(M.state==='carnet'){M.state='fin';sndTone(523,1.4,.07)}},2600)}});return}
-  if(M.state==='play')[0,1,2,3].forEach(j=>{if(M.place[j]>=0||M.drag)return;const[x,y]=M.tag(j);if(inR(cx,cy,[x,y-40,164,100])){M.drag={j,x:cx,y:cy};sndPaper(.25,.2)}})},
- move(cx,cy){if(M.drag){M.drag.x=cx;M.drag.y=cy}},
- up(){if(!M.drag)return;const{j,x,y}=M.drag;M.drag=null;const i=[0,1,2,3].find(i=>{const[sx,sy]=M.card(i);return x>sx&&x<sx+340&&y>sy&&y<sy+244});if(i==null)return;
-  if(i===j&&!M.place.includes(i)){M.place[j]=i;sndTone(523+j*60,.6,.07);if(M.place.every(p=>p>=0))setTimeout(()=>{M.state='mid';showHint('« Tu as dû te demander, pour chaque phrase : je l’ai vu ? entendu ? on me l’a dit ? En français, rien ne t’y oblige. »')},700)}
-  else{sndTone(330,.4,.06);showHint('« Comment le sais-tu, au juste ? Tu l’as vu, tu l’as entendu, on te l’a dit… ou tu l’as deviné à des traces ? »')}},
- solve(){M.done=true}};return M}
+     if(i===2)setTimeout(()=>{if(M.state==='carnet'){M.state='fin';sndTone(523,1.4,.07)}},2600)}})}},
+ move(){},up(){},solve(){M.done=true}};return M}
 const mkIA=mkEvid;
 // ---- le script du cinquième lieu
 SCRIPTS.ai=[{say:'lieu',t:'L’université, aujourd’hui. Au sous-sol, des voix enregistrées : des langues que plus personne ne parle.'},

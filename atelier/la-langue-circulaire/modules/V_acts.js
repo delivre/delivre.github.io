@@ -69,49 +69,40 @@ const tapLine=(c,y,s='toucher pour continuer')=>txt(c,s,384,y,34,'#5a4a3a','cent
 // un bandeau de papier pour les consignes en haut de la carte
 const header=(c,l1,l2,y=26)=>{tagBox(c,26,y,716,l2?118:72,12);fitTxt(c,l1,384,y+36,38,'#22306e',680);if(l2)fitTxt(c,l2,384,y+84,34,'#3a2a20',680)};
 
-/* 1. L'université — « Où sont les mots ? » : une langue parlée est une file de sons, sans espaces */
-const VOY=[['a','patte'],['â','pâte'],['é','été'],['è','mère'],['e','le'],['eu','peu'],['eu','peur'],['i','ici'],['o','peau'],['o','pore'],['ou','loup'],['u','lune'],['an','blanc'],['on','bon'],['in','vin'],['un','brun']];
-const FR_S=['la','lin','guis','te','re','gar','de','la','vi','tre'],FR_CUT=[0,3,6,7];        // la | linguiste | regarde | la | vitre
-const AL_S=['ka','lu','mi','so','ta','ne','ru','ka','lu','po'];
-const KALU={seed:31,a0:.3,f:[{a:-2.2,k:'hook',s:1.6},{a:.95,k:'hook',s:1.6},{a:-.6,k:'blob',s:1},{a:2.4,k:'spike',s:1.1},{a:3.6,k:'tendril',s:1,d:-1}]};
-function mkMots(){const M={state:'predict',pick:-1,cuts:new Set(),done:false,t0:0,ok:false,
- hint:'Maman, dans son bureau : « Avant de parler aux visiteurs, une question. Combien de voyelles a le français… quand on le parle ? »',
- wantsTap:()=>['reveal','r1end','r2end','circle'].includes(M.state),
- syl(){return M.state.startsWith('r1')?FR_S:AL_S},
- pos(i,n){const w=n>8?68:70,x0=384-(n-1)*w/2;return[x0+i*w,430]},
- draw(c,T){c.drawImage(OFFICEBG,0,0);
-  if(M.state==='predict'||M.state==='reveal'){header(c,'Combien de voyelles en français,','quand on le parle ?');
-   if(M.state==='predict'){[['5',0],['11',1],['16',2]].forEach(([l,i])=>btn(c,104+i*200,250,160,110,l,M.pick===i,60))}
-   else{const k=clamp((performance.now()-M.t0)/1400);VOY.forEach(([v,ex],i)=>{if(i/16>k)return;const col=i%4,row=i/4|0,x=40+col*178,y=176+row*96;tagBox(c,x,y,166,80,8);txt(c,v,x+44,y+40,46,'#7a2a08');txt(c,ex,x+112,y+42,30,'#3a2a20','center','600',true)});
-    if(k>=1){tagBox(c,40,566,688,120,10);txt(c,'16 voyelles à l’oral, pour 5 lettres : a, e, i, o, u.',384,604,36,'#22306e');txt(c,'L’écrit ne montre pas tout ce qu’on entend.',384,650,36,'#22306e');tapLine(c,724)}}
-   return}
-  const S=M.syl(),n=S.length,r1=M.state.startsWith('r1');
-  header(c,r1?'Une phrase, comme on l’entend : sans espaces.':'La voix des visiteurs, enregistrée.',r1?'Toucher entre deux sons pour séparer les mots.':'Où commencent leurs mots ? Couper où l’on veut.');
-  // l'onde sonore, qui passe sous les syllabes
-  c.save();c.strokeStyle='rgba(255,226,170,.55)';c.lineWidth=3;c.beginPath();for(let u=40;u<=728;u+=3){const a=Math.sin(u*.09+T*4)*Math.sin(u*.013+T)*34*(r1?1:1.2);u===40?c.moveTo(u,520+a):c.lineTo(u,520+a)}c.stroke();c.restore();
-  S.forEach((s,i)=>{const[x,y]=M.pos(i,n);const lift=Math.sin(T*3-i*.5)*3;tagBox(c,x-30,y-34+lift,60,70,8);txt(c,s,x,y+2+lift,40,r1?'#22306e':'#3a3a3a')});
-  for(let i=0;i<n-1;i++){const[x]=M.pos(i,n),gx=x+(M.pos(1,n)[0]-M.pos(0,n)[0])/2;if(M.cuts.has(i)){c.save();c.strokeStyle='#c8463a';c.lineWidth=6;c.lineCap='round';c.beginPath();c.moveTo(gx+6,376);c.lineTo(gx-6,484);c.stroke();c.restore()}else{c.fillStyle='rgba(255,236,200,.35)';c.beginPath();c.arc(gx,470,5,0,7);c.fill()}}
-  if(M.state==='r1'&&M.cuts.size===0){const[x]=M.pos(0,n);const k=(tutT()*.7)%1;drawHand(c,x+36,452,k<.5)}
-  if(M.state==='r1'||M.state==='r2')btn(c,264,620,240,84,'C’est coupé',false,40);
-  if(M.state==='r1end'){tagBox(c,40,566,688,150,10);if(M.ok){txt(c,'la | linguiste | regarde | la | vitre',384,602,38,'#22306e');txt(c,'Facile : on connaît déjà ces mots.',384,648,36,'#3a2a20')}else{txt(c,'la | linguiste | regarde | la | vitre',384,602,38,'#22306e');txt(c,'Presque. Et pourtant, on connaît ces mots.',384,648,36,'#3a2a20')}tapLine(c,696)}
-  if(M.state==='r2end'){tagBox(c,40,566,688,150,10);txt(c,'9 endroits où couper : 512 découpages possibles.',384,602,36,'#22306e');txt(c,'Rien, dans le son, ne dit lequel est juste.',384,648,36,'#3a2a20');tapLine(c,696)}
-  if(M.state==='circle'){const k=clamp((performance.now()-M.t0)/1800);c.save();c.globalAlpha=.94;c.fillStyle='#e9e8e2';c.fillRect(40,140,688,600);c.restore();
-   drawGlyph(c,KALU,384,350,170,k);
-   if(k>.6){c.save();c.strokeStyle='#c8463a';c.lineWidth=4;c.setLineDash([8,8]);[KALU.f[0].a,KALU.f[1].a].forEach(a=>{c.beginPath();c.arc(384+Math.cos(a)*170,350+Math.sin(a)*170,62,0,7);c.stroke()});c.restore()}
-   if(k>=1){txt(c,'Écrit, le message reste sous les yeux.',384,566,38,'#22306e');fitTxt(c,'Le même trait revient deux fois : « ka-lu » ?',384,612,38,'#7a2a08',660);tapLine(c,700)}}},
+/* Chaque activité : très peu de gestes, et un principe qu'on découvre. On se laisse porter. */
+const nextBtn=(c,label='suite ▸')=>btn(c,284,672,200,72,label,false,38);
+const hitNext=(cx,cy)=>inR(cx,cy,[284,672,200,72]);
+const bigLine=(c,s,y,size=44,col='#22306e')=>fitTxt(c,s,384,y,size,col,690);
+const paper=(c,y,h)=>tagBox(c,34,y,700,h,14);
+
+/* 1. L'université — « Où commence tiède ? » : chaque langue, chaque personne, découpe le monde à sa façon */
+const THERMO=(c,T)=>{const x0=94,x1=674,y=350;const g=c.createLinearGradient(x0,0,x1,0);g.addColorStop(0,'#3b6fd6');g.addColorStop(.5,'#e9e2c8');g.addColorStop(1,'#c8463a');c.save();c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=10;c.shadowOffsetY=5;c.fillStyle=g;c.beginPath();rrect(c,x0,y-30,x1-x0,60,30);c.fill();c.restore();
+ txt(c,'glacée',x0+40,y+64,30,'#cfe0f0');txt(c,'brûlante',x1-50,y+64,30,'#f6c4b0');return[x0,x1,y]};
+function mkMots(){const M={state:'drag',v:.35,drag:false,t0:0,pick:-1,done:false,
+ hint:'Maman, à ses étudiants : « Une question toute simple. L’eau du bain : où commence le mot tiède ? »',
+ wantsTap:()=>['marks','snow2','end'].includes(M.state),
+ draw(c,T){c.drawImage(OFFICEBG,0,0);const now=performance.now();
+  if(M.state==='drag'||M.state==='marks'){paper(c,28,96);bigLine(c,'Où commence « tiède » ?',76,46);const[x0,x1,y]=THERMO(c,T);
+   const mark=(v,lab,col,up)=>{const px=x0+(x1-x0)*v;c.save();c.fillStyle=col;c.beginPath();c.moveTo(px,y-36);c.lineTo(px-14,y-62);c.lineTo(px+14,y-62);c.closePath();c.fill();c.restore();txt(c,lab,px,y-86-(up?44:0),34,col)};
+   mark(M.v,'moi','#ffd27a');
+   if(M.state==='drag'){txt(c,'Glisser la flèche dorée',384,520,40,'#f3ead6');txt(c,'là où l’eau devient « tiède ».',384,566,40,'#f3ead6');const k=(tutT()*.6)%1;drawHand(c,x0+(x1-x0)*(M.v+.12*Math.sin(k*Math.PI)),y-50,k<.6);if(M.moved)nextBtn(c,'c’est là')}
+   else{const k=clamp((now-M.t0)/900);if(k>.2)mark(.52,'Maman','#e8b4c8',true);if(k>.6)mark(.22,'Papa','#9ec6f0',true);
+    if(k>=1){paper(c,470,190);bigLine(c,'Trois personnes, trois « tiède ».',516,40);bigLine(c,'Le même mot ne coupe pas le monde',566,36,'#3a2a20');bigLine(c,'au même endroit pour chacun.',606,36,'#3a2a20');tapLine(c,700)}}return}
+  if(M.state==='snow'||M.state==='snow2'){paper(c,28,96);bigLine(c,'Les Inuits ont-ils des dizaines de mots',62,40);bigLine(c,'pour dire la neige ?',104,40);
+   [['2',0],['50',1],['100',2]].forEach(([l,i])=>btn(c,94+i*200,170,180,110,l,M.pick===i,58));
+   if(M.state==='snow2'){paper(c,320,330);bigLine(c,'Deux racines seulement :',372,42,'#7a2a08');bigLine(c,'la neige au sol, la neige qui tombe.',420,38);bigLine(c,'Les « cent mots », c’est un mythe.',476,38);
+    bigLine(c,'Et nous ? neige, givre, verglas,',536,36,'#3a2a20');bigLine(c,'poudreuse, grésil, flocon…',576,36,'#3a2a20');tapLine(c,700)}return}
+  if(M.state==='end'){paper(c,150,420);bigLine(c,'Une langue découpe le monde',230,44);bigLine(c,'à sa façon.',284,44);bigLine(c,'Mais elle ne nous empêche pas de le voir :',370,36,'#3a2a20');bigLine(c,'quand un mot manque, on dit',420,36,'#3a2a20');bigLine(c,'« rouge foncé », « neige qui colle ».',470,38,'#7a2a08');tapLine(c,640)}},
  down(cx,cy){const now=performance.now();
-  if(M.state==='predict'){[0,1,2].forEach(i=>{if(inR(cx,cy,[104+i*200,250,160,110])){M.pick=i;M.state='reveal';M.t0=now;sndPaper(.4,.3);showHint(i===2?'« Exactement : seize. L’écriture n’en montre que cinq. »':'« Seize ! a, â, é, è, e, eu, eu, i, o, o, ou, u, an, on, in, un. L’écriture n’en montre que cinq. »')}});return}
-  if(M.state==='reveal'){if(now-M.t0<1400)return;M.state='r1';M.cuts=new Set();showHint('« D’abord en français. Coupe la phrase en mots. »');return}
-  if(M.state==='r1end'){M.state='r2';M.cuts=new Set();showHint('« Maintenant leur langue. Pas un mot connu. Coupe-la comme tu peux. »');return}
-  if(M.state==='r2end'){M.state='circle';M.t0=now;sndPaper(.4,.3);showHint('« Et si on l’écrivait ? »');return}
-  if(M.state==='circle'){if(now-M.t0<1800)return;M.score=M.ok?1:0;M.done=true;return}
-  if(M.state==='r1'||M.state==='r2'){if(inR(cx,cy,[264,620,240,84])){if(M.state==='r1'){M.ok=FR_CUT.every(i=>M.cuts.has(i))&&M.cuts.size===FR_CUT.length;if(!M.ok){M.cuts=new Set(FR_CUT)}M.state='r1end';sndTone(M.ok?659:440,.8,.08);showHint(M.ok?'« Sans réfléchir. Parce que tu connais déjà les mots. »':'« Presque. Tu les connais pourtant, ces mots. Et à l’oral, c’est encore plus traître : “une heure et demie” se prononce comme “une heure ennemie”. »')}
-     else{M.state='r2end';sndTone(392,.8,.08);showHint('« Voilà ce que Louise a dit au colonel : avec un enregistrement, on ne peut rien faire. Il faut être en face. »')}return}
-   const S=M.syl(),n=S.length,dx=M.pos(1,n)[0]-M.pos(0,n)[0];for(let i=0;i<n-1;i++){const gx=M.pos(i,n)[0]+dx/2;if(Math.abs(cx-gx)<dx*.45&&cy>360&&cy<500){if(M.cuts.has(i))M.cuts.delete(i);else M.cuts.add(i);sndPaper(.2,.15);return}}}},
- move(){},up(){},solve(){M.done=true}};return M}
+  if(M.state==='drag'){if(M.moved&&hitNext(cx,cy)){M.state='marks';M.t0=now;sndTone(523,.8,.08);showHint('« Moi, je mets “tiède” plus haut. Papa, bien plus bas. Personne n’a tort : chacun découpe à sa façon. »');return}if(Math.abs(cy-350)<90){M.drag=true;M.move(cx,cy)}return}
+  if(M.state==='marks'){if(now-M.t0<900)return;M.state='snow';showHint('« Alors, une langue changerait ce qu’on voit ? Voyons un exemple célèbre. »');return}
+  if(M.state==='snow'){[0,1,2].forEach(i=>{if(inR(cx,cy,[94+i*200,170,180,110])){M.pick=i;M.state='snow2';sndTone(i===0?659:440,.6,.08);showHint(i===0?'« Bravo, presque personne ne le sait. »':'« C’est ce que tout le monde croit. Landragin le dit : c’est un mythe. »')}});return}
+  if(M.state==='snow2'){M.state='end';showHint('C’est la vieille question de Sapir et Whorf : la langue façonne-t-elle la pensée ? Maman disait : « On verra ça au bord du lac. »');return}
+  if(M.state==='end'){M.done=true}},
+ move(cx){if(M.drag&&M.state==='drag'){M.v=clamp((cx-94)/580,.04,.96);M.moved=true}},up(){M.drag=false},solve(){M.done=true}};return M}
 
 /* 2. Le camp — « Gavagai ! » : un mot montré du doigt peut tout vouloir dire ; on ne le devine pas, on le demande */
-const G_OUI=GLYPH(101,3),G_NON={...GLYPH(202,2),gap:.9},G_GAV=GLYPH(303,5);
+const G_OUI=GLYPH(101,3),G_GAV=GLYPH(303,5);
 const PICS={
  lapin:doodle(150,110,x=>{F(x,'#f6f2ea',c=>{c.ellipse(70,70,44,28,0,0,7)});F(x,'#f6f2ea',c=>c.ellipse(112,48,20,17,0,0,7));F(x,'#f6f2ea',c=>{c.ellipse(108,20,6,18,-.2,0,7)});F(x,'#f6f2ea',c=>{c.ellipse(120,20,6,18,.2,0,7)});F(x,'#f6f2ea',c=>c.arc(26,62,9,0,7));x.fillStyle='#2a1a22';x.beginPath();x.arc(118,46,3,0,7);x.fill();x.beginPath();x.moveTo(50,96);x.lineTo(30,104);x.moveTo(92,96);x.lineTo(118,104);x.stroke()}),
  dort:doodle(150,100,x=>{F(x,'#f6f2ea',c=>{c.ellipse(70,64,48,26,0,0,7)});F(x,'#f6f2ea',c=>c.ellipse(112,64,20,16,0,0,7));F(x,'#f6f2ea',c=>{c.ellipse(96,40,6,18,-1.1,0,7)});x.beginPath();x.moveTo(112,62);x.quadraticCurveTo(118,66,124,62);x.stroke();x.font='600 26px Caveat, cursive';x.fillStyle='#22306e';x.fillText('z',120,24);x.fillText('z',134,12)}),
@@ -119,141 +110,78 @@ const PICS={
  feuille:doodle(140,110,x=>{x.save();x.translate(70,56);x.rotate(-.5);F(x,'#c98a3a',c=>{c.moveTo(-40,0);c.quadraticCurveTo(0,-34,40,0);c.quadraticCurveTo(0,34,-40,0)});x.beginPath();x.moveTo(-40,0);x.lineTo(40,0);x.stroke();x.restore();x.strokeStyle='#8a9aa8';x.beginPath();x.moveTo(6,90);x.quadraticCurveTo(40,80,60,96);x.moveTo(20,104);x.quadraticCurveTo(60,94,90,104);x.stroke()}),
  balan:doodle(150,120,x=>{x.lineWidth=5;x.strokeStyle='#6a4a30';x.beginPath();x.moveTo(20,110);x.lineTo(40,8);x.lineTo(110,8);x.lineTo(130,110);x.stroke();x.lineWidth=2.6;x.strokeStyle='#3a2630';x.beginPath();x.moveTo(62,8);x.lineTo(56,78);x.moveTo(88,8);x.lineTo(94,78);x.stroke();F(x,'#c84a3a',c=>c.rect(50,76,50,8));x.strokeStyle='#8a9aa8';x.beginPath();x.arc(75,60,40,1.2,1.9);x.stroke()}),
  mur:doodle(150,110,x=>{for(let r=0;r<4;r++)for(let k=0;k<4;k++){F(x,'#b8aca0',c=>c.rect(8+k*34+(r%2)*16,8+r*24,30,20))}})};
-const HYP=[['lapin',x=>x.lapin],['animal',null],['blanc',null],['oreille',null],['qui court',null],['qui bouge',null]];
-// ce que dirait chaque hypothèse devant chaque objet (oui = 1) ; la vraie réponse : « ce qui s'enfuit »
-const TESTS=[{k:'dort',n:'un lapin qui dort',h:[1,1,1,1,0,0],a:0},{k:'chien',n:'un chien qui court',h:[0,1,0,1,1,1],a:1},{k:'feuille',n:'une feuille qui s’envole',h:[0,0,0,0,0,1],a:1},{k:'balan',n:'une balançoire qui bouge',h:[0,0,0,0,0,1],a:0},{k:'mur',n:'le mur',h:[0,0,0,0,0,0],a:0}];
-function mkGavagai(){const M={state:'learn',lstep:0,map:null,alive:[1,1,1,1,1,1],asked:[],show:null,t0:performance.now(),done:false,
- hint:'Au camp, Louise apprenait d’abord deux mots : oui et non. Elle montrait le carton ALICE… et le visiteur répondait.',
- wantsTap:()=>['learn','gav0','fin','fin2'].includes(M.state)&&M.state!=='learn'||M.state==='learn'&&M.lstep<2,
- draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now();
-  if(M.state==='learn'){header(c,M.lstep<2?'Le carton ALICE, et ce qu’on désigne :':'Lequel de ces cercles veut dire « oui » ?');
-   const pair=[[0,'Alice se désigne',G_OUI],[1,'Alice désigne le mur',G_NON]];
-   pair.forEach(([i,l,g])=>{if(i>M.lstep&&M.lstep<2)return;const x=i?560:208;tagBox(c,x-130,170,260,64,10);txt(c,l,x,202,34,'#3a2a20');
-    // le carton et le geste
-    c.save();c.translate(x,300);tagBox(c,-70,-26,140,52,6);txt(c,'ALICE',0,2,36,'#22306e');c.restore();txt(c,i?'→ le mur':'→ moi',x,360,32,'#5a4a3a','center','600',true);
-    const k=i===M.lstep?clamp((now-M.t0)/1300):1;drawGlyph(c,g,x,500,92,k);
-    if(M.lstep>=2){const on=M.map===i;if(on){c.save();c.strokeStyle='#c8463a';c.lineWidth=5;c.beginPath();c.arc(x,500,128,0,7);c.stroke();c.restore()}}});
-   if(M.lstep<2)tapLine(c,690,M.lstep===0?'toucher : Alice désigne le mur':'toucher pour continuer');
-   else{txt(c,'Toucher le cercle du « oui ».',384,690,36,'#3a2a20');}return}
-  if(M.state==='gav0'){header(c,'Un lapin détale derrière la vitre.','Le visiteur trace un cercle : « gavagai ».');const k=clamp((now-M.t0)/2200);
-   const lx=lerp(80,700,clamp((now-M.t0)/1600));if(k<.8){c.save();c.globalAlpha=1-clamp((k-.6)/.2);c.drawImage(PICS.lapin,lx-75,560);c.restore()}
-   drawGlyph(c,G_GAV,384,390,120,clamp((now-M.t0-500)/1600));if(k>=1){txt(c,'Gavagai : que veut dire ce mot ?',384,612,40,'#22306e');tapLine(c,690)}return}
-  if(M.state==='ask'||M.state==='fin'||M.state==='fin2'){
-   // les six idées
-   tagBox(c,22,22,724,58,10);txt(c,'« Gavagai », ça veut dire…',384,52,36,'#22306e');
-   HYP.forEach(([l],i)=>{const x=34+(i%3)*240,y=96+(i/3|0)*76;const al=M.alive[i];c.save();c.globalAlpha=al?1:.45;tagBox(c,x,y,224,62,8);txt(c,l,x+112,y+32,38,al?'#22306e':'#6a5a5a');c.restore();
-    if(!al){c.save();c.strokeStyle='#c8463a';c.lineWidth=5;c.beginPath();c.moveTo(x+12,y+40);c.lineTo(x+212,y+24);c.stroke();c.restore()}});
-   if(M.state==='ask'){
-    if(M.show){const t=TESTS[M.show.i],k=clamp((now-M.show.t0)/900);c.save();c.globalAlpha=Math.min(1,k*2);const p=PICS[t.k];c.drawImage(p,190-p.width/2,360-p.height/2);c.restore();txt(c,'« Gavagai ? »',190,452,38,'#22306e');
-      const k2=clamp((now-M.show.t0-700)/1200);if(k2>0)drawGlyph(c,t.a?G_OUI:G_NON,540,360,82,k2);if(k2>=1)txt(c,t.a?'oui':'non',540,470,44,t.a?'#2a6a3a':'#9a3a1a')}
-    else{txt(c,'Lui montrer quelque chose, et lui demander :',384,330,36,'#3a2a20');txt(c,'« Gavagai ? »',384,380,46,'#22306e')}
-    TESTS.forEach((t,i)=>{const x=24+i*146,y=530,used=M.asked.includes(i);c.save();c.globalAlpha=used?.4:1;tagBox(c,x,y,138,190,10);const p=PICS[t.k],s=Math.min(1,120/p.width);c.save();c.translate(x+69,y+70);c.scale(s,s);c.drawImage(p,-p.width/2,-p.height/2);c.restore();const ls=(()=>{c.font='600 34px Caveat, cursive';return jLines(c,t.n,124)})();ls.slice(0,2).forEach((l,j)=>txt(c,l,x+69,y+140+j*32,30,'#3a2a20'));c.restore()});
-    if(!M.asked.length){const k=(tutT()*.7)%1;drawHand(c,96,610,k<.5)}}
-   if(M.state==='fin'){tagBox(c,40,320,688,330,12);txt(c,'Aucune de nos six idées ne tient !',384,366,40,'#7a2a08');txt(c,'Le lapin qui détale, le chien, la feuille… oui.',384,420,36,'#3a2a20');txt(c,'Le lapin qui dort, la balançoire… non.',384,466,36,'#3a2a20');
-    txt(c,'Gavagai voulait dire : « ce qui s’enfuit ».',384,532,42,'#22306e');txt(c,`${M.asked.length} questions posées`,384,590,36,'#5a4a3a');tapLine(c,690)}
-   if(M.state==='fin2'){tagBox(c,40,320,688,330,12);txt(c,'Un seul exemple : six sens possibles.',384,380,40,'#22306e');txt(c,'Des questions, des oui, des non :',384,446,38,'#3a2a20');txt(c,'et le sens qu’on n’avait pas imaginé.',384,494,38,'#3a2a20');txt(c,'Un mot ne se devine pas. Il se demande.',384,566,40,'#7a2a08');tapLine(c,690)}}},
+const GUESS=['un lapin','un animal','blanc','« regarde ! »'];
+const GSCN=[['chien','Un chien qui détale.',1],['feuille','Une feuille emportée par le vent.',1],['dort','Un lapin qui dort.',0]];
+function mkGavagai(){const M={state:'rabbit',t0:performance.now(),pick:-1,i:-1,done:false,
+ hint:'Au camp. Un lapin traverse le champ ; le visiteur trace un cercle. Louise note : « gavagai ».',
+ wantsTap:()=>['rabbit','scene','fin'].includes(M.state),
+ draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now(),k=(now-M.t0)/1000;
+  if(M.state==='rabbit'){const lx=lerp(60,640,clamp(k/1.8));if(k<2.2){c.save();c.globalAlpha=1-clamp((k-1.8)/.4);c.drawImage(PICS.lapin,lx-75,560);c.restore()}drawGlyph(c,G_GAV,384,330,170,clamp((k-.4)/1.8));if(k>2.3){bigLine(c,'« Gavagai ! »',640,54);tapLine(c,712)}return}
+  if(M.state==='guess'){drawGlyph(c,G_GAV,384,250,150);paper(c,450,80);bigLine(c,'Gavagai, ça veut dire… ?',490,44);GUESS.forEach((g,i)=>btn(c,40+(i%2)*352,560+(i/2|0)*96,336,82,g,M.pick===i,40));return}
+  if(M.state==='scene'){const[img,l,yes]=GSCN[M.i];paper(c,30,74);bigLine(c,'Louise continue de montrer, et de demander.',67,36,'#3a2a20');const p=PICS[img];c.save();c.translate(220,330);c.scale(1.6,1.6);c.drawImage(p,-p.width/2,-p.height/2);c.restore();bigLine(c,l,470,40);
+   const kk=clamp((k-.4)/1.2);if(yes)drawGlyph(c,G_GAV,560,320,110,kk);else if(kk>.3){c.save();c.globalAlpha=kk;txt(c,'…',560,320,90,'#3a3a3a');c.restore()}
+   if(kk>=1){bigLine(c,yes?'« Gavagai ! »':'Silence. Pas de gavagai.',560,44,yes?'#22306e':'#6a5a5a');const note=M.i===0?(M.pick===0?'Un chien ? Alors ce n’est pas « lapin ».':'Un chien aussi ?'):M.i===1?'Une feuille ? Ni lapin, ni animal…':'Un lapin… mais immobile.';bigLine(c,note,620,36,'#7a2a08');tapLine(c,712)}return}
+  if(M.state==='fin'){paper(c,120,500);drawGlyph(c,G_GAV,384,260,100);bigLine(c,'Gavagai voulait dire :',420,40,'#3a2a20');bigLine(c,'« ce qui s’enfuit ».',476,52,'#7a2a08');bigLine(c,'Un seul exemple ne suffit jamais.',548,38);bigLine(c,'Un mot ne se devine pas : il se demande.',596,38);tapLine(c,690)}},
  down(cx,cy){const now=performance.now();
-  if(M.state==='learn'){if(M.lstep<2){if(now-M.t0<1300)return;M.lstep++;M.t0=now;if(M.lstep===1)showHint('Puis elle montrait le carton ALICE en désignant le mur. Le visiteur répondait autrement.');else showHint('Deux réponses. L’une veut dire oui, l’autre non. Laquelle est le « oui » ?');return}
-   [[208,0],[560,1]].forEach(([x,i])=>{if(Math.hypot(cx-x,cy-500)<130){M.map=i;sndPaper(.3,.2);if(i===0){sndTone(659,.8,.08);showHint('« Oui : quand le carton dit vrai. C’est la première chose à apprendre, disait Maman. Sans oui ni non, on ne peut rien vérifier. »');setTimeout(()=>{M.state='gav0';M.t0=performance.now();showHint('Puis, un matin, un lapin a traversé le champ.')},2200)}else{sndTone(330,.5,.08);showHint('Pas celui-là : Alice ne s’appelle pas « mur ». Le « oui », c’est quand le carton dit vrai.')}}});return}
-  if(M.state==='gav0'){if(now-M.t0<2200)return;M.state='ask';showHint('« Tu crois savoir ? Vérifie. Montre-lui quelque chose et demande : gavagai ? »');return}
-  if(M.state==='fin'){M.state='fin2';return}
-  if(M.state==='fin2'){M.score=M.asked.length;M.done=true;return}
-  if(M.state==='ask'){if(M.show&&now-M.show.t0<1900)return;TESTS.forEach((t,i)=>{const x=24+i*146;if(inR(cx,cy,[x,530,138,190])&&!M.asked.includes(i)){M.asked.push(i);M.show={i,t0:now};sndPaper(.35,.25);
-     setTimeout(()=>{const before=M.alive.slice();HYP.forEach((h,j)=>{if(t.h[j]!==t.a)M.alive[j]=0});const gone=HYP.filter((h,j)=>before[j]&&!M.alive[j]).map(h=>'« '+h[0]+' »');
-      if(t.k==='mur')showHint('« Le mur ? Non. Bien : il ne dit pas oui à tout. Une question fausse exprès, ça sert aussi. »');
-      else showHint(`${t.n[0].toUpperCase()+t.n.slice(1)} : ${t.a?'oui':'non'}. `+(gone.length?`Ce n’est donc pas ${gone.join(', ')}.`:'Rien d’éliminé, mais c’est une preuve de plus.'));
-      if(!M.alive.some(a=>a)&&M.state==='ask'){setTimeout(()=>{M.state='fin';sndTone(784,1.2,.1);showHint('« Fyunch (clic) », dans un roman de Niven et Pournelle, ne voulait dire aucun des sens imaginés non plus. Landragin adore cet exemple.')},1800)}},1900)}});}},
+  if(M.state==='rabbit'){if(now-M.t0<2300)return;M.state='guess';showHint('« À ton avis ? Choisis. Il n’y a pas de mauvaise réponse… pour l’instant. »');return}
+  if(M.state==='guess'){GUESS.forEach((g,i)=>{if(inR(cx,cy,[40+(i%2)*352,560+(i/2|0)*96,336,82])){M.pick=i;sndPaper(.3,.2);M.state='scene';M.i=0;M.t0=now;showHint('« '+(i===3?'Regarde':g[0].toUpperCase()+g.slice(1))+' ? Vérifions. »')}});return}
+  if(M.state==='scene'){if(now-M.t0<1600)return;M.i++;M.t0=now;sndPaper(.25,.2);if(M.i>=GSCN.length){M.state='fin';sndTone(784,1.2,.1);showHint('C’est l’énigme « gavagai » du philosophe Quine. Et dans le film, Louise s’avance vers la vitre pour ça : on n’apprend une langue qu’en face à face.')}return}
+  if(M.state==='fin'){M.done=true}},
  move(){},up(){},solve(){M.done=true}};return M}
 
-/* 3. La coquille — « Ligne ou cercles » : en ligne, deux phrases emboîtées au milieu d'une autre nous perdent ; dessinées, elles se lisent d'un regard */
-// [extérieur, milieu, intérieur] : « le N1 que le N2 que le N3 V3 V2 V1… » ; la question porte sur le verbe le plus enfoui
-const EMB=[
- {s:'La lettre que l’homme que le chien a mordu a écrite est partie.',P:[['la lettre','est partie'],['l’homme','a écrit (la lettre)'],['le chien','a mordu (l’homme)']],q:'Qui a écrit ?',o:['l’homme','le chien','la lettre'],a:0},
- {s:'Le gâteau que la fille que le garçon aime a fait est brûlé.',P:[['le gâteau','est brûlé'],['la fille','a fait (le gâteau)'],['le garçon','aime (la fille)']],q:'Qui aime ?',o:['le garçon','la fille','le gâteau'],a:0},
- {s:'Le livre que la linguiste que le colonel appelle a lu est ouvert.',P:[['le livre','est ouvert'],['la linguiste','a lu (le livre)'],['le colonel','appelle (la linguiste)']],q:'Qui a lu ?',o:['la linguiste','le colonel','le livre'],a:0},
- {s:'Le vase que le chat que la voisine nourrit a cassé était bleu.',P:[['le vase','était bleu'],['le chat','a cassé (le vase)'],['la voisine','nourrit (le chat)']],q:'Qui nourrit ?',o:['la voisine','le chat','le vase'],a:0},
- {s:'La chanson que la femme que l’enfant écoute chante est triste.',P:[['la chanson','est triste'],['la femme','chante (la chanson)'],['l’enfant','écoute (la femme)']],q:'Qui écoute ?',o:['l’enfant','la femme','la chanson'],a:0},
- {s:'Le pont que l’ouvrier que l’ingénieur paie construit est long.',P:[['le pont','est long'],['l’ouvrier','construit (le pont)'],['l’ingénieur','paie (l’ouvrier)']],q:'Qui paie ?',o:['l’ingénieur','l’ouvrier','le pont'],a:0}];
-const RINGS=[GLYPH(41,4),GLYPH(52,3),GLYPH(63,3)];
-function mkEmboite(){const M={state:'predict',pick:-1,i:0,round:1,sc:[0,0],t0:0,opts:null,done:false,
- hint:'Maman me lisait une phrase de Chomsky, reprise dans un roman, L’Enchâssement : « Le malt que le rat que le chat a mordu a mangé était dans la maison. »',
- wantsTap:()=>['pred2','r1in','r2in','show','res'].includes(M.state),
- shuffle(e){M.opts=e.o.map((t,k)=>[t,k]).sort(()=>Math.random()-.5)},
- draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now();
-  if(M.state==='predict'||M.state==='pred2'){tagBox(c,30,30,708,200,12);['« Le malt que le rat','que le chat a mordu a mangé','était dans la maison. »'].forEach((l,k)=>txt(c,l,384,78+k*54,40,'#22306e'));
-   txt(c,'Qui a mordu ?',384,290,46,'#3a2a20');['le malt','le rat','le chat'].forEach((l,i)=>btn(c,64+i*220,340,200,90,l,M.pick===i,42));
-   if(M.state==='pred2'){tagBox(c,40,470,688,220,12);txt(c,'Le chat a mordu le rat.',384,516,40,'#7a2a08');txt(c,'Le rat a mangé le malt.',384,564,40,'#7a2a08');txt(c,'Deux phrases rangées au milieu d’une autre :',384,620,34,'#3a2a20');txt(c,'notre mémoire décroche.',384,656,34,'#3a2a20');tapLine(c,724)}return}
-  if(M.state==='r1in'||M.state==='r2in'){header(c,M.round===1?'Première manche : en ligne.':'Deuxième manche : en cercles.',M.round===1?'Les mots passent un par un, comme à l’oral.':'Les mêmes phrases, dessinées. Même durée.');
-   txt(c,'Trois phrases. Une question après chacune.',384,330,40,'#3a2a20');tapLine(c,420,'toucher pour commencer');return}
-  const e=EMB[M.i];
-  if(M.state==='show'){const t=(now-M.t0)/1000;
-   if(M.round===1){const W=e.s.split(' '),per=.55,k=Math.floor(t/per);txt(c,'phrase '+(M.i%3+1)+' sur 3',384,60,34,'#5a4a3a','center','600',true);if(k<W.length){const a=1-((t/per)%1)*.35;c.save();c.globalAlpha=a;txt(c,W[k],384,384,64,'#141414');c.restore()}
-    if(k>=W.length+1)M.ask()}
-   else{const dur=EMB[M.i-3].s.split(' ').length*.55;txt(c,'phrase '+(M.i%3+1)+' sur 3',384,60,34,'#5a4a3a','center','600',true);if(t<dur){M.drawRings(c,e,clamp(t/1.2))}else M.ask();
-    const rest=Math.max(0,dur-t);c.save();c.fillStyle='rgba(60,60,60,.35)';c.fillRect(184,730,400*(rest/dur),8);c.restore()}return}
-  if(M.state==='q'){txt(c,'phrase '+(M.i%3+1)+' sur 3',384,60,34,'#5a4a3a','center','600',true);txt(c,e.q,384,240,56,'#22306e');M.opts.forEach(([l,k],j)=>btn(c,64+j*220,340,200,90,l,false,40));return}
-  if(M.state==='fb'){txt(c,e.q,384,170,48,'#22306e');M.drawRings(c,e,1,.8);const ok=M.last;txt(c,ok?'Juste.':'Non : '+e.o[e.a]+'.',384,700,42,ok?'#2a6a3a':'#9a3a1a');return}
-  if(M.state==='res'){tagBox(c,40,120,688,520,14);txt(c,'En ligne :',230,214,44,'#3a2a20');txt(c,`${M.sc[0]} sur 3`,540,214,52,'#7a2a08');txt(c,'En cercles :',230,300,44,'#3a2a20');txt(c,`${M.sc[1]} sur 3`,540,300,52,'#7a2a08');
-   txt(c,'Les mêmes phrases, le même temps.',384,394,36,'#3a2a20');txt(c,'Une ligne de sons passe et fuit ;',384,446,38,'#22306e');txt(c,'un dessin se lit d’un regard.',384,494,38,'#22306e');txt(c,'Et pour le tracer, il faut déjà tout savoir.',384,556,34,'#5a4a3a','center','600',true);tapLine(c,700)}},
- // trois cercles d'encre emboîtés : chacun est une phrase ; le trait relie le verbe à ce qu'il touche
- drawRings(c,e,k,sc=1){c.save();c.translate(384,410);c.scale(sc,sc);[[300,0],[210,1],[118,2]].forEach(([r,j])=>{drawGlyph(c,RINGS[j],0,0,r,clamp(k*1.6-j*.3));});
-  if(k>.5){c.globalAlpha=clamp((k-.5)*2);const P=e.P,v=P[2][1].split(' (');txt(c,P[0][0]+'…',0,-255,38,'#22306e');txt(c,'…'+P[0][1],0,258,38,'#22306e');txt(c,P[1][0]+'…',0,-163,32,'#7a2a08');txt(c,'…'+P[1][1],0,166,32,'#7a2a08');
-   txt(c,P[2][0],0,-36,32,'#141414');txt(c,v[0],0,2,32,'#141414');if(v[1])txt(c,'('+v[1],0,38,28,'#141414')}c.restore()},
- ask(){M.state='q';M.shuffle(EMB[M.i])},
+/* 3. La coquille — « Une phrase dans une phrase » : en ligne, notre mémoire décroche ; dessinée en cercles, la phrase se lit d'un regard */
+const EMBS=[{l:'Le malt était dans la maison.',ring:['le malt','était dans la maison']},
+ {l:'Le malt que le rat a mangé était dans la maison.',ring:['le rat','a mangé le malt']},
+ {l:'Le malt que le rat que le chat a mordu a mangé était dans la maison.',ring:['le chat','a mordu le rat']}];
+const RINGS3=[GLYPH(41,4),GLYPH(52,3),GLYPH(63,3)];
+function mkEmboite(){const M={state:'build',n:1,t0:performance.now(),pick:-1,done:false,
+ hint:'Maman me montrait une phrase célèbre du linguiste Chomsky. « On va y glisser une autre phrase. Puis encore une. »',
+ wantsTap:()=>['res','end'].includes(M.state),
+ draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now(),k=clamp((now-M.t0)/1200);
+  // en haut : la phrase en ligne
+  paper(c,24,M.n===3?150:110);const L=EMBS[M.n-1].l;const ls=(()=>{c.font='600 50px Caveat, cursive';return jLines(c,L,640)})();ls.forEach((t,i)=>fitTxt(c,t,384,70+i*46,40,M.n===3?'#5a2a2a':'#22306e',660));
+  // en dessous : la même phrase, en cercles emboîtés
+  const cy=M.state==='res'||M.state==='end'?400:420,R=[230,160,92];
+  for(let j=0;j<M.n;j++){const kk=j===M.n-1?k:1;drawGlyph(c,RINGS3[j],384,cy,R[j],kk);if(kk>.6){c.save();c.globalAlpha=clamp((kk-.6)/.4);const r=EMBS[j].ring,ty=j===2?-18:-R[j]+44;txt(c,r[0],384,cy+ty,j===2?32:34,['#22306e','#7a2a08','#141414'][j]);txt(c,r[1],384,cy+(j===2?20:R[j]-48),j===2?28:32,['#22306e','#7a2a08','#141414'][j]);c.restore()}}
+  if(M.state==='build'){if(k>=1)btn(c,214,672,340,72,M.n<3?'glisser une phrase ▸':'qui a mordu ?',false,36);if(M.n===1&&k>=1){const kk=(tutT()*.7)%1;drawHand(c,384,708,kk<.5)}}
+  if(M.state==='ask'){['le malt','le rat','le chat'].forEach((l,i)=>btn(c,64+i*220,672,200,72,l,M.pick===i,40))}
+  if(M.state==='res'){paper(c,660,96);bigLine(c,M.pick===2?'Le chat ! On le voit d’un regard.':'Le chat : regarde le petit cercle.',708,40,'#7a2a08')}
+  if(M.state==='end'){c.save();c.globalAlpha=.94;paper(c,200,420);c.restore();bigLine(c,'En ligne, deux phrases glissées',270,42);bigLine(c,'au milieu suffisent à nous perdre :',318,42);bigLine(c,'la mémoire ne tient pas les morceaux.',366,38,'#3a2a20');bigLine(c,'Dessinée, la phrase se lit d’un regard.',440,42,'#7a2a08');bigLine(c,'Les visiteurs écrivent comme ça :',500,36,'#3a2a20');bigLine(c,'toute la phrase, d’un seul geste.',540,36,'#3a2a20');tapLine(c,600)}},
  down(cx,cy){const now=performance.now();
-  if(M.state==='predict'){[0,1,2].forEach(i=>{if(inR(cx,cy,[64+i*220,340,200,90])){M.pick=i;M.state='pred2';sndTone(i===2?659:440,.6,.08);showHint(i===2?'« Oui, le chat. Mais tu as dû relire, n’est-ce pas ? »':'« Le chat ! Ne t’en fais pas : presque tout le monde se perd. Deux phrases emboîtées au milieu, et la mémoire lâche. »')}});return}
-  if(M.state==='pred2'){M.state='r1in';showHint('« Les visiteurs, eux, écrivaient en cercles. Essayons les deux. »');return}
-  if(M.state==='r1in'||M.state==='r2in'){M.state='show';M.t0=now;hideSay();return}
-  if(M.state==='show')return;
-  if(M.state==='q'){M.opts.forEach(([l,k],j)=>{if(inR(cx,cy,[64+j*220,340,200,90])){M.last=k===EMB[M.i].a;if(M.last)M.sc[M.round-1]++;sndTone(M.last?659:330,.6,.08);M.state='fb';
-     setTimeout(()=>{M.i++;if(M.i===3){M.round=2;M.state='r2in';showHint('« Maintenant, les mêmes phrases… dessinées comme eux. »')}else if(M.i===6){M.state='res';showHint(M.sc[1]>M.sc[0]?'« Tu vois ? Ce que l’oreille perd, l’œil le garde. Les visiteurs pensaient peut-être comme ça : tout en même temps. »':'« Même quand on s’en sort en ligne, il faut tout retenir de tête. Dessinée, la phrase reste là, entière. »')}else{M.state='show';M.t0=performance.now()}},1500)}});return}
-  if(M.state==='res'){M.score=M.sc[1]-M.sc[0];M.done=true}},
+  if(M.state==='build'){if(now-M.t0<1200||!inR(cx,cy,[214,672,340,72]))return;if(M.n<3){M.n++;M.t0=now;sndPaper(.35,.25);showHint(M.n===2?'« Le rat a mangé le malt. Ça va encore. »':'« Et le chat a mordu le rat. Relis la ligne du haut… Et maintenant, regarde les cercles. »')}else{M.state='ask';showHint('« Sans relire : qui a mordu ? »')}return}
+  if(M.state==='ask'){[0,1,2].forEach(i=>{if(inR(cx,cy,[64+i*220,672,200,72])){M.pick=i;M.state='res';sndTone(i===2?659:440,.7,.08);showHint('« Dans la ligne, on cherche, on revient en arrière. Dans les cercles, le chat est là, au cœur, avec ce qu’il a fait. »')}});return}
+  if(M.state==='res'){M.state='end';return}
+  if(M.state==='end'){M.done=true}},
  move(){},up(){},solve(){M.done=true}};return M}
 
-/* 4. La maison du lac — « Quand, ou où en est-on ? » : le français oblige à dire quand ; une langue à aspect oblige à dire où en est l'action */
+/* 4. La maison du lac — « Le cercle qui se ferme » : une langue peut obliger à dire où en est l'action, plutôt que quand */
 const VIGN=(k)=>{const o=document.createElement('canvas');o.width=300;o.height=230;const x=o.getContext('2d');x.lineJoin=x.lineCap='round';x.strokeStyle='#3a2630';x.lineWidth=3;
  x.fillStyle='#f3ead6';x.fillRect(0,0,300,230);x.fillStyle='#c9b48a';x.fillRect(0,170,300,60);// sol
  const vali=(px,py,open,fill)=>{F(x,'#8a4a3a',c=>c.rect(px,py,150,64));if(open){F(x,'#6a3a2e',c=>{c.moveTo(px,py);c.lineTo(px+150,py);c.lineTo(px+140,py-60);c.lineTo(px+10,py-60);c.closePath()});F(x,'#f6efe0',c=>c.rect(px+8,py+8,134,48))
    ;for(let i=0;i<fill;i++){F(x,['#4a86e0','#e8b84a','#7aa86a','#d87a6a'][i%4],c=>c.rect(px+12+(i%3)*44,py+14+(i/3|0)*18,38,16))}}else{F(x,'#6a3a2e',c=>c.rect(px+50,py-14,50,14));x.beginPath();x.moveTo(px,py+32);x.lineTo(px+150,py+32);x.stroke()}};
- if(k===0){vali(40,120,true,0);[[200,140],[214,124],[228,108]].forEach(([a,b],i)=>F(x,['#4a86e0','#e8b84a','#7aa86a'][i],c=>c.rect(a,b,60,14)))}
- if(k===1){vali(60,120,true,4);x.fillStyle='#14102a';x.beginPath();x.ellipse(150,88,8,22,.3,0,7);x.fill();x.beginPath();x.arc(150,60,10,0,7);x.fill()}
- if(k===2){F(x,'#9a8a7a',c=>c.rect(210,20,70,150));F(x,'#c9a84a',c=>c.arc(222,96,4,0,7));vali(40,120,false,0)}
+ if(k<3){F(x,'#fffaf0',c=>c.rect(60,24,180,140));const e=[.12,.55,1][k],a0=-1.9;x.strokeStyle='#14102a';x.lineWidth=9;x.beginPath();x.arc(150,94,48,a0,a0+e*6.2832);x.stroke();x.lineWidth=3;
+   const pa=a0+e*6.2832,px=150+Math.cos(pa)*48,py=94+Math.sin(pa)*48;if(k<2){x.save();x.translate(px,py);x.rotate(.7);F(x,'#e8b84a',c=>c.rect(-6,-70,12,64));F(x,'#3a2630',c=>{c.moveTo(-6,-6);c.lineTo(6,-6);c.lineTo(0,6);c.closePath()});x.restore()}
+   else{F(x,'#14102a',c=>c.arc(196,52,5,0,7));F(x,'#14102a',c=>c.arc(108,140,4,0,7))}x.strokeStyle='#3a2630'}
  if(k===3){vali(70,120,false,0);[[86,140,'#e05a4a'],[150,132,'#4a86e0'],[180,150,'#e8b84a'],[110,124,'#7aa86a']].forEach(([a,b,col])=>F(x,col,c=>c.arc(a,b,9,0,7)));
    F(x,'#fffaf0',c=>c.rect(20,16,110,80));for(let r=0;r<3;r++)for(let q=0;q<5;q++){x.beginPath();x.moveTo(28+q*20,26+r*24);x.lineTo(40+q*20,38+r*24);x.moveTo(40+q*20,26+r*24);x.lineTo(28+q*20,38+r*24);x.stroke()}}
  return lifted(bordered(paperize(o),5))};
 const VIGS=[0,1,2,3].map(VIGN);
-const ASP=[['va commencer',{seed:71,f:[{a:-1.6,k:'tendril',s:1.4}],a0:-1.4,gap:1.2}],['en cours',{seed:72,f:[{a:.3,k:'blob',s:1.6},{a:2.6,k:'blob',s:1.2}]}],['terminé',{seed:73,f:[{a:-.2,k:'hook',s:1.5}]}],['toujours',{seed:74,f:[{a:1,k:'spike',s:1},{a:3,k:'spike',s:1},{a:5,k:'spike',s:1}]}]];
-const TENSE=[['demain','fera'],['maintenant','fait'],['hier','a fait'],['chaque mois','fait']];
-function mkAspect(){const M={state:'intro',round:1,place:[-1,-1,-1,-1],drag:null,order:[0,1,2,3],done:false,t0:performance.now(),
- hint:'Ce soir-là, Maman a fait un jeu avec sa valise. « Quatre images. Mais pour les dire, chaque langue pose sa question. »',
- wantsTap:()=>['intro','mid','res','twist'].includes(M.state),
- slot(i){return[40+(i%2)*356,150+(i/2|0)*268]},
- tag(j){return[30+j*182,690]},
- draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now();
-  if(M.state==='intro'){header(c,'« Maman fait sa valise. »','Quatre fois la même phrase, quatre images.');M.order.forEach((v,i)=>{const[x,y]=M.slot(i);c.drawImage(VIGS[v],x,y,330,250)});tapLine(c,724);return}
-  if(M.state==='mid'||M.state==='res'||M.state==='twist'){
-   if(M.state==='twist'){tagBox(c,40,60,688,640,14);txt(c,'Whorf, devant la langue hopi, en a conclu',384,120,38,'#3a2a20');txt(c,'qu’on n’y perçoit pas le temps comme nous.',384,166,38,'#3a2a20');
-     txt(c,'Mais le français sait le dire aussi :',384,250,40,'#22306e');['« elle va commencer »','« elle est en train de »','« elle vient de finir »','« elle a l’habitude de »'].forEach((l,k)=>txt(c,l,384,312+k*52,40,'#7a2a08'));
-     txt(c,'La langue n’enferme pas la pensée.',384,560,40,'#22306e');txt(c,'Elle oblige à regarder certaines choses.',384,606,40,'#22306e');tapLine(c,676);return}
-   header(c,M.state==='mid'?'En français, il a fallu dire : quand ?':'La même scène, deux questions.');
-   [0,1,2,3].forEach(v=>{const x=40+v*176,y=150;c.drawImage(VIGS[v],x,y,166,128);if(M.state==='res'||M.state==='mid')btn(c,x,300,166,58,TENSE[v][0],false,32);if(M.state==='res'){drawGlyph(c,ASP[v][1],x+83,470,58);txt(c,ASP[v][0],x+83,560,32,'#7a2a08')}});
-   if(M.state==='mid'){txt(c,'Maman fera, fait, a fait sa valise…',384,450,38,'#3a2a20');txt(c,'Maintenant, la langue des cercles.',384,520,40,'#22306e');tapLine(c,700)}
-   else{txt(c,'Quand ?',384,388,36,'#5a4a3a','center','600',true);txt(c,'Où en est l’action ?',384,620,36,'#5a4a3a','center','600',true);tapLine(c,700)}return}
-  // les manches : poser les étiquettes sur les images
-  const r1=M.round===1;header(c,r1?'En français : quand Maman fait-elle sa valise ?':'Dans la langue des cercles, le verbe porte une marque :',r1?'Glisser chaque étiquette sur son image.':'où en est l’action ? Glisser chaque cercle sur son image.');
-  M.order.forEach((v,i)=>{const[x,y]=M.slot(i);c.drawImage(VIGS[v],x,y,330,250);if(r1){const d=['demain','maintenant','hier','tous les mois'][v];txt(c,d,x+165,y+228,30,'#5a4a3a','center','600',true)}});
-  M.place.forEach((p,j)=>{if(p<0)return;const[x,y]=M.slot(p);if(r1)btn(c,x+70,y+92,190,62,TENSE[j][1],false,40);else{c.save();c.fillStyle='rgba(240,238,232,.85)';c.beginPath();c.arc(x+165,y+120,76,0,7);c.fill();c.restore();drawGlyph(c,ASP[j][1],x+165,y+112,52);txt(c,ASP[j][0],x+165,y+176,30,'#7a2a08')}});
-  [0,1,2,3].forEach(j=>{if(M.place[j]>=0)return;let[x,y]=M.tag(j);if(M.drag&&M.drag.j===j){x=M.drag.x-80;y=M.drag.y-30}
-   if(r1)btn(c,x,y,166,60,TENSE[j][1],!!(M.drag&&M.drag.j===j),36);else{tagBox(c,x,y-34,166,96,10);drawGlyph(c,ASP[j][1],x+40,y+14,30);txt(c,ASP[j][0],x+112,y+14,26,'#7a2a08')}});
-  if(M.place.every(p=>p<0)&&!M.drag){const[x,y]=M.tag(0),k=(tutT()*.6)%1;drawHand(c,x+80+(M.slot(M.order.indexOf(0))[0]+120-x)*clamp(k*1.4),y+20+(M.slot(M.order.indexOf(0))[1]+100-y)*clamp(k*1.4),k<.8)}},
- down(cx,cy){const now=performance.now();
-  if(M.state==='intro'){M.state='play';M.round=1;showHint('« En français, la phrase change selon le jour. »');return}
-  if(M.state==='mid'){M.state='play';M.round=2;M.place=[-1,-1,-1,-1];M.order=[2,0,3,1];showHint('« Dans leur langue, pas de date. Regarde l’image : la valise est vide, à moitié pleine, fermée… ou toute cabossée de voyages ? »');return}
-  if(M.state==='res'){M.state='twist';showHint('« Une langue n’enferme pas : elle fait regarder. Et Louise, qui voyait l’avenir ? Ça, c’est la fiction. Même Ted Chiang le dit : “ma vision du monde restera un amalgame”. »');return}
-  if(M.state==='twist'){M.done=true;return}
-  [0,1,2,3].forEach(j=>{if(M.place[j]>=0||M.drag)return;const[x,y]=M.tag(j);if(inR(cx,cy,[x,y-34,166,100])){M.drag={j,x:cx,y:cy};sndPaper(.25,.2)}})},
- move(cx,cy){if(M.drag){M.drag.x=cx;M.drag.y=cy}},
- up(){if(!M.drag)return;const{j,x,y}=M.drag;M.drag=null;const i=[0,1,2,3].find(i=>{const[sx,sy]=M.slot(i);return x>sx&&x<sx+330&&y>sy&&y<sy+250});if(i==null)return;const v=M.order[i];
-  const okp=M.round===1?TENSE[v][1]===TENSE[j][1]:v===j;if(okp&&!M.place.includes(i)){if(M.round===1&&v!==j)showHint('« Tiens : “fait” sert pour maintenant… et pour tous les mois. Le français ne dit pas si c’est en ce moment ou d’habitude, remarque Landragin. »');M.place[j]=i;sndTone(523+j*60,.6,.07);if(M.place.every(p=>p>=0)){setTimeout(()=>{M.state=M.round===1?'mid':'res';if(M.round===2)showHint('« Tu as regardé l’image, pas le calendrier. C’est ce que leur langue t’obligeait à faire. »');else showHint('« Facile : tu savais quel jour c’était. Mais dans la langue des cercles, on ne demande pas la date. »')},700)}}
-  else{sndTone(330,.4,.06);showHint(M.round===1?'« Regarde ce qui est écrit sous l’image : c’est quel jour ? »':'« Regarde la valise : où en est Maman ? Elle commence, elle est en train, elle a fini… ou elle le fait tout le temps ? »')}},
- solve(){M.done=true}};return M}
+const ASPS=[['elle commence','va commencer'],['elle est en train','est en train de'],['c’est fini','vient de finir']];
+const VERB=GLYPH(88,3);
+function mkAspect(){const M={state:'s',i:0,t0:performance.now(),done:false,
+ hint:'J’essayais de dessiner un cercle, comme eux. Maman : « Regarde le tien. Dans cette langue, le verbe ne dit pas quand : il dit où en est l’action. »',
+ wantsTap:()=>true,
+ draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now(),k=clamp((now-M.t0)/1000);
+  if(M.state==='s'){paper(c,24,82);bigLine(c,'« Alice dessine un cercle. »',66,46);const v=VIGS[M.i];c.drawImage(v,40,140,340,262);
+   // le cercle du verbe se trace avec l'action : un début, une moitié, tout le cercle
+   const prog=[.18,.55,1][M.i],prev=M.i?[.18,.55,1][M.i-1]:0;drawGlyph(c,{...VERB,gap:0},570,270,120,lerp(prev,prog,k));
+   paper(c,440,150);bigLine(c,'Dans la langue des cercles :',486,36,'#3a2a20');bigLine(c,ASPS[M.i][0],546,50,'#7a2a08');
+   tapLine(c,690,M.i<2?'toucher : la suite':'toucher pour continuer');return}
+  if(M.state==='fr'){paper(c,40,640);bigLine(c,'En français, le verbe oblige à dire quand :',96,38);bigLine(c,'elle fera · elle fait · elle a fait.',150,42,'#7a2a08');
+   bigLine(c,'Le verbe hopi, lui, marque plutôt',236,38);bigLine(c,'où en est l’action. Whorf en a conclu',282,38);bigLine(c,'que les Hopi voient le temps autrement.',328,38);
+   bigLine(c,'Mais nous savons le dire aussi :',414,40,'#22306e');bigLine(c,'« va commencer », « est en train de »,',466,38,'#7a2a08');bigLine(c,'« vient de finir ».',514,38,'#7a2a08');
+   bigLine(c,'Une langue n’enferme pas la pensée.',590,40);bigLine(c,'Elle oblige à regarder certaines choses.',636,40);tapLine(c,720)}},
+ down(){const now=performance.now();if(now-M.t0<1000)return;
+  if(M.state==='s'){if(M.i<2){M.i++;M.t0=now;sndPaper(.3,.2);showHint(M.i===1?'« Le trait avance, le cercle du verbe aussi. »':'« Fini : le cercle se referme. Il n’a dit ni hier, ni demain. »')}else{M.state='fr';M.t0=now;showHint('« Et Louise, qui voit l’avenir ? C’est le cinéma. Même Ted Chiang l’écrit : “ma vision du monde restera un amalgame”. »')}return}
+  if(M.state==='fr'){M.done=true}},
+ move(){},up(){},solve(){M.done=true}};return M}

@@ -64,7 +64,7 @@ function drawScreen(T){mx.setTransform(HD,0,0,HD,0,0);mx.clearRect(0,0,MS,MS);
   drawSat(mx,T);
   SCR.a+=(SCR.ta-SCR.a)*(1-Math.pow(.03,DTG));if(SCR.ta===0&&SCR.a<.01){SCR.a=0;if(SCR.kind&&!SCR.keep)SCR.kind=null}
   if(SCR.a>0&&SCR.kind){mf.setTransform(HD,0,0,HD,0,0);mf.globalCompositeOperation='source-over';mf.clearRect(0,0,MS,MS);mf.drawImage(PAGE,0,0);
-    if(SCR.kind==='mem'){if(PAPER){mf.drawImage(LABEL,0,0);drawTab(mf,T)}const P=POP[SCR.id],t=(performance.now()-(SCR.t0||0))/1000;mf.save();mf.translate(384,30);mf.scale(.72,.72);mf.translate(-384,-40);drawPieces(mf,P.P,T,t);if(t>.8){mf.globalAlpha=clamp(t-.8);P.fx(mf,T);mf.globalAlpha=1}drawReveal(mf,T,SCR.id);memLight(mf,T,t,P.P);mf.restore();drawJournal(mf,T)}
+    if(SCR.kind==='mem'){if(PAPER)mf.drawImage(LABEL,0,0);const P=POP[SCR.id],t=(performance.now()-(SCR.t0||0))/1000;mf.save();mf.translate(384,30);mf.scale(.72,.72);mf.translate(-384,-40);drawPieces(mf,P.P,T,t);if(t>.8){mf.globalAlpha=clamp(t-.8);P.fx(mf,T);mf.globalAlpha=1}drawReveal(mf,T,SCR.id);memLight(mf,T,t,P.P);mf.restore();if(PAPER)drawTab(mf,T);drawJournal(mf,T)}
     else if(SCR.obj)drawCard(mf,(c,TT)=>SCR.obj.draw(c,TT),T);
     mx.globalAlpha=SCR.a;mx.drawImage(memF,0,0,MS,MS);mx.globalAlpha=1}
   memTex.needsUpdate=true}
@@ -104,7 +104,7 @@ function hideSay(){say.hidden=true;waitTap=false}
 /* ---------- le scénario ---------- */
 let Q=[],qi=0,busy=false,curManip=null,camMode='title',next=0,openT=0;
 const RC=(i,q,ans)=>[{fn:()=>{RECAP=i}},{say:'lieu',t:q},{say:'lieu',t:ans}];
-const RCARD=[[0,'Maman : « Une langue parlée, qu’entend-on vraiment ? »','Une file de sons, sans espaces. On n’y entend des mots que si on la connaît : un enregistrement ne suffit pas.'],
+const RCARD=[[0,'Maman : « Où commence “tiède” ? »','Chacun place la frontière ailleurs. Chaque langue découpe le monde à sa façon, sans empêcher de voir ce qu’elle ne nomme pas.'],
  [1,'Papa : « Gavagai ! Qu’est-ce que ça veut dire ? »','Impossible à deviner : il faut un oui, un non, des questions. Une langue s’apprend en face à face.'],
  [2,'Maman : « Pourquoi écrire en cercles ? »','Dessinées, des phrases emboîtées se lisent d’un regard. Mais pour tracer le cercle, il faut connaître toute la phrase.'],
  [3,'Papa : « Une langue change-t-elle la pensée ? »','Elle ne l’enferme pas et ne fait pas voir l’avenir. Elle oblige à regarder certaines choses : où en est l’action, comment on sait.'],
@@ -119,14 +119,14 @@ function showCard([i,q,a]){q=nb(q);a=nb(a);say.className='line ask card';sayWho.
     setTimeout(()=>{[['Je l’avais ✓',1],['Pas encore ↺',0]].forEach(([t,ok])=>{const b=document.createElement('button');b.className='ch half';b.textContent=t;b.addEventListener('click',e2=>{e2.stopPropagation();if(say.dataset.done)return;say.dataset.done='1';CARDST[i]=ok?1:0;if(CARDFIRST[i]==null)CARDFIRST[i]=ok?1:0;pipsSync();b.classList.add(ok?'ok':'no');if(ok)sndTone(659,.9,.1);setTimeout(()=>{delete say.dataset.done;hideSay();step()},500)});row.appendChild(b)})},450)});
   say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=false}
 const SCRIPTS={
- // fil : une file de sons → un mot se demande → une phrase en cercle → une langue fait regarder → (aujourd'hui) une langue vit dans ceux qui la parlent
+ // fil : les mots découpent le monde → un mot se demande → une phrase en cercle → une langue fait regarder → (aujourd'hui) une langue vit dans ceux qui la parlent
  intro:[{cam:'box'},{fn:()=>{aliceSay('Une carte de Maman est arrivée. Un seul mot dessus. J’ai rouvert notre boîte ronde.');showHint('Toucher le sol pour emmener Alice vers la lumière. Glisser pour tourner, pincer pour zoomer.')}}],
- 0:[{cam:'box'},{say:'lieu',t:'L’université. Dans le film, c’est ici qu’une linguiste écoute pour la première fois la voix des visiteurs. Un flot de sons.'},{cam:'lid'},{manip:()=>mkMots()},
+ 0:[{cam:'box'},{say:'lieu',t:'L’université. Dans le film, Louise y enseigne les langues. Toutes parlent du même monde, mais chacune le découpe à sa façon.'},{cam:'lid'},{manip:()=>mkMots()},
   {mem:'escalier'},{say:'alice',t:'C’était le film préféré de Maman. Papa disait qu’il était trop triste pour moi.'},
   {say:'alice',t:'Un soir, je suis descendue en cachette. Entre les barreaux, je voyais la brume sur l’écran, et Maman, toute seule sous son plaid.'},
   {say:'papa',t:'Juste le début. Après, au lit.'},{say:'alice',t:'Il ne m’a pas renvoyée. Il s’est assis sur la marche, à côté de moi.'},
-  {note:'Une langue parlée est une file de sons. On n’y entend des mots que si on la connaît.'},
-  {say:'alice',t:'Au pied de l’escalier, il y avait sa valise, déjà fermée. Elle le regardait toujours la veille de partir. Je l’ai compris bien plus tard.'},
+  {note:'Chaque langue découpe le monde à sa façon, sans nous empêcher de le voir.'},
+  {say:'alice',t:'Sur la table basse, son carnet était ouvert, plein de cercles et de mots. Elle ne regardait pas le film : elle l’étudiait.'},
   {say:'alice',t:'Mais alors, comment parler à quelqu’un dont on ne connaît pas un seul mot ?'},{memoff:1},{reward:0},{cam:'box'}],
  1:[{cam:'box'},{say:'lieu',t:'Le camp. Louise ôte sa combinaison, s’avance vers la vitre et montre un tableau blanc : HUMAIN.'},
   {ask:[-1,'Le capitaine Cook montre un animal et demande son nom. On lui répond : « kangourou ». Que voulait dire ce mot ?','Personne ne sait : l’histoire est inventée','« Je ne comprends pas »','« Animal qui saute »']},
@@ -136,7 +136,7 @@ const SCRIPTS={
   {say:'alice',t:'Pendant la scène du tableau, j’ai écrit ALICE sur un carton de céréales et je me suis plantée devant la télé. Maman a écrit MAMAN.'},
   {say:'papa',t:'Kangourou !'},{say:'maman',t:'Elle est fausse, cette histoire.'},{say:'papa',t:'Mais elle marche.'},
   {note:'Un mot montré du doigt peut tout vouloir dire. On ne le devine pas : on le demande.'},
-  {say:'alice',t:'Il criait depuis la cuisine, le téléphone à l’oreille. Au téléphone, il parlait une langue que je ne connaissais pas. Il préparait déjà un voyage.'},
+  {say:'alice',t:'Au dos de son carton, Maman avait écrit « maman » dans toutes les langues qu’elle connaissait. Presque toutes commencent par m.'},{say:'maman',t:'C’est souvent le premier mot. Le plus facile à dire, avec les lèvres.'},
   {say:'alice',t:'Ensuite, dans le film, les visiteurs ont écrit. Des cercles. Pourquoi des cercles ?'},{memoff:1},{reward:1},{cam:'box'}],
  2:[{cam:'box'},{say:'lieu',t:'La coquille. Derrière la vitre, les visiteurs écrivaient à l’encre, des deux mains, en partant des deux bouts à la fois. Le cercle se refermait.'},
   {say:'lieu',t:'Louise comprend : pour écrire ainsi, il faut déjà connaître chaque mot de la phrase, et la place qu’il prendra.'},{cam:'lid'},{manip:()=>mkEmboite()},
@@ -144,12 +144,12 @@ const SCRIPTS={
   {say:'alice',t:'Ça se lit par où ?'},{say:'maman',t:'Par partout à la fois. Pour l’écrire, il faut déjà savoir la fin.'},
   {say:'alice',t:'Moi, je ne sais jamais la fin de mes phrases.'},{say:'papa',t:'Ça, c’est vrai.'},
   {note:'Ce qui nous perd dans une ligne de sons se lit d’un regard quand c’est dessiné.'},
-  {say:'alice',t:'Mon cercle voulait dire « reste ». Des mois plus tard, je l’ai retrouvé plié dans son passeport.'},
+  {say:'alice',t:'Mon cercle voulait dire « encore ». Bien plus tard, je l’ai retrouvé dans son vieux carnet d’étudiante, glissé au milieu de ses cercles à elle.'},
   {say:'alice',t:'Mais apprendre leur langue, qu’est-ce que ça changeait dans la tête de Louise ?'},{memoff:1},{reward:2},{cam:'box'}],
  3:[{cam:'box'},{say:'lieu',t:'La maison du lac. Dans le film, c’est ici que Louise se souvient… de jours qui ne sont pas encore venus.'},
-  {say:'lieu',t:'L’idée que la langue façonne la pensée porte un nom : l’hypothèse de Sapir-Whorf. Dans le film, Ian la cite à Louise.'},
-  {ask:[-1,'On dit souvent que les Inuits ont des dizaines de mots pour la neige. Vrai ?','Non, c’est un mythe','Oui, plus de cinquante','Oui, plus d’une centaine']},
-  {say:'lieu',t:'Un mythe : deux racines, l’une pour la neige au sol, l’autre pour la neige qui tombe. Et nous aussi, nous avons neige, givre, verglas…'},
+  {say:'lieu',t:'Dans le film, Ian lui donne son nom : l’hypothèse de Sapir-Whorf. La langue qu’on parle façonnerait notre façon de penser. Jusqu’où ?'},
+  {ask:[-1,'Apprendre une langue peut-il faire voir l’avenir ?','Non : c’est la part de fiction du film','Oui, si on la parle assez bien','Oui, mais seulement en rêve']},
+  {say:'lieu',t:'Une langue qui enfermerait la pensée : cette version forte n’est plus défendue. Une langue qui oriente l’attention, ce qu’on remarque et ce qu’on doit dire : cette version-là se discute encore.'},
   {cam:'lid'},{manip:()=>mkAspect()},
   {mem:'fin'},{say:'alice',t:'À la fin, j’ai compris, pour la petite fille du film.'},{say:'alice',t:'Elle savait, et elle l’a fait quand même ?'},
   {say:'alice',t:'Maman s’est tue longtemps.'},{say:'maman',t:'Elle ne voyait pas une fin. Elle voyait tout en même temps. Les jours heureux aussi.'},
@@ -159,7 +159,7 @@ const SCRIPTS={
   {memoff:1},{reward:3},
   {wait:600},{cam:'lid'},{trace:1},{fn:()=>{constelT=1}},{wait:1800},
   {say:'maman',t:'Regarde : ton chemin fait le tour, et revient à son début. Comme un de leurs cercles.'},{say:'alice',t:'Et chaque étoile garde un morceau du film. Je m’en souviens encore ?'},
-  {ask:[0,'L’escalier garde…','Une langue parlée : des sons à la file, sans espaces','Une langue parlée : des mots bien séparés','Une langue que tout le monde comprend']},
+  {ask:[0,'L’escalier garde…','Chaque langue découpe le monde à sa façon','Toutes les langues ont les mêmes mots','On ne voit pas ce qu’on ne sait pas nommer']},
   {ask:[1,'Le carton ALICE garde…','Un mot ne se devine pas : il se demande','Un mot montré du doigt n’a qu’un sens','Un mot se traduit toujours mot à mot']},
   {ask:[2,'La tache d’encre garde…','Dessinées, des phrases emboîtées se lisent d’un regard','En ligne, on suit mieux qu’en cercle','Un cercle se lit de gauche à droite']},
   {ask:[3,'Les deux tasses de thé gardent…','La langue fait regarder autrement, sans enfermer','La langue permet de voir l’avenir','La langue ne change rien à rien']},

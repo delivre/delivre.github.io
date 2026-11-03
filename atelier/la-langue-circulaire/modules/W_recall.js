@@ -61,7 +61,7 @@ function recallTick(now){if(!RECALL||phase!=='play')return;pipsSync();if(figStat
   if(next<4&&!busy){SPOTS.forEach((s,j)=>{if(j>next&&fig.position.distanceTo(s)<.6&&REC.warn!==j){REC.warn=j;showHint('« Pas encore : ce lieu-là vient plus tard dans l’histoire. »')}})}}
 const recallLost=now=>RECALL&&now-REC.t<22000;
 // ---- réécrire l'argument : cinq étiquettes à remettre dans l'ordre, chacune à côté de l'image de son lieu
-const ARG=['Une langue parlée est une file de sons : on n’y entend des mots que si on la connaît.','Un mot montré du doigt peut tout vouloir dire : une langue s’apprend en face à face.','Dessinées en cercles, des phrases emboîtées se lisent d’un regard ; en ligne, elles nous perdent.','Une langue n’enferme pas la pensée : elle oblige à regarder certaines choses.','Une langue vit dans ceux qui la parlent : demander pendant qu’on peut.'];
+const ARG=['Chaque langue découpe le monde à sa façon, sans empêcher de voir ce qu’elle ne nomme pas.','Un mot montré du doigt peut tout vouloir dire : une langue s’apprend en face à face.','Dessinées en cercles, des phrases emboîtées se lisent d’un regard ; en ligne, elles nous perdent.','Une langue n’enferme pas la pensée : elle oblige à regarder certaines choses.','Une langue vit dans ceux qui la parlent : demander pendant qu’on peut.'];
 function startArg(){curManip=mkArg();SCR.kind='manip';SCR.obj=curManip;SCR.ta=1;curManip.panel()}
 // réécrire l'argument : les phrases à choisir sont en bas (grandes, lisibles) ; on les écrit dans l'ordre, en face de chaque lieu
 function mkArg(){const order=[0,1,2,3,4].sort(()=>Math.random()-.5),labels=order.map(k=>({k,slot:-1,flash:0}));

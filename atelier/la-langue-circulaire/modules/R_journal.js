@@ -49,17 +49,23 @@ function memLight(c0,T,t,P){if(!PAPER)return;const k=clamp((t-.6)/.8);if(k<=0)re
 // la languette à tirer : chaque souvenir a un petit mécanisme de papier (le soleil se lève, les rideaux s'ouvrent…)
 const TAB={p:0,drag:false,x0:0,L:80,used:0,need:false,rev:false,auto:0,note:''};
 const TABFX={};
-const tabX=()=>626+TAB.p*TAB.L,tabHit=([x,y])=>x>tabX()-40&&x<tabX()+70&&y>286&&y<366;
+const tabX=()=>560+TAB.p*TAB.L,tabHit=([x,y])=>x>tabX()-40&&x<tabX()+70&&y>286&&y<366;
 // ce que la languette dévoile : ce qu'Alice a perdu, et qu'elle garde
 const REVEAL=PAPER?{
- // la valise de Maman, au pied de l'escalier, déjà fermée
- escalier:()=>cut(x=>{x.save();x.translate(330,0);fp(x,'#8a3a2e',c=>rrect(c,96,560,170,120,10));fp(x,'#6a2a22',c=>rrect(c,150,536,62,30,8));fp(x,'#efe6cf',c=>c.rect(96,610,170,8));fp(x,'#e8d8b0',c=>{c.moveTo(250,600);c.lineTo(290,620);c.lineTo(282,650);c.lineTo(244,632);c.closePath()});x.strokeStyle='#e8d8b0';x.lineWidth=3;x.beginPath();x.moveTo(240,600);x.lineTo(250,604);x.stroke();fp(x,'#2a2a30',c=>c.arc(122,688,9,0,7));fp(x,'#2a2a30',c=>c.arc(240,688,9,0,7));x.restore()},{border:5,outline:1.4}),
- // la place de Papa est vide : il est au téléphone, dans une langue qu'Alice ne connaît pas
- canape:()=>cut(x=>{fp(x,'#fffaf0',c=>{c.ellipse(230,220,110,52,0,0,7);c.moveTo(190,262);c.lineTo(176,300);c.lineTo(214,266)});x.strokeStyle='#22306e';x.lineWidth=3;x.lineCap='round';const R=seeded(77);for(let k=0;k<3;k++){let px=150;x.beginPath();x.moveTo(px,200+k*20);while(px<300){const w=10+R()*18;for(let u=0;u<w;u+=3)x.lineTo(px+u,200+k*20-Math.abs(Math.sin(u*.8+R()*3))*8);px+=w+8;x.moveTo(px,200+k*20)}x.stroke()}
-   fp(x,'#14102a',c=>rrect(c,196,382,22,44,5))},{border:5,outline:1.4}),
- // des mois plus tard : le cercle d'Alice, plié dans le passeport de Maman
- encre:()=>cut(x=>{x.save();x.translate(560,190);x.rotate(.1);fp(x,'#5a1e2a',c=>rrect(c,-110,-80,220,160,8));fp(x,'#efe6cf',c=>c.rect(-100,-72,96,144));fp(x,'#e6dcc2',c=>c.rect(4,-72,96,144));x.strokeStyle='#d8b04a';x.lineWidth=2;x.strokeRect(-92,-62,80,30);
-   x.save();x.translate(30,10);x.rotate(-.25);fp(x,'#fbf8f0',c=>c.rect(-70,-50,140,100));x.save();x.beginPath();x.rect(-70,-50,140,100);x.clip();inkRing(x,30,10,58,{seed:9,w:9,f:[{a:.6,k:'tendril',s:1.4},{a:3.4,k:'splash',s:1}],drops:4});x.restore();x.strokeStyle='rgba(120,100,70,.5)';x.beginPath();x.moveTo(0,-50);x.lineTo(0,50);x.stroke();x.restore();x.restore()},{border:5,outline:1.4}),
+ // sur la table basse, le carnet de Maman : des cercles, des mots, des flèches. Elle ne regardait pas le film, elle l'étudiait.
+ escalier:()=>cut(x=>{x.save();x.translate(250,190);x.rotate(-.06);fp(x,'#3a2a24',c=>rrect(c,-176,-118,352,236,10));fp(x,'#f6f0e0',c=>c.rect(-166,-108,164,216));fp(x,'#efe7d2',c=>c.rect(2,-108,164,216));
+   x.strokeStyle='rgba(120,100,70,.35)';x.lineWidth=1.5;for(let v=-80;v<100;v+=26){x.beginPath();x.moveTo(-156,v);x.lineTo(-12,v);x.moveTo(12,v);x.lineTo(156,v);x.stroke()}
+   inkRing(x,-84,-30,46,{seed:21,w:7,f:[{a:.4,k:'tendril',s:1.2},{a:3.6,k:'splash',s:.8}],drops:3});inkRing(x,-104,66,24,{seed:5,w:4,f:[{a:2,k:'hook',s:.8}],drops:1});
+   x.font='600 34px Caveat, cursive';x.fillStyle='#1d2a66';x.fillText('le temps ?',22,-60);x.fillText('gavagai',30,-10);x.fillStyle='#7a2a08';x.fillText('Whorf !',40,46);
+   x.strokeStyle='#7a2a08';x.lineWidth=3;x.beginPath();x.moveTo(-40,-30);x.quadraticCurveTo(-6,-60,18,-66);x.stroke();x.beginPath();x.moveTo(-70,66);x.lineTo(30,46);x.stroke();x.restore()},{border:5,outline:1.4}),
+ // au dos du carton de Maman, au crayon : « maman » dans toutes les langues qu'elle connaissait
+ canape:()=>cut(x=>{x.save();x.translate(250,200);x.rotate(-.05);fp(x,'#d8b98a',c=>c.rect(-180,-120,360,240));x.strokeStyle='rgba(120,80,40,.4)';x.lineWidth=2;x.strokeRect(-170,-110,340,220);
+   x.font='600 38px Caveat, cursive';x.fillStyle='#3a2414';[['mama',-150,-60],['ima',-150,-6],['amma',-150,48],['mãe',20,-60],['Mutter',20,-6]].forEach(([w,a,b])=>x.fillText(w,a,b));x.font='600 36px sans-serif';x.fillText('はは',20,48);
+   x.font='600 26px Caveat, cursive';x.fillStyle='#7a2a08';x.fillText('presque partout, ça commence par m…',-160,96);x.restore()},{border:5,outline:1.4}),
+ // le vieux carnet d'étudiante de Maman, plein de cercles ; elle y a glissé celui d'Alice (« encore »)
+ encre:()=>cut(x=>{x.save();x.translate(540,200);x.rotate(.06);fp(x,'#2f3a4a',c=>rrect(c,-150,-110,300,220,8));fp(x,'#efe6cf',c=>c.rect(-140,-100,138,200));fp(x,'#e6dcc2',c=>c.rect(2,-100,138,200));
+   [[-104,-56,26,3],[-40,-50,20,7],[-90,10,22,11],[-34,40,28,15],[-100,70,16,19]].forEach(([a,b,r,sd])=>inkRing(x,a,b,r,{seed:sd,w:4,f:[{a:sd%6,k:'hook',s:.7}],drops:1}));
+   x.save();x.translate(72,0);x.rotate(-.18);fp(x,'#fbf8f0',c=>c.rect(-62,-80,124,160));inkRing(x,0,-14,40,{seed:9,w:7,f:[{a:.6,k:'tendril',s:1.2},{a:3.4,k:'splash',s:.8}],drops:2});x.font='600 30px Caveat, cursive';x.fillStyle='#1d2a66';x.textAlign='center';x.fillText('encore',0,62);x.restore();x.restore()},{border:5,outline:1.4}),
  // plus tard dans la nuit : depuis l'escalier, Maman qui regarde encore la fin, toute seule (un croquis d'Alice)
  fin:()=>cut(x=>{x.save();x.translate(250,210);x.rotate(-.05);fp(x,'#f6f1e2',c=>c.rect(-160,-130,320,260));x.save();x.beginPath();x.rect(-160,-130,320,260);x.clip();
    fp(x,'#cfd9e2',c=>c.rect(40,-60,100,70));x.strokeStyle='#3a3a4a';x.lineWidth=3;x.strokeRect(40,-60,100,70);fp(x,'#d8904a',c=>rrect(c,-60,40,170,60,12));fp(x,'#14102a',c=>c.ellipse(20,24,16,20,0,0,7));fp(x,'#14102a',c=>{c.moveTo(-6,60);c.quadraticCurveTo(0,38,20,40);c.quadraticCurveTo(40,38,46,60);c.closePath()});
@@ -75,7 +81,7 @@ function tabReveal(){if(TAB.rev)return;TAB.rev=true;TAB.p=1;TAB.used=1;const n=T
 function drawTab(c,T){if(!PAPER||!REVEAL[SCR.id]||!(TAB.need||TAB.rev))return;if(TAB.auto&&!TAB.rev)TAB.p=Math.min(1,(performance.now()-TAB.auto)/650);if(!TAB.drag&&!TAB.rev&&!TAB.auto)TAB.p*=.9;if(!TAB.rev&&TAB.p>.85)tabReveal();
 const x=tabX(),y=296;
  // la bande de papier qui sort de derrière l'image : on voit qu'on tire un mécanisme, pas une étiquette qu'on arrache
- c.save();c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.fillRect(520,308,x-30-520+2,36);c.fillStyle='rgba(60,35,10,.22)';c.fillRect(520,308,x-30-520+2,3);c.fillRect(520,341,x-30-520+2,3);c.strokeStyle='rgba(120,80,40,.5)';c.setLineDash([5,6]);c.lineWidth=1.5;c.beginPath();c.moveTo(560,326);c.lineTo(x-44,326);c.stroke();c.restore();
+ c.save();c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.fillRect(470,308,x-30-470+2,36);c.fillStyle='rgba(60,35,10,.22)';c.fillRect(470,308,x-30-470+2,3);c.fillRect(470,341,x-30-470+2,3);c.strokeStyle='rgba(120,80,40,.5)';c.setLineDash([5,6]);c.lineWidth=1.5;c.beginPath();c.moveTo(480,326);c.lineTo(x-44,326);c.stroke();c.restore();
  c.save();c.translate(x-30,y+30);c.scale(1.32,1.32);c.translate(-(x-30),-(y+30));c.save();c.shadowColor='rgba(20,10,0,.45)';c.shadowBlur=8;c.shadowOffsetY=4;c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.beginPath();c.moveTo(x-30,y);c.lineTo(x+46,y);c.quadraticCurveTo(x+58,y+30,x+46,y+60);c.lineTo(x-30,y+60);c.closePath();c.fill();c.restore();
  c.strokeStyle='rgba(120,80,40,.8)';c.lineWidth=2;c.beginPath();c.moveTo(x-30,y);c.lineTo(x+46,y);c.quadraticCurveTo(x+58,y+30,x+46,y+60);c.lineTo(x-30,y+60);c.stroke();
  c.font='700 26px Caveat, cursive';c.fillStyle='#5a3418';c.fillText('tirer',x-22,y+38);c.strokeStyle='#5a3418';c.lineWidth=3;c.beginPath();c.moveTo(x+22,y+30);c.lineTo(x+40,y+30);c.moveTo(x+32,y+22);c.lineTo(x+40,y+30);c.lineTo(x+32,y+38);c.stroke();c.restore();
@@ -100,23 +106,26 @@ const banister=(x,x0,y0,x1,y1,n)=>{for(let i=0;i<=n;i++){const t=i/n,px=x0+(x1-x
 const cardboard=(x,cx,cy,w,h,label,r=0,col='#22306e',box=false)=>{x.save();x.translate(cx,cy);x.rotate(r);if(box){fp(x,'#e8b84a',c=>c.rect(-w/2-8,-h/2-6,w+16,h+12));}fp(x,box?'#f6f2ea':'#d8b98a',c=>c.rect(-w/2,-h/2,w,h));x.font=`700 ${Math.round(h*.5)}px "Patrick Hand", Caveat, cursive`;x.fillStyle=col;x.textAlign='center';x.textBaseline='middle';x.fillText(label,0,4);x.restore()};
 const sofa=(x,X,Y,W,H,col,col2)=>{fp(x,col2,c=>rrect(c,X,Y,W,H*.55,24));fp(x,col,c=>rrect(c,X-20,Y+H*.35,W+40,H*.65,18));fp(x,col2,c=>rrect(c,X-34,Y+H*.2,50,H*.8,16));fp(x,col2,c=>rrect(c,X+W-16,Y+H*.2,50,H*.8,16))};
 /* 1. l'escalier : la nuit, en cachette, entre les barreaux ; Papa s'assoit à côté */
-{const wall=cut(x=>stripes(x,70,40,628,640,'#3a3f6a','#343963'),{crayon:.35,border:0,outline:0});
- const room=cut(x=>{fp(x,'#5a3a4a',c=>c.rect(470,600,228,100));tvSet(x,540,250,140,104,'shell');
-   sofa(x,575,610,105,90,'#d8904a','#c07a3a');
-   fp(x,'#14102a',c=>{c.ellipse(628,590,26,32,0,0,7)});fp(x,'#14102a',c=>{c.moveTo(584,646);c.quadraticCurveTo(588,614,628,616);c.quadraticCurveTo(668,614,672,646);c.closePath()});fp(x,'#7a2a3a',c=>{c.moveTo(646,620);c.quadraticCurveTo(676,628,676,648);c.lineTo(640,648);c.closePath()})});
- // l'escalier, vu de côté : les marches descendent vers le salon, en pente douce
- const ST=k=>[110+k*58,330+k*46];
- const stairs=cut(x=>{for(let k=7;k>=0;k--){const[nx,ny]=ST(k);fp(x,'#c98a5a',c=>c.rect(70,ny,nx-70,700-ny));fp(x,'#e0a46e',c=>c.rect(70,ny,nx-70,10));fp(x,'#9a6236',c=>c.rect(nx-6,ny,6,46))}});
- const kids=cut(x=>{parent(x,{kind:'man',x:166,y:540,h:236,view:'front',seated:true,hat:'#000',armL:[-20,40],armR:[70,50]});chibi(x,{x:236,y:516,h:180,view:'front',armL:[-30,-120],armR:[30,120]})});
- const fg=cut(x=>{const B=[...Array(8)].map((_,k)=>{const[nx,ny]=ST(k);return[nx-24,ny]});B.forEach(([bx,by])=>{fp(x,'#efe2c6',c=>rrect(c,bx-7,by-150,14,150,5));x.fillStyle='rgba(120,80,40,.3)';x.fillRect(bx+2,by-146,4,142)});
-   const sl=46/58,[a0,b0]=B[0],[a1,b1]=B[7];x.save();x.lineCap='round';x.strokeStyle='#8a5a34';x.lineWidth=20;x.beginPath();x.moveTo(a0-18,b0-150-18*sl);x.lineTo(a1+18,b1-150+18*sl);x.stroke();x.strokeStyle='#b07a45';x.lineWidth=7;x.beginPath();x.moveTo(a0-18,b0-156-18*sl);x.lineTo(a1+18,b1-156+18*sl);x.stroke();x.restore()});
- POP.escalier={P:[{...wall,depth:0},{...room,depth:.9},{...stairs,depth:1.6},{...kids,depth:2.5},{...fg,depth:3.8}],
-  fx:(c,T)=>{tvGlow(c,610,302,T,220);motes(c,T,500,690,260,640)}}}
+{const wall=cut(x=>{stripes(x,70,40,628,640,'#3a3f6a','#343963');fp(x,'#4a3a4a',c=>c.rect(70,470,628,210))},{crayon:.35,border:0,outline:0});
+ // en bas, le salon : la télé, et Maman de dos sur le canapé
+ const room=cut(x=>{fp(x,'#7a5a3a',c=>c.rect(600,330,22,140));fp(x,'#f2c46a',c=>{c.moveTo(584,330);c.lineTo(638,330);c.lineTo(626,300);c.lineTo(596,300);c.closePath()});
+   tvSet(x,370,210,210,150,'shell');parent(x,{kind:'woman',view:'back',seated:true,x:470,y:520,h:250,armL:[10,20],armR:[-10,-20]});
+   fp(x,'#c07a3a',c=>rrect(c,330,420,280,90,22));fp(x,'#a8682f',c=>rrect(c,314,440,40,80,14));fp(x,'#a8682f',c=>rrect(c,586,440,40,80,14));
+   fp(x,'#6a4a30',c=>rrect(c,250,480,70,14,4));fp(x,'#f6efe0',c=>c.rect(262,470,40,12))});
+ // l'escalier et sa rampe : un seul morceau de bois, qui ne bouge pas
+ const RL=t=>[70+t*628,450+t*90],BS=t=>[70+t*628,600+t*90];
+ const stairs=cut(x=>{fp(x,'#c98a5a',c=>{c.moveTo(70,600);c.lineTo(698,690);c.lineTo(698,680);c.lineTo(70,680);c.closePath()});
+   for(let i=0;i<=9;i++){const t=i/9,[bx,by]=BS(t);fp(x,'#efe2c6',c=>rrect(c,bx-8,by-150,16,150,5));x.fillStyle='rgba(120,80,40,.3)';x.fillRect(bx+3,by-146,4,142)}
+   const[a0,b0]=RL(0),[a1,b1]=RL(1);x.save();x.lineCap='round';x.strokeStyle='#8a5a34';x.lineWidth=22;x.beginPath();x.moveTo(a0,b0);x.lineTo(a1,b1);x.stroke();x.strokeStyle='#b07a45';x.lineWidth=8;x.beginPath();x.moveTo(a0,b0-7);x.lineTo(a1,b1-7);x.stroke();x.restore()});
+ // Alice et Papa, assis sur la marche, de dos : ils regardent entre les barreaux
+ const kids=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();parent(x,{kind:'man',view:'back',seated:true,x:210,y:730,h:340,hat:'#000',armL:[20,30],armR:[-10,-20]});chibi(x,{x:440,y:745,h:260,view:'back',armL:[-20,0],armR:[30,-40]});x.restore()});
+ POP.escalier={P:[{...wall,depth:0},{...room,depth:.8},{...stairs,depth:1.8},{...kids,depth:2.6}],
+  fx:(c,T)=>{tvGlow(c,475,285,T,230);motes(c,T,360,600,220,460)}}}
 /* 2. le canapé : le carton « ALICE », le carton « MAMAN » ; Papa crie « Kangourou ! » de la cuisine */
 {const wall=cut(x=>stripes(x,70,40,628,640,'#2f3a5c','#2a3454'),{crayon:.35,border:0,outline:0});
  const door=cut(x=>{fp(x,'#f2c46a',c=>c.rect(96,170,150,470));fp(x,'#e0a84a',c=>c.rect(96,560,150,80));parent(x,{kind:'man',x:170,y:636,h:300,view:'front',hat:'#000',scarf:'#000',armL:[-20,20],armR:[60,90]});fp(x,'#6a4a30',c=>c.rect(84,160,12,480));fp(x,'#6a4a30',c=>c.rect(246,160,12,480));fp(x,'#6a4a30',c=>c.rect(84,158,174,12))});
  const tv=cut(x=>tvSet(x,520,250,150,112,'board'));
- const couch=cut(x=>{sofa(x,300,470,370,190,'#d8904a','#c07a3a');parent(x,{kind:'woman',x:560,y:650,h:300,view:'front',seated:true,armL:[-150,10],armR:[150,-10]});cardboard(x,560,386,136,64,'MAMAN',.04,'#5a2a14')});
+ const couch=cut(x=>{sofa(x,300,470,370,190,'#d8904a','#c07a3a');parent(x,{kind:'woman',x:560,y:650,h:300,view:'front',seated:true,armL:[30,70],armR:[-30,-70]});cardboard(x,560,500,136,64,'MAMAN',.04,'#5a2a14')});
  const kid=cut(x=>{chibi(x,{x:400,y:700,h:190,view:'front',armL:[-165,20],armR:[165,-20]});cardboard(x,400,488,150,76,'ALICE',-.06,'#22306e',true)});
  const fg=cut(x=>{fp(x,'#7a4a2a',c=>rrect(c,500,676,200,26,8));fp(x,'#f6efe0',c=>c.ellipse(600,668,46,18,0,0,7));for(let i=0;i<14;i++)fp(x,'#fff6d0',c=>c.arc(570+rnd(0,60),660+rnd(-6,4),7,0,7));plant(x,120,700,1)});
  POP.canape={P:[{...wall,depth:0},{...door,depth:.7},{...tv,depth:1.1},{...couch,depth:1.9},{...kid,depth:2.9},{...fg,depth:4.1}],
