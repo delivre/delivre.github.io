@@ -1,5 +1,5 @@
 /* ---------- l'écran du couvercle : constellation de la Lyre + souvenirs + manipulations ---------- */
-const memF=mkC(),mf=memF.getContext('2d');
+const memF=document.createElement('canvas');memF.width=memF.height=Math.round(MS*HD);const mf=memF.getContext('2d');
 // les étoiles sont à l'endroit exact des lieux sur la carte : la constellation, c'est le chemin parcouru
 let RECAP=-1;const MAPK=52,toStar=(x,z)=>[MS/2+x*MAPK,MS/2+z*MAPK];const STARS=SPOTS.map(s=>toStar(s.x,s.z));
 const ROUTEPX=(()=>{const c=new THREE.CatmullRomCurve3(ROUTE.map(([a,b])=>new THREE.Vector3(a,0,b)));return[...Array(80)].map((_,i)=>{const p=c.getPoint(i/79);return toStar(p.x,p.z)})})();
@@ -36,7 +36,7 @@ function drawSketch(T,al){mx.save();mx.globalAlpha=al;mx.translate(384,384);mx.r
   if(TRACE.cur!=null){const[sx,sy]=STARS[TRACE.cur];mx.fillStyle='rgba(200,140,40,.18)';mx.beginPath();mx.arc(sx,sy,24,0,7);mx.fill()}
   if(TRACE.edges.size===0&&!TRACE.drag){const[a,b2]=LYRE_E[0],A=STARS[a],B=STARS[b2],k=(performance.now()/1000*.45)%1,u=clamp((k-.15)/.6);drawHand(mx,A[0]+(B[0]-A[0])*u+6,A[1]+(B[1]-A[1])*u+10,k>.1&&k<.8,k>.9?(1-k)*10:1)}}
  mx.restore()}
-function drawScreen(T){mx.setTransform(1,0,0,1,0,0);mx.clearRect(0,0,MS,MS);
+function drawScreen(T){mx.setTransform(HD,0,0,HD,0,0);mx.clearRect(0,0,MS,MS);
   STARS.forEach(([sx,sy],i)=>{const on=i<lit?1:0;blob(mx,sx,sy,14+on*56,`rgba(255,226,150,${.16+on*.62})`);mx.fillStyle=`rgba(255,245,215,${.4+on*.6})`;mx.beginPath();mx.arc(sx,sy,3+on*6,0,7);mx.fill()});
   STARS.forEach(([sx,sy],i)=>{if(i<lit){const hl=RECAP===i?1:0,k=(.5+.5*constel)*(.85+.15*Math.sin(T*2+i)),s=lerp(.75,1.05,constel)+hl*.45,ic=ICONS[i];mx.save();mx.globalCompositeOperation='lighter';mx.globalAlpha=Math.min(1,k+hl*.3);if(hl)blob(mx,sx,sy+14+ic.height*s/2,110,'rgba(170,210,255,.5)');mx.drawImage(ic,sx-ic.width*s/2,sy+14,ic.width*s,ic.height*s);mx.restore()}});
   // version papier : on trace d'abord au crayon, sur une page du carnet d'Alice ; puis la page s'efface et les traits deviennent des étoiles
@@ -63,10 +63,10 @@ function drawScreen(T){mx.setTransform(1,0,0,1,0,0);mx.clearRect(0,0,MS,MS);
   vegaA+=(vegaT-vegaA)*(1-Math.pow(.15,DTG));
   drawSat(mx,T);
   SCR.a+=(SCR.ta-SCR.a)*(1-Math.pow(.03,DTG));if(SCR.ta===0&&SCR.a<.01){SCR.a=0;if(SCR.kind&&!SCR.keep)SCR.kind=null}
-  if(SCR.a>0&&SCR.kind){mf.globalCompositeOperation='source-over';mf.clearRect(0,0,MS,MS);mf.drawImage(PAGE,0,0);
+  if(SCR.a>0&&SCR.kind){mf.setTransform(HD,0,0,HD,0,0);mf.globalCompositeOperation='source-over';mf.clearRect(0,0,MS,MS);mf.drawImage(PAGE,0,0);
     if(SCR.kind==='mem'){if(PAPER){mf.drawImage(LABEL,0,0);drawTab(mf,T)}const P=POP[SCR.id],t=(performance.now()-(SCR.t0||0))/1000;mf.save();mf.translate(384,30);mf.scale(.72,.72);mf.translate(-384,-40);drawPieces(mf,P.P,T,t);if(t>.8){mf.globalAlpha=clamp(t-.8);P.fx(mf,T);mf.globalAlpha=1}drawReveal(mf,T,SCR.id);memLight(mf,T,t,P.P);mf.restore();drawJournal(mf,T)}
     else if(SCR.obj)drawCard(mf,(c,TT)=>SCR.obj.draw(c,TT),T);
-    mx.globalAlpha=SCR.a;mx.drawImage(memF,0,0);mx.globalAlpha=1}
+    mx.globalAlpha=SCR.a;mx.drawImage(memF,0,0,MS,MS);mx.globalAlpha=1}
   memTex.needsUpdate=true}
 
 /* ---------- les objets-souvenirs ---------- */

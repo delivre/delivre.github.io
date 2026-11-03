@@ -3,7 +3,7 @@ applyPaint();
 /* ---------- caméra ---------- */
 let yaw=0,yawT=0,dist=40,distT=40,pitch=.6,pitchT=.6,zt=0,zs=0,phase='closed',open=0;
 const look=new THREE.Vector3(0,-.6,0),lookT=new THREE.Vector3(0,-.6,0);
-const ovDist=()=>Math.max(21,7.3/(Math.tan(camera.fov*Math.PI/360)*camera.aspect));
+const ovDist=()=>Math.max(20,6.8/(Math.tan(camera.fov*Math.PI/360)*camera.aspect));
 function camUpdate(){camera.position.set(look.x+Math.sin(yaw)*Math.cos(pitch)*dist,look.y+Math.sin(pitch)*dist,look.z+Math.cos(yaw)*Math.cos(pitch)*dist);camera.lookAt(look)}
 const AUTO=location.hash.includes('auto');
 
@@ -124,7 +124,7 @@ function frame(now){const rawDt=Math.min(1,(now-last)/1000),dt=Math.min(.05,rawD
     const mv=g.position.distanceTo(u.tgt);if(mv>.02){g.position.x+=(u.tgt.x-g.position.x)*.06;g.position.z+=(u.tgt.z-g.position.z)*.06;g.rotation.y=Math.atan2(u.tgt.x-g.position.x,u.tgt.z-g.position.z)-Math.PI/2;g.position.y=TOP+Math.abs(Math.sin(T*14+i))*.06}else g.position.y=TOP+Math.max(0,Math.sin(T*2+i*1.7))*.02});
   abubTick(T);BUB.forEach(b=>{const k=(T-b.userData.t0);b.visible=k<1.4;if(b.visible){b.position.copy(b.userData.g.position).add(new THREE.Vector3(0,.55+k*.15,0));b.material.opacity=Math.min(1,(1.4-k)*3)}});boats.forEach((b,i)=>{b.position.y=(PAPER?TOP-.035:TOP+.06)+Math.sin(T*1.4+i)*.015;b.rotation.z=Math.sin(T*1.1+i)*.06});
   pharosLight.intensity=.8+.15*Math.sin(T*7);pharosFire.scale.y=1+.12*Math.sin(T*9);
-  drawScreen(T);
+  drawScreen(T);if(typeof mapTick==='function')mapTick(T);
   const k=1-Math.pow(.03,dt);yaw+=(yawT-yaw)*k;pitch+=(pitchT-pitch)*k;dist+=(distT-dist)*k;look.lerp(lookT,k);camUpdate();
   const fp=(camMode==='lid'&&phase==='play'?lid.localToWorld(apexL.clone()).lerp(look,.4):zs>.45&&phase==='play'&&camMode==='box'?fig.position.clone().add(new THREE.Vector3(0,.6,0)):look.clone()).project(camera);
   lidSharp+=((camMode==='lid'&&phase==='play'?1:0)-lidSharp)*.06;const tsA=lerp(2.8,3,zs)*(1-lidSharp);hPass.uniforms.h.value=tsA/SW;vPass.uniforms.v.value=tsA/SH;hPass.uniforms.r.value=vPass.uniforms.r.value=clamp(fp.y*.5+.5,.25,.75);
