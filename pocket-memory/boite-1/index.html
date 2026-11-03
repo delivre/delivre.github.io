@@ -1479,11 +1479,19 @@ const tabX=()=>626+TAB.p*TAB.L,tabHit=([x,y])=>x>tabX()-40&&x<tabX()+70&&y>286&&
 const REVEAL=PAPER?{
  echo:()=>cut(x=>{parent(x,{kind:'girl',x:565,y:572,h:172,view:'back'});},{border:5,outline:0}),
  maman:()=>cut(x=>{fp(x,'#9a6a3a',c=>rrect(c,128,186,150,22,5));fp(x,'#7a4a26',c=>c.rect(128,204,150,4));[146,260].forEach(px=>fp(x,'#d8b878',c=>c.arc(px,197,4,0,7)));x.strokeStyle='#7a4a26';x.lineWidth=9;x.lineCap='round';x.beginPath();x.moveTo(200,204);x.lineTo(214,236);x.stroke();fp(x,'#9a6a3a',c=>c.arc(215,239,8,0,7));
-   x.save();x.translate(222,262);x.rotate(.22);
-   fp(x,'#14102a',c=>c.ellipse(0,24,70,13,0,0,7));
-   fp(x,'#14102a',c=>{c.moveTo(-36,24);c.bezierCurveTo(-40,0,-34,-22,-20,-26);c.quadraticCurveTo(-8,-18,0,-24);c.quadraticCurveTo(8,-18,20,-26);c.bezierCurveTo(34,-22,40,0,36,24);c.closePath()});
-   fp(x,'#4a3a2a',c=>{c.moveTo(-37,10);c.lineTo(37,10);c.lineTo(36,19);c.lineTo(-36,19);c.closePath()});
-   x.strokeStyle='rgba(255,255,255,.18)';x.lineWidth=2;x.beginPath();x.moveTo(-12,-16);x.quadraticCurveTo(0,-6,12,-16);x.stroke();x.restore()},{border:5,outline:0}),
+   x.save();x.translate(220,282);x.rotate(-.18);
+   fp(x,'#14102a',c=>c.ellipse(0,18,80,30,0,0,7));
+   x.strokeStyle='rgba(255,255,255,.14)';x.lineWidth=2;x.beginPath();x.ellipse(0,18,72,24,0,Math.PI*.1,Math.PI*.9);x.stroke();
+   fp(x,'#1c1630',c=>{c.moveTo(-40,14);c.bezierCurveTo(-44,-14,-38,-34,-30,-40);c.lineTo(30,-40);c.bezierCurveTo(38,-34,44,-14,40,14);c.ellipse(0,14,40,15,0,0,Math.PI,false);c.closePath()});
+   fp(x,'#5a4630',c=>{c.moveTo(-41,4);c.ellipse(0,4,41,15,0,Math.PI,0,true);c.lineTo(40,14);c.ellipse(0,14,40,15,0,0,Math.PI,false);c.closePath()});
+   fp(x,'#2c2444',c=>c.ellipse(0,-40,30,11,0,0,7));
+   x.strokeStyle='#14102a';x.lineWidth=4;x.lineCap='round';x.beginPath();x.moveTo(-18,-40);x.quadraticCurveTo(0,-34,18,-40);x.stroke();
+   x.strokeStyle='rgba(255,255,255,.18)';x.lineWidth=2;x.beginPath();x.moveTo(-34,-30);x.quadraticCurveTo(-38,-10,-36,2);x.stroke();
+   x.restore()
+   x.strokeStyle='#c8b08a';x.lineWidth=2;x.beginPath();x.moveTo(262,206);x.lineTo(310,266);x.stroke();
+   x.save();x.translate(318,290);x.rotate(.38);fp(x,'#f3e6c4',c=>{c.moveTo(-14,-26);c.lineTo(14,-26);c.lineTo(22,-16);c.lineTo(22,30);c.lineTo(-22,30);c.lineTo(-22,-16);c.closePath()});
+   x.strokeStyle='rgba(120,90,60,.6)';x.lineWidth=1.5;x.stroke();fp(x,'#9a6a3a',c=>c.arc(0,-16,4,0,7));
+   x.save();x.rotate(-Math.PI/2);x.font='600 30px Caveat, cursive';x.fillStyle='#22306e';x.textAlign='center';x.fillText('Papa',-6,10);x.restore();x.restore()},{border:5,outline:0}),
  papa:()=>cut(x=>{x.save();x.translate(250,270);x.rotate(-.08);x.scale(1.75,1.75);fp(x,'#f6eedb',c=>{c.moveTo(-70,0);c.lineTo(0,6);c.lineTo(70,0);c.lineTo(70,-44);c.lineTo(0,-38);c.lineTo(-70,-44);c.closePath()});x.strokeStyle='rgba(120,90,60,.6)';x.lineWidth=1.5;x.beginPath();x.moveTo(0,6);x.lineTo(0,-38);x.stroke();
    x.font='600 19px Caveat, cursive';x.fillStyle='#22306e';x.fillText('pour Alice,',-62,-14);x.fillText('plus tard.',8,-12);x.restore()},{border:5,outline:1.4}),
  phare:()=>cut(x=>{const H=430;fp(x,'#1a1430',c=>{c.moveTo(186,H-2);c.lineTo(236,H-2);c.lineTo(228,H+8);c.lineTo(194,H+8);c.closePath()});fp(x,'#1a1430',c=>c.rect(209,H-34,3,32));fp(x,'#1a1430',c=>{c.moveTo(212,H-32);c.lineTo(232,H-10);c.lineTo(212,H-10);c.closePath()});fp(x,'#ffd27a',c=>c.arc(196,H-14,4,0,7))},{border:4,outline:0}),
@@ -1608,7 +1616,7 @@ function handBox(c,x,y,w,h){c.beginPath();const seg=(x0,y0,x1,y1,o)=>{c.moveTo(x
 function drawJournal(c,T){c.save();c.textBaseline='alphabetic';
   if(JR.note){// Alice encadre l'essentiel au crayon, avec une petite étoile
     const k=clamp((performance.now()-JR.note.t0)/700);let fz=46;for(;fz>=32;fz-=2){c.font=`600 ${fz}px Caveat, "Patrick Hand", cursive`;if(jLines(c,JR.note.text,520).length<=2)break}
-    const ls=jLines(c,JR.note.text,520),bh=ls.length*fz*1.15+30,by=640-bh/2;c.strokeStyle='#22306e';c.lineWidth=2.6;c.globalAlpha=k;handBox(c,110,by,560,bh);
+    const ls=jLines(c,JR.note.text,520),bh=ls.length*fz*1.15+30,by=624-bh/2;c.strokeStyle='#22306e';c.lineWidth=2.6;c.globalAlpha=k;handBox(c,110,by,560,bh);
     // de temps en temps, un petit dessin au stylo à côté du cadre, jamais au même endroit
     const dk=(JR.noteN||0)%3;if(dk){const px=dk===1?660:120,py=dk===1?by-10:by+bh+6;c.save();c.translate(px,py);c.rotate(dk===1?.15:-.1);c.beginPath();
       if(dk===1){for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2,rr=i%2?6:14;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}c.closePath()}else{c.moveTo(-14,4);c.quadraticCurveTo(-4,-12,6,0);c.quadraticCurveTo(14,10,22,-6);c.moveTo(-14,10);c.quadraticCurveTo(-4,-6,6,6);c.quadraticCurveTo(14,16,22,0)}c.stroke();c.restore()}
@@ -1796,14 +1804,14 @@ function mkTheatre(){const items=STORY.map(([n,s],i)=>({n,s,i,hx:150+i*156,hy:25
    if(M.state==='showA'){c.fillText('D’abord, une simple liste.',400,56);c.fillText('Retenir les plats, dans l’ordre.',400,104)}
    else{c.fillText('Le festin, dans l’ordre ?',400,76)}c.restore();
    if(M.state==='showA'){const e=now-M.tS,i=Math.floor(e/1400)%4,u=(e%1400)/1400,al=clamp(u*6)*clamp((1-u)*6),f=FEAST[i];
-    c.save();c.globalAlpha=al;c.translate(384,290);c.scale(1.9,1.9);c.drawImage(f.s,-f.s.width/2,-f.s.height/2);c.restore();c.save();c.globalAlpha=al;txt(c,f.n,384,400,40,'#fff3d6','center','600');c.restore();
+    c.save();c.globalAlpha=al;txt(c,`${i+1} / 4`,384,172,40,'#ffd27a');c.restore();c.save();c.globalAlpha=al;c.translate(384,290);c.scale(1.9,1.9);c.drawImage(f.s,-f.s.width/2,-f.s.height/2);c.restore();c.save();c.globalAlpha=al;txt(c,f.n,384,400,40,'#fff3d6','center','600');c.restore();
     if(e>5600){tagBox(c,234,436,300,76,10);txt(c,'J’ai retenu',384,476,40,'#3a2410')}}
    if(M.state==='recallA'||M.state==='scoreA'){shelfP(c,560);for(let k=0;k<4;k++){const x=150+k*156,f=M.lineA[k];if(f!=null){const o=FEAST[f];c.save();c.translate(x,500);c.scale(1.4,1.4);c.drawImage(o.s,-o.s.width/2,-o.s.height/2);c.restore();if(M.state==='scoreA'){txt(c,f===k?'✓':'✗',x,612,40,f===k?'#9fe0a0':'#f0a0a0')}}else{c.save();c.strokeStyle='rgba(255,231,168,.6)';c.setLineDash([6,6]);c.lineWidth=3;c.strokeRect(x-56,446,112,104);c.restore();txt(c,String(k+1),x,500,34,'#ffe7a8')}}
     if(M.state==='recallA')M.poolA.forEach((f,j)=>{if(M.lineA.includes(f))return;const x=150+j*156,y=270;c.save();c.translate(x,y);c.scale(1.4,1.4);c.drawImage(FEAST[f].s,-FEAST[f].s.width/2,-FEAST[f].s.height/2);c.restore()});
     if(M.state==='scoreA')txt(c,`${M.scoreA} sur 4, avec la liste`,384,300,44,'#ffd27a')}
    let k=0;if(M.state==='darkA')k=clamp((now-M.tA)/800);else if(M.state==='recallA'&&M.tA1)k=1-clamp((now-M.tA1)/800);if(PAPER)curtain(c,k,T);else if(k>0){c.fillStyle=`rgba(8,6,24,${.85*k})`;c.fillRect(0,0,MS,MS)}
    if(M.state==='darkA'&&k>.9)txt(c,'Le rideau tombe…',384,384,40,'#ffe7a8');drawConf(c);return}
-  if(M.state==='place'){if(PAPER)tagBox(c,40,8,688,150,10);else{c.fillStyle='rgba(10,8,30,.55)';c.fillRect(0,0,MS,104)}if(PAPER){c.save();c.font='700 40px Caveat, cursive';c.fillStyle='#22306e';c.textAlign='center';c.fillText('Une histoire, posée sur des lieux :',400,52);c.font='600 38px Caveat, cursive';c.fillStyle='#3a2410';c.fillText('le navire part sur la mer couleur de vin,',400,96);c.fillText('le héros affronte la tempête.',400,136);c.restore()}else{txt(c,'L\u2019aède chante : le navire part sur la mer',384,36,30);txt(c,'couleur de vin, le héros affronte la tempête.',384,76,30)}}
+  if(M.state==='place'){if(PAPER)tagBox(c,40,8,688,150,10);else{c.fillStyle='rgba(10,8,30,.55)';c.fillRect(0,0,MS,104)}if(PAPER){c.save();c.font='700 40px Caveat, cursive';c.fillStyle='#22306e';c.textAlign='center';c.fillText('Une histoire, ancrée dans des lieux :',400,52);c.font='600 38px Caveat, cursive';c.fillStyle='#3a2410';c.fillText('le navire part sur la mer couleur de vin,',400,96);c.fillText('le héros affronte la tempête.',400,136);c.restore()}else{txt(c,'L\u2019aède chante : le navire part sur la mer',384,36,30);txt(c,'couleur de vin, le héros affronte la tempête.',384,76,30)}}
   if(M.state==='place'||M.state==='recall'){SEATS.forEach(([sx,sy],k)=>{const occ=items.some(it=>it.seat===k&&it!==M.drag);if(PAPER){const hot=M.drag&&!occ&&Math.hypot(M.drag.x-sx,M.drag.y+36-sy)<120;seatDisc(c,sx,sy,occ?'':String(k+1),hot,T)}else{ringPlace(c,sx,sy,T,occ);if(!occ)txt(c,String(k+1),sx,sy+4,34,'#ffe7a8')}})}
   items.forEach(it=>{const show=M.state!=='dark'||it===M.drag;if(!show&&it.seat>=0)return;let tx=it.hx,ty=it.hy;if(it.seat>=0&&it!==M.drag){tx=SEATS[it.seat][0];ty=SEATS[it.seat][1]-36}if(it!==M.drag){it.x+=(tx-it.x)*.25;it.y+=(ty-it.y)*.25}
    if(M.state==='dark'&&it.seat>=0)return;const pe=it.popT?clamp((performance.now()-it.popT)/450):1,lift=(it===M.drag?1.75:(it.seat>=0?1.35:1.55))*(1+(pe<1?Math.sin(pe*Math.PI)*.28:0));dropShadow(c,it.x,it.y+30,34,10);c.save();c.translate(it.x,it.y);c.scale(lift,lift);c.drawImage(it.s,-it.s.width/2,-it.s.height/2);c.restore();
@@ -1817,14 +1825,14 @@ function mkTheatre(){const items=STORY.map(([n,s],i)=>({n,s,i,hx:150+i*156,hy:25
   if(M.state==='reveal'){M.state='showA';M.tS=performance.now();showHint('Maman : « D’abord une simple liste, sans histoire ni lieux. Regarde bien, puis touche « J’ai retenu ». »');return}
   if(M.state==='showA'){if(performance.now()-M.tS>5600&&cy>426&&cy<522){M.state='darkA';M.tA=performance.now();setTimeout(()=>{M.poolA=[0,1,2,3].sort(()=>Math.random()-.5);M.lineA=[null,null,null,null];M.state='recallA';M.tA1=performance.now();showHint('Toucher les plats dans l’ordre où l’aède les a chantés.')},1700)}return}
   if(M.state==='recallA'){const j=M.poolA.findIndex((f,j)=>!M.lineA.includes(f)&&Math.hypot(cx-(150+j*156),cy-270)<74);if(j<0)return;const k=M.lineA.indexOf(null);M.lineA[k]=M.poolA[j];sndPaper(.25,.2);
-   if(M.lineA.every(v=>v!=null)){M.scoreA=M.lineA.filter((f,k)=>f===k).length;M.state='scoreA';setTimeout(()=>{M.state='place';showHint('« Maintenant, comme les aèdes : une histoire, et chaque moment posé sur un lieu du théâtre, dans l’ordre : 1, 2, 3, 4. » Faire glisser chaque image sur sa place.')},2400)}return}
+   if(M.lineA.every(v=>v!=null)){M.scoreA=M.lineA.filter((f,k)=>f===k).length;M.state='scoreA';setTimeout(()=>{M.state='place';showHint('« Maintenant, comme les aèdes : une histoire, et chaque moment ancré dans un lieu du théâtre, dans l’ordre : 1, 2, 3, 4. » Faire glisser chaque image sur sa place.')},2400)}return}
   if(M.state==='scoreA'||M.state==='darkA')return;
   if(M.state!=='place'&&M.state!=='recall')return;const it=[...items].reverse().find(it=>Math.hypot(cx-it.x,cy-it.y)<76&&(M.state==='recall'?it.seat<0:true));if(it){M.drag=it;M.ox=cx-it.x;M.oy=cy-it.y;if(M.state==='place')it.seat=-1}},
  move(cx,cy){if(M.drag){M.drag.x=cx-M.ox;M.drag.y=cy-M.oy}},
  up(){const it=M.drag;if(!it)return;M.drag=null;let best=-1,bd=170;SEATS.forEach(([sx,sy],k)=>{const d=Math.hypot(it.x-sx,it.y+36-sy);if(d<bd&&!items.some(o=>o!==it&&o.seat===k)){bd=d;best=k}});if(M.state==='place'){const [qx,qy]=SEATS[it.i];if(Math.hypot(it.x-qx,it.y+36-qy)<210)best=it.i;else if(best>=0)best=-2}if(best===-2){best=-1;showHint('« Dans l’ordre de l’histoire : '+STORY[it.i][0]+' va sur la place '+(it.i+1)+'. »')}else if(best<0)showHint('« Sur un des cercles, Alice. »');it.seat=best;if(best>=0){M.tut=1;it.popT=performance.now();if(PAPER)confetti(SEATS[best][0],SEATS[best][1]-60,12)}
   if(M.state==='place'&&items.every(o=>o.seat>=0)){M.answer=items.map(o=>o.seat);M.state='dark';M.t0=performance.now();showHint('« Regarde bien où chaque image est rangée… »');
    setTimeout(()=>{items.forEach((o,k)=>{o.seat=-1;o.hx=150+[2,0,3,1][k]*156;o.hy=250;o.x=o.hx;o.y=o.hy});M.state='recall';M.t1=performance.now();showHint('« L’aède reprend son récit. Remets chaque image à sa place. » Faire glisser chaque image sur son cercle.')},2600)}
-  else if(M.state==='recall'&&items.every(o=>o.seat>=0)){M.score=items.filter((o,k)=>o.seat===M.answer[k]).length;M.state='result';if(PAPER)confetti(384,140,40);showHint(M.score>M.scoreA?'« Tu vois ? Une histoire posée sur des lieux : tout revient, dans l’ordre. Les aèdes faisaient pareil… pour 16 000 vers. »':M.score===M.scoreA?'« Autant l’un que l’autre, pour quatre images. Mais pour 16 000 vers, une liste ne tient pas : il faut une histoire et des lieux, le chemin qui ramène le récit. »':'« Ce soir, la liste a mieux marché. Avec l’habitude, l’histoire et les lieux gagnent : c’est ainsi que les aèdes gardaient 16 000 vers. »');setTimeout(()=>M.done=true,3200)}},
+  else if(M.state==='recall'&&items.every(o=>o.seat>=0)){M.score=items.filter((o,k)=>o.seat===M.answer[k]).length;M.state='result';if(PAPER)confetti(384,140,40);showHint(M.score>M.scoreA?'« Tu vois ? Une histoire ancrée dans des lieux : tout revient, dans l’ordre. Les aèdes faisaient pareil… pour 16 000 vers. »':M.score===M.scoreA?'« Autant l’un que l’autre, pour quatre images. Mais pour 16 000 vers, une liste ne tient pas : il faut une histoire et des lieux, le chemin qui ramène le récit. »':'« Ce soir, la liste a mieux marché. Avec l’habitude, l’histoire et les lieux gagnent : c’est ainsi que les aèdes gardaient 16 000 vers. »');setTimeout(()=>M.done=true,3200)}},
  solve(){M.done=true}};return M}
 
 /* 2. Le papyrus de Thot : avoir la liste sous les yeux… puis la perdre */
