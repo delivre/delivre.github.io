@@ -5,8 +5,18 @@ Les sources des boîtes Pocket Memory. Chaque boîte est construite en **un seul
 **Les boîtes ne sont pas numérotées** (ni dans le jeu, ni dans les adresses, ni sur Notion) : l'ordre peut changer. On les désigne par leur titre, en minuscules et sans accents (`le-prix-de-l-ecriture`).
 
 > Les règles de contenu (histoire, style, activités, souvenirs) sont dans le projet claude.ai « Pocket Memory » :
-> `bible-histoire-alice.md`, `charte-graphique.md`, `regle-des-activites.md`, `regle-des-souvenirs.md`, `kit-demarrage.md`.
+> `socle-commun.md`, `bible-histoire-alice.md`, `charte-graphique.md`, `regle-des-activites.md`, `regle-des-souvenirs.md`, `kit-demarrage.md`.
 > Ce dossier-ci ne contient que la technique.
+
+## Le socle commun : ne pas y toucher boîte par boîte
+
+Une nouvelle boîte **part toujours d'une copie** de `le-prix-de-l-ecriture/`. Restent identiques dans toutes les boîtes (détail et valeurs dans `socle-commun.md`) :
+- Alice (`C_alice.js`) et sa marche (`J_main.js`, partie « marche » : vitesse max 2,85, accélération 9, freinage 12, rotation 14) ; le chemin A* (`K_path.js`) ;
+- les gestes, le zoom, la caméra et ses états, l'effet maquette (`J_main.js`, `D_post.js`) ;
+- la bulle d'Alice, le panneau de texte, les boutons, l'écran d'accueil, l'écran de secours, l'intégration Notion (`head.html`, `J_main.js`) ;
+- le déroulé d'un lieu, les languettes, le journal (`I_flow.js` : mécanique ; `R_journal.js`) ; le mode Rappel (`W_recall.js`) ; les sons (`U_music.js`).
+
+Changent d'une boîte à l'autre : la carte et ses lieux (`F_box.js`), les souvenirs (`G_scenes.js`, `REVEAL` dans `R_journal.js`), les activités (`V_acts.js`, `X_ia.js`), le contenu du scénario (`SCRIPTS` dans `I_flow.js`), le carnet (`Y_carnet.js`), les cartes et l'argument du Rappel, le titre et l'image d'accueil (`head.html`). Une amélioration du socle se reporte dans **toutes** les boîtes.
 
 ## Construire et publier une boîte
 
