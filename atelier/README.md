@@ -1,6 +1,8 @@
 # Atelier Pocket Memory
 
-Les sources des boîtes Pocket Memory. Chaque boîte est construite en **un seul fichier HTML autonome** (Three.js r128, images, sons et musique inclus), publié sur GitHub Pages dans `pocket-memory/boite-N/`.
+Les sources des boîtes Pocket Memory. Chaque boîte est construite en **un seul fichier HTML autonome** (Three.js r128, images, sons et musique inclus), publié sur GitHub Pages dans `pocket-memory/<nom-de-la-boite>/`.
+
+**Les boîtes ne sont pas numérotées** (ni dans le jeu, ni dans les adresses, ni sur Notion) : l'ordre peut changer. On les désigne par leur titre, en minuscules et sans accents (`le-prix-de-l-ecriture`).
 
 > Les règles de contenu (histoire, style, activités, souvenirs) sont dans le projet claude.ai « Pocket Memory » :
 > `bible-histoire-alice.md`, `charte-graphique.md`, `regle-des-activites.md`, `regle-des-souvenirs.md`, `kit-demarrage.md`.
@@ -9,10 +11,10 @@ Les sources des boîtes Pocket Memory. Chaque boîte est construite en **un seul
 ## Construire et publier une boîte
 
 ```bash
-cd atelier/boite-1
-python3 build.py                 # écrit ../../pocket-memory/boite-1/index.html et vérifie la syntaxe
-python3 ../outils/err.py ../../pocket-memory/boite-1/index.html     # erreurs JavaScript au chargement
-python3 ../outils/auto.py ../../pocket-memory/boite-1/index.html 20 15000   # parcours complet (lent, en arrière-plan)
+cd atelier/le-prix-de-l-ecriture
+python3 build.py                 # écrit ../../pocket-memory/le-prix-de-l-ecriture/index.html et vérifie la syntaxe
+python3 ../outils/err.py ../../pocket-memory/le-prix-de-l-ecriture/index.html     # erreurs JavaScript au chargement
+python3 ../outils/auto.py ../../pocket-memory/le-prix-de-l-ecriture/index.html 20 15000   # parcours complet (lent, en arrière-plan)
 git add -A && git commit -m "…" && git push   # en ligne 1 à 2 minutes plus tard
 ```
 
@@ -58,9 +60,9 @@ Avec `#test` dans l'adresse, l'écran d'accueil est sauté et `window.__T` donne
 - Mémoire mobile : textures plafonnées (`LOW`), ombres 1024 sur mobile ; un écran de secours propose de rouvrir si le contexte WebGL est perdu.
 - Le dépôt est public : n'y mettre rien de confidentiel. Le PDF du livre n'y va jamais.
 
-## Démarrer la boîte suivante
+## Démarrer une nouvelle boîte
 
 ```bash
-cp -r atelier/boite-1 atelier/boite-2
+cp -r atelier/le-prix-de-l-ecriture atelier/<nom-de-la-nouvelle-boite>
 ```
-Puis modifier dans `boite-2` : le titre et l'image de l'écran d'accueil (`head.html`), la carte et les lieux (`F_box`), les souvenirs (`G_scenes`, `R_journal`), les activités (`V_acts`, `X_ia`), le scénario (`I_flow`), le carnet (`Y_carnet`), le Rappel (`W_recall`). Ajouter la boîte à la liste de `pocket-memory/index.html`.
+Puis modifier dans le nouveau dossier : le titre et l'image de l'écran d'accueil (`head.html`), la carte et les lieux (`F_box`), les souvenirs (`G_scenes`, `R_journal`), les activités (`V_acts`, `X_ia`), le scénario (`I_flow`), le carnet (`Y_carnet`), le Rappel (`W_recall`). Ajouter la boîte à la liste de `pocket-memory/index.html`. Les anciennes adresses `boite-1/` et `pocket-memory/boite-1/` redirigent vers `pocket-memory/le-prix-de-l-ecriture/`.

@@ -1,5 +1,5 @@
 """Construit la boîte : head.html + modules/*.js + musique -> un seul fichier HTML autonome.
-Usage : python3 build.py [sortie]   (par défaut : ../../pocket-memory/boite-1/index.html)"""
+Usage : python3 build.py [sortie]   (par défaut : ../../pocket-memory/<nom du dossier>/index.html)"""
 import os,sys,subprocess
 D=os.path.dirname(os.path.abspath(__file__))
 ORDRE=['A_env','B_paint','F_box','P_people','G_scenes','H_manips','R_journal','S_chibi','T_manpaper','V_acts','C_alice','I_flow','D_post','K_path','U_music','W_recall','X_ia','Y_carnet','J_main']
