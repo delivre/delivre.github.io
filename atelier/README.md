@@ -76,4 +76,4 @@ Avec `#test` dans l'adresse, l'écran d'accueil est sauté et `window.__T` donne
 ```bash
 cp -r atelier/le-prix-de-l-ecriture atelier/<nom-de-la-nouvelle-boite>
 ```
-Puis modifier dans le nouveau dossier : le titre et l'image de l'écran d'accueil (`head.html`), la carte et les lieux (`F_box`), les souvenirs (`G_scenes`, `R_journal`), les activités (`V_acts`, `X_ia`), le scénario (`I_flow`), le carnet (`Y_carnet`), le Rappel (`W_recall`). Ajouter la boîte à la liste de `pocket-memory/index.html`. Les anciennes adresses `boite-1/` et `pocket-memory/boite-1/` redirigent vers `pocket-memory/le-prix-de-l-ecriture/`.
+Puis modifier dans le nouveau dossier : le titre et l'image de l'écran d'accueil (`head.html`), la carte et les lieux (`F_box`), les souvenirs (`G_scenes`, `R_journal`), les activités (`V_acts`, `X_ia`), le scénario (`I_flow`), le carnet (`Y_carnet`), le Rappel (`W_recall`). Ajouter la boîte à la liste de `pocket-memory/index.html`.
