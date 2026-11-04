@@ -148,6 +148,8 @@ const SCRIPTS={
   {ask:[3,'La lanterne garde…','Écrire, et rallumer sa mémoire','Tout écrire pour tout garder','Ne plus rien écrire du tout']},
   {fn:()=>{RECAP=3;vegaT=1;sndTone(784,2.4,.12);sndTone(1175,2.4,.06,.25)}},{wait:1400},{say:'alice',t:'Et Alexandrie, au bord du delta, là où l\u2019on a voulu tout écrire. C\u2019est là que j\u2019ai allumé mon phare.'},{fn:()=>{RECAP=-1}},{say:'alice',t:'Thamus avait raison sur le risque. Mais la mémoire, ça se reprend.'},
   {cam:'box'},{fn:()=>{unlock5()}},{wait:1800},{say:'alice',t:'Mais papa ne s\u2019arrêtait jamais à Alexandrie. Il disait que l\u2019histoire continuait… jusqu\u2019à aujourd\u2019hui.'},{fn:()=>{hideSay();next=4;REPLAY.last=3}}]};
+// les lieux vécus à la première personne : l'activité et le souvenir se passent dans le lieu même
+if(FPM)[0,1,2,3].forEach(n=>{if(!FP_PLACES[n])return;const a=SCRIPTS[n],i=a.findIndex(s=>s.manip);if(i<0)return;a.splice(a[i-1]&&a[i-1].cam==='lid'?i-1:i,a[i-1]&&a[i-1].cam==='lid'?2:1,{fp:n});const r=a.findIndex(s=>s.reward!=null);if(!(a[r+1]&&a[r+1].wait))a.splice(r+1,0,{wait:900})})
 let constelT=0,DTG=.016;
 let curName=null;function run(name){curName=name;Q=SCRIPTS[name];qi=0;busy=true;step()}
 function step(){while(qi<Q.length){const s=Q[qi++];
@@ -168,6 +170,7 @@ function step(){while(qi<Q.length){const s=Q[qi++];
   if(s.retry){const miss=[...Array(s.retry).keys()].filter(i=>CARDST[i]===0);if(miss.length)Q.splice(qi,0,{say:'alice',t:'Je reprends celles qui m\u2019échappaient.'},...miss.map(i=>({card:RCARD[i]})));continue}
   if(s.arg){startArg();return}
   if(s.trace){TRACE.on=true;TRACE.t0=performance.now();showHint('Papa me montrait le ciel : « Relie les étoiles. Suis les pointillés. »');return}
+  if(s.fp!=null){FPT.start(s.fp,()=>step());return}
   if(s.manip){sndPaper(.45,.4);curManip=s.manip();SCR.kind='manip';SCR.obj=curManip;SCR.ta=1;showHint(curManip.hint);return}}
   busy=false;if(typeof curName==='number'&&curName<3)next=curName+1;Q=[]}
 function advance(){if(jWriting()){jFinish();return}if(PAPER&&TAB.need&&!TAB.rev){if(!TAB.auto)TAB.auto=performance.now();return}if(waitTap){waitTap=false;hideSay();step()}}

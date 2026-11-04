@@ -949,6 +949,7 @@ const css=m=>m&&m.color?'#'+m.color.clone().convertLinearToSRGB().getHexString()
 const PAWNC={};const pawnMat=(b,hd)=>{const k=css(b)+css(hd);return PAWNC[k]||(PAWNC[k]=cutMat((x,W,H)=>{x.fillStyle=css(b);x.beginPath();x.moveTo(W*.36,H*.42);x.lineTo(W*.64,H*.42);x.lineTo(W*.76,H*.97);x.lineTo(W*.24,H*.97);x.closePath();x.fill();
   x.fillStyle=css(hd);x.beginPath();x.arc(W/2,H*.27,W*.17,0,7);x.fill();x.fillStyle='rgba(0,0,0,.12)';x.fillRect(W/2,H*.42,W*.22,H*.55)},96,160))};
 const pawn=(body,head,h=.36)=>{const g=new THREE.Group();g.add(at(mesh(new THREE.CylinderGeometry(.07,.1,h,14),body),0,h/2,0));g.add(at(mesh(new THREE.SphereGeometry(.075,14,10),head),0,h+.06,0));return g};
+let THEA=null,GOBE=null,PALA=null,PHAR=null; // la maquette du théâtre (pour la vue à la première personne)
 // 1. le théâtre de l'aède : des gradins en demi-cercle bien fermés, une scène, un mur de scène à colonnes
 {const g=new THREE.Group();
  const tier=(r0,r1,h,mat)=>{const sh=new THREE.Shape();sh.absarc(0,0,r1,0,Math.PI,false);sh.absarc(0,0,r0,Math.PI,0,true);sh.closePath();const geo=new THREE.ExtrudeGeometry(sh,{depth:h,bevelEnabled:true,bevelThickness:.015,bevelSize:.015,bevelSegments:2,curveSegments:40});geo.rotateX(-Math.PI/2);const m=mesh(geo,mat);g.add(m)};
@@ -964,8 +965,8 @@ const pawn=(body,head,h=.36)=>{const g=new THREE.Group();g.add(at(mesh(new THREE
  // l'aède sur la scène, avec sa lyre
  const bard=pawn(M.white,M.skin,.3);bard.position.set(0,.12,.48);g.add(bard);const bb=mesh(new THREE.SphereGeometry(.05,10,8),M.marbleD);bb.scale.y=1.4;bb.position.set(0,.43,.42);g.add(bb);
  // le public, assis sur les gradins
- [[-.95,.62,.16],[-.55,.62,.16],[-.2,.62,.16],[.25,.62,.16],[.7,.62,.16],[-.75,.76,.24],[-.3,.76,.24],[.1,.76,.24],[.5,.76,.24],[-.45,.9,.32],[.35,.9,.32]].forEach(([a,r,h],i)=>{const t=Math.PI/2+a;const p=pawn([M.terra,M.turq,M.cream,M.blue,M.yellow,M.red][i%6],M.skin,.12);p.scale.setScalar(.75);p.position.set(Math.cos(t)*r,h,-Math.sin(t)*r);g.add(p)});
- g.scale.setScalar(.78);put(g,...PLACES[1])}
+ [[-.95,.62,.16],[-.55,.62,.16],[-.2,.62,.16],[.25,.62,.16],[.7,.62,.16],[-.75,.76,.24],[-.3,.76,.24],[.1,.76,.24],[.5,.76,.24],[-.45,.9,.32],[.35,.9,.32]].forEach(([a,r,h],i)=>{const t=Math.PI/2+a;const p=pawn([M.terra,M.turq,M.cream,M.blue,M.yellow,M.red][i%6],M.skin,.12);p.scale.setScalar(.75);p.position.set(Math.cos(t)*r,h,-Math.sin(t)*r);p.userData.a=a;(g.userData.pub=g.userData.pub||[]).push(p);g.add(p)});
+ g.scale.setScalar(.78);put(g,...PLACES[1]);THEA=g;THEA.userData.bard=bard;THEA.userData.lyre=bb}
 // 2. le palais du roi Thamus
 {const g=new THREE.Group();[-.5,.5].forEach(x=>{const t=mesh(new THREE.CylinderGeometry(.3,.42,1.25,4),M.sandC);t.rotation.y=Math.PI/4;t.position.set(x,.62,0);g.add(t);const c=mesh(new THREE.BoxGeometry(.48,.08,.48),M.turq);c.position.set(x,1.28,0);g.add(c);
    const st=mesh(new THREE.BoxGeometry(.44,.05,.02),M.terra);st.position.set(x,.95,.27);g.add(st)});
@@ -976,23 +977,23 @@ const pawn=(body,head,h=.36)=>{const g=new THREE.Group();g.add(at(mesh(new THREE
   const stripe=canvasTex(128,64,(x,W,H)=>{for(let u=0;u<W;u+=16){x.fillStyle=(u/16)%2?'#e8b04a':'#2a4a9a';x.fillRect(u,0,16,H)}},true);stripe.repeat.set(3,1);
   const nem=new THREE.MeshStandardMaterial({map:stripe,roughness:.95,flatShading:true,side:THREE.DoubleSide});
   const ocre=plastic('#d8a24a'),robe=plastic('#f3ead6'),peau=plastic('#b9764a'),noir=plastic('#2a2430'),pap=plastic('#efe2bf');
-  {const th=new THREE.Group();th.position.set(-.32,0,.62);th.rotation.y=.5;g.add(th);
+  {const th=new THREE.Group();th.position.set(-.32,0,.62);th.rotation.y=.5;g.add(th);g.userData.th=th;
    th.add(at(mesh(new THREE.BoxGeometry(.36,.2,.32),ocre),0,.1,0));th.add(at(mesh(new THREE.BoxGeometry(.36,.5,.05),ocre),0,.34,-.14));[-.16,.16].forEach(x=>th.add(at(mesh(new THREE.ConeGeometry(.03,.08,4),ocre),x,.62,-.14)));
    th.add(at(mesh(new THREE.ConeGeometry(.13,.34,6),robe),0,.36,.02));th.add(at(mesh(new THREE.IcosahedronGeometry(.07,1),peau),0,.6,.03));
    const n=mesh(new THREE.ConeGeometry(.11,.2,8,1,true),nem);n.position.set(0,.6,0);th.add(n);th.add(at(mesh(new THREE.CylinderGeometry(.075,.075,.03,8),nem),0,.66,.0));
    th.add(at(mesh(new THREE.ConeGeometry(.018,.06,4),ocre),0,.72,.06));[-.08,.08].forEach(x=>{const a=mesh(new THREE.ConeGeometry(.025,.16,4),robe);a.position.set(x,.38,.08);a.rotation.x=1.2;th.add(a)})}
-  {const ib=new THREE.Group();ib.position.set(.3,0,.66);ib.rotation.y=-.6;g.add(ib);
+  {const ib=new THREE.Group();ib.position.set(.3,0,.66);ib.rotation.y=-.6;g.add(ib);g.userData.ib=ib;
    ib.add(at(mesh(new THREE.ConeGeometry(.12,.42,6),robe),0,.21,0));ib.add(at(mesh(new THREE.CylinderGeometry(.06,.07,.08,6),plastic('#3b6fd6')),0,.42,0));
    ib.add(at(mesh(new THREE.IcosahedronGeometry(.065,1),noir),0,.52,.01));const bk=mesh(new THREE.ConeGeometry(.016,.22,4),noir);bk.position.set(0,.47,.12);bk.rotation.x=2.1;ib.add(bk);
    const sh=mesh(new THREE.PlaneGeometry(.22,.15),new THREE.MeshStandardMaterial({color:pap.color,side:THREE.DoubleSide,roughness:.95}));sh.position.set(-.1,.33,.13);sh.rotation.set(-.5,.2,.15);ib.add(sh);
    [-1,1].forEach(k=>{const r=mesh(new THREE.CylinderGeometry(.018,.018,.17,6),pap);r.rotation.z=Math.PI/2;r.rotation.y=.2;r.position.set(-.1+k*.11,.33,.13);ib.add(r)})}
  }else{
  // le roi Thamus sur son trône d'or (coiffe rayée bleu et or), face à Thot, dieu à tête d'ibis, qui lui tend un papyrus déroulé
- {const th=new THREE.Group();th.position.set(-.32,0,.62);th.rotation.y=.5;g.add(th);th.add(at(mesh(new THREE.BoxGeometry(.34,.2,.3),M.gold),0,.1,0));th.add(at(mesh(new THREE.BoxGeometry(.34,.42,.06),M.gold),0,.3,-.13));
+ {const th=new THREE.Group();th.position.set(-.32,0,.62);th.rotation.y=.5;g.add(th);g.userData.th=th;th.add(at(mesh(new THREE.BoxGeometry(.34,.2,.3),M.gold),0,.1,0));th.add(at(mesh(new THREE.BoxGeometry(.34,.42,.06),M.gold),0,.3,-.13));
   const k=pawn(M.white,M.skin,.32);k.position.set(0,.16,.02);k.scale.setScalar(1.25);th.add(k);
   for(let s=0;s<5;s++){const n=mesh(new THREE.CylinderGeometry(.05+s*.022,.06+s*.022,.035,16,1,false,Math.PI*.15,Math.PI*1.7),s%2?M.gold:M.blue);n.position.set(0,.66-s*.035,-.005);n.rotation.y=Math.PI;th.add(n)}
   th.add(at(mesh(new THREE.SphereGeometry(.025,8,6),M.gold),0,.72,.07))}
- {const ib=new THREE.Group();ib.position.set(.3,0,.66);ib.rotation.y=-.6;g.add(ib);const body=pawn(M.white,M.white,.36);body.scale.setScalar(1.25);ib.add(body);ib.children.length;
+ {const ib=new THREE.Group();ib.position.set(.3,0,.66);ib.rotation.y=-.6;g.add(ib);g.userData.ib=ib;const body=pawn(M.white,M.white,.36);body.scale.setScalar(1.25);ib.add(body);ib.children.length;
   const head=mesh(new THREE.SphereGeometry(.08,14,10),M.black);head.position.set(0,.58,0);ib.add(head);
   const beak=mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[0,.57,.06],[0,.53,.18],[0,.45,.27]].map(p=>new THREE.Vector3(...p))),12,.016,6),M.black);ib.add(beak);
   const sheet=mesh(new THREE.BoxGeometry(.24,.005,.16),M.cream);sheet.position.set(-.12,.34,.12);sheet.rotation.set(.6,0,.2);ib.add(sheet);
@@ -1001,7 +1002,7 @@ const pawn=(body,head,h=.36)=>{const g=new THREE.Group();g.add(at(mesh(new THREE
 
 
  }
- g.rotation.y=-.3;g.scale.setScalar(.9);put(g,...PLACES[2])}
+ g.rotation.y=-.3;g.scale.setScalar(.9);put(g,...PLACES[2]);PALA=g}
 // 3. les pierres devenues temple
 if(PAPER){const g=new THREE.Group();const stoneC=plastic('#cbbfa6');
  const anim=(k)=>{const t=canvasTex(128,256,(x,W,H)=>{x.fillStyle='#cbbfa6';x.fillRect(0,0,W,H);for(let i=0;i<900;i++){x.fillStyle=Math.random()<.5?`rgba(255,250,235,${rnd(.08,.2)})`:`rgba(90,70,50,${rnd(.06,.14)})`;x.fillRect(rnd(0,W),rnd(0,H),rnd(1,3),rnd(1,2))}
@@ -1011,13 +1012,13 @@ if(PAPER){const g=new THREE.Group();const stoneC=plastic('#cbbfa6');
    else if(k===2){x.moveTo(cx,cy-40);x.lineTo(cx,cy+30);x.moveTo(cx,cy-20);x.lineTo(cx-40,cy-34);x.moveTo(cx,cy-20);x.lineTo(cx+40,cy-34);x.moveTo(cx-10,cy-44);x.lineTo(cx+10,cy-44)}
    else{x.moveTo(cx-10,cy-60);for(let i=0;i<8;i++)x.quadraticCurveTo(cx+(i%2?26:-26),cy-50+i*14,cx+(i%2?-10:10),cy-40+i*14)}x.stroke()});return new THREE.MeshStandardMaterial({map:t,roughness:.95,bumpMap:t,bumpScale:.015})};
  const AM=[0,1,2,3].map(anim),side=M.cbSide;
- const tp=(x,z,a,h,k)=>{const p=new THREE.Group();const sh=mesh(new THREE.BoxGeometry(.13,h,.07),[stoneC,stoneC,stoneC,stoneC,AM[k%4],stoneC]);sh.position.y=h/2;p.add(sh);const hd=mesh(new THREE.BoxGeometry(.3,.11,.1),stoneC);hd.position.y=h+.05;p.add(hd);p.position.set(x,0,z);p.rotation.y=a;g.add(p)};
+ const tp=(x,z,a,h,k)=>{const p=new THREE.Group();p.userData.k=k;p.userData.a=a;(g.userData.tps=g.userData.tps||[]).push(p);const sh=mesh(new THREE.BoxGeometry(.13,h,.07),[stoneC,stoneC,stoneC,stoneC,AM[k%4],stoneC]);sh.position.y=h/2;p.add(sh);const hd=mesh(new THREE.BoxGeometry(.3,.11,.1),stoneC);hd.position.y=h+.05;p.add(hd);p.position.set(x,0,z);p.rotation.y=a;g.add(p)};
  // le muret circulaire, en carton empilé (on voit les couches)
  for(let r=0;r<3;r++){const ring=mesh(new THREE.CylinderGeometry(.92-r*.015,.94-r*.015,.07,40,1,true),side);ring.material=side;ring.position.y=.035+r*.07;g.add(ring)}
  g.add(at(mesh(new THREE.CylinderGeometry(.9,.9,.02,40),plastic('#b8a882')),0,.21,0));
  for(let i=0;i<8;i++){const a=i/8*Math.PI*2+.2;tp(Math.cos(a)*.72,Math.sin(a)*.72,-a+Math.PI/2,.38,i)}
  tp(-.14,0,0,.62,0);tp(.14,0,0,.62,1);
- g.children.forEach(o=>{if(o.isGroup)o.position.y+=.21});put(g,...PLACES[0])}
+ g.children.forEach(o=>{if(o.isGroup)o.position.y+=.21});put(g,...PLACES[0]);GOBE=g}
 else
 {const g=new THREE.Group();g.add(at(mesh(new THREE.CylinderGeometry(.85,.9,.1,40),M.marbleD),0,.01,0));
  [0,1,2,3,4].forEach(i=>{const a=Math.PI*(.55+i*.225);const s=mesh(new THREE.BoxGeometry(.2,.55+i%2*.1,.13),M.stone);s.position.set(Math.cos(a)*.7,.3,Math.sin(a)*.7);s.rotation.y=-a;g.add(s)});
@@ -1036,7 +1037,7 @@ let pharosFire,pharosLight;const BEAM={};
  const bmG=new THREE.Group();[[.32,.075],[.6,.035]].forEach(([r,o])=>{const bg=new THREE.ConeGeometry(r,2.6,24,1,true);bg.translate(0,-1.3,0);bg.rotateZ(Math.PI/2);bmG.add(new THREE.Mesh(bg,new THREE.MeshBasicMaterial({color:'#ffd9a0',alphaMap:am,transparent:true,opacity:o,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide})))});bmG.position.y=1.99;g.add(bmG);BEAM.m=bmG}
 if(PAPER){const lan=mesh(new THREE.CylinderGeometry(.17,.2,.32,8,1,true),new THREE.MeshStandardMaterial({color:'#fff1d0',emissive:new THREE.Color('#ffb25a'),emissiveIntensity:1.8,transparent:true,opacity:.9,side:THREE.DoubleSide,roughness:.9,bumpMap:FIB,bumpScale:.01}),false,false);lan.position.y=1.99;g.add(lan);g.add(at(mesh(new THREE.ConeGeometry(.17,.12,8),plastic('#a84a2a')),0,2.18,0))}
  pharosLight=new THREE.PointLight(0xffa850,.9,5,2);pharosLight.position.y=2.0;g.add(pharosLight);
- put(g,...PLACES[3])}
+ put(g,...PLACES[3]);PHAR=g}
 {const g=new THREE.Group();g.add(at(mesh(new THREE.BoxGeometry(1.1,.08,.6),M.marbleD),0,.04,0));
  [-.45,-.15,.15,.45].forEach(x=>g.add(at(mesh(new THREE.CylinderGeometry(.045,.05,.5,10),M.marbleP),x,.33,.24)));
  g.add(at(mesh(new THREE.BoxGeometry(1.0,.5,.3),M.sandC),0,.33,-.08));g.add(at(mesh(new THREE.BoxGeometry(1.15,.07,.62),M.marbleP),0,.62,0));
@@ -2006,6 +2007,256 @@ function mkPhares(){const boats=[0,1,2].map(i=>({x:90+i*250,ph:i*2,dir:1}));
   if(!M.opts)return;M.opts.forEach(([t,ok],i)=>{const y=M.by+i*78;if(cy>y-4&&cy<y+72){M.ans={i,ok};sndPaper(.3,.25);setTimeout(()=>{M.lamps[M.q]=ok?2:1;if(ok){sndTone([523,659,784][M.q],1.2,.12);showHint('Retrouvé de mémoire : la lampe brille fort.')}else showHint('Pas tout à fait : la bonne réponse était sur le rouleau. Une petite lueur seulement.');M.next()},ok?700:2000)}})},
  move(){},up(){},solve(){M.lamps=[2,2,2];M.q=3;M.done=true},wantsTap:()=>M.mode==='scroll'&&M.q<3};return M}
 
+/* ---------- les lieux vécus de l'intérieur, à la première personne ----------
+   On plonge de la carte jusque dans le lieu de la maquette. L'activité s'y joue en vrai volume, puis le souvenir
+   sort sur place (une boîte dans le lieu, lui-même dans la boîte), avant que son étoile monte au couvercle.
+   Le moteur est commun ; chaque lieu fournit sa configuration (FP_PLACES[n]) : où l'on s'assied, ce qu'on y fait. */
+const FPM=PAPER&&!/flat/.test(location.hash);
+const FPT={on:false,k:0,kT:0,st:null,t0:0,cb:null,yaw:0,yawT:0,drag:null,hand:[],sel:null,fly:[],auto:0,P:null,gen:0};
+const FP_PLACES=[];
+const fpG=new THREE.Group();fpG.visible=false; // les objets du moment (cartes posées, étiquettes), rattachés au lieu en cours
+const fpTex=(c)=>{const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return t};
+function fpCard(c,h,o={}){const w=h*c.width/c.height;const m=new THREE.MeshStandardMaterial({map:fpTex(c),transparent:true,alphaTest:.04,side:THREE.DoubleSide,roughness:.95,metalness:0});
+  const p=new THREE.Mesh(new THREE.PlaneGeometry(w,h),m);p.castShadow=!o.noShadow;p.userData.h=h;p.renderOrder=o.ro||0;return p}
+// une étiquette de papier, écrite à la main
+function fpTag(text,o={}){const W=o.w||360,H=o.h||132,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');tagBox(x,8,8,W-16,H-16,10);
+  const lines=String(text).split('\n');lines.forEach((l,i)=>txt(x,l,W/2,H/2+(i-(lines.length-1)/2)*(o.fs||44)*1.05,o.fs||44,o.col||'#3a2410'));return c}
+const fpDiscC=(n)=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle=x.createPattern(KRAFTP,'repeat');x.beginPath();x.arc(64,64,58,0,7);x.fill();
+  x.strokeStyle='rgba(120,80,40,.85)';x.lineWidth=6;x.stroke();x.strokeStyle='rgba(120,80,40,.4)';x.lineWidth=3;x.beginPath();x.arc(64,64,46,0,7);x.stroke();
+  if(n){x.font='700 64px Caveat, cursive';x.fillStyle='#5a3418';x.textAlign='center';x.textBaseline='middle';x.fillText(n,64,68)}return c};
+// un lieu de dépôt : un disque de carton au sol (numéroté ou non) et une zone de toucher plus large
+function fpSite(parent,pos,label,r=.045,hitR=.13,yaw=Math.PI){const m=new THREE.MeshStandardMaterial({map:fpTex(fpDiscC(label)),roughness:.95,emissive:new THREE.Color('#ffcf80'),emissiveIntensity:0});
+  const d=new THREE.Mesh(new THREE.CircleGeometry(r,32),m);d.rotation.x=-Math.PI/2;d.rotation.z=yaw;d.position.copy(pos);d.receiveShadow=true;d.visible=false;parent.add(d);
+  const hit=new THREE.Mesh(new THREE.SphereGeometry(hitR,8,6),new THREE.MeshBasicMaterial({visible:false}));hit.position.copy(pos).add(new THREE.Vector3(0,hitR*.5,0));parent.add(hit);d.userData.hit=hit;return d}
+// la nuit qui tombe (un voile bleu nuit sur la vue) : pour cacher sans rideau
+const fpNight=document.createElement('div');fpNight.style.cssText='position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .9s;background:radial-gradient(ellipse at 50% 35%,rgba(30,34,80,.86),rgba(6,6,22,.97))';cv.insertAdjacentElement('afterend',fpNight);
+let fpCurtKT=0;
+// le ciel : à hauteur du lieu, un vrai ciel de fin de journée (le soleil est du côté de la lumière de la maquette)
+const fpSky=(()=>{const sd=new THREE.Vector3(sun.position.x,0,sun.position.z).normalize();sd.y=.16;sd.normalize();
+  const m=new THREE.ShaderMaterial({side:THREE.BackSide,transparent:true,depthWrite:false,uniforms:{op:{value:0},sd:{value:sd}},
+   vertexShader:'varying vec3 vD;void main(){vD=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+   fragmentShader:'varying vec3 vD;uniform float op;uniform vec3 sd;float hs(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}'+
+   'void main(){vec3 d=normalize(vD);float h=d.y;float s=max(dot(d,sd),0.);'+
+   'vec3 hor=vec3(.98,.66,.42),mid=vec3(.62,.42,.58),zen=vec3(.13,.13,.32);vec3 c=mix(hor,mid,smoothstep(-.02,.22,h));c=mix(c,zen,smoothstep(.18,.75,h));'+
+   'c+=vec3(1.,.72,.4)*pow(s,6.)*.55+vec3(1.,.9,.7)*pow(s,300.)*1.2;'+
+   'vec3 q=floor(d*180.);float st=step(.996,hs(q))*smoothstep(.35,.8,h);c+=vec3(st*.9);gl_FragColor=vec4(c,op);}'});
+  const o=new THREE.Mesh(new THREE.SphereGeometry(60,32,16),m);o.renderOrder=-10;o.frustumCulled=false;o.visible=false;scene.add(o);return o})();
+// les objets posés dans le lieu (cartes, étiquettes)
+const fpStage=[];function fpClearStage(){fpStage.forEach(o=>fpG.remove(o));fpStage.length=0}
+function fpPut(c,h,pos,o={}){const p=fpCard(c,h,o);p.position.copy(pos).add(new THREE.Vector3(0,h/2,0));p.rotation.y=o.ry!=null?o.ry:FPT.P.face;p.userData.pop=performance.now();fpG.add(p);fpStage.push(p);return p}
+function fpUnput(p){fpG.remove(p);const i=fpStage.indexOf(p);if(i>=0)fpStage.splice(i,1)}
+// la main : des cartes tenues en bas de la vue (placées chaque image devant la caméra)
+function fpSetHand(cards,stack){FPT.stack=!!stack;FPT.hand.forEach(o=>scene.remove(o.m));FPT.hand=cards.map((c)=>{const m=fpCard(c.c,.06,{noShadow:true,ro:20});m.material.depthTest=false;scene.add(m);return Object.assign({m,lift:0},c)});FPT.sel=null}
+function fpHandTick(){const dg=FPT.drag&&FPT.drag.card&&FPT.drag.moved&&FPT.drag.p?FPT.drag:null;const n=FPT.hand.length;if(!n)return;const fw=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion),rt=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
+  const vh=2*Math.tan(camera.fov*Math.PI/360)*.3,vw=vh*camera.aspect,gap=Math.min(.075,vw*.9/n);
+  if(FPT.stack){// des réponses écrites : l'une sous l'autre, bien lisibles
+   FPT.hand.forEach((o,i)=>{const tl=(o===FPT.sel?1:0);o.lift+=(tl-o.lift)*.2;const w=o.m.geometry.parameters.width,h=o.m.geometry.parameters.height,s=Math.min(vw*.78/w,vh*.16/h),y=-vh*.02-i*h*s*1.12;
+    o.m.position.copy(camera.position).addScaledVector(fw,.3).addScaledVector(up,y).addScaledVector(rt,o.lift*.006);o.m.quaternion.copy(camera.quaternion);o.m.rotateZ((i%2?.012:-.012));o.m.scale.setScalar(o.used?0.0001:s*(1+o.lift*.06))});return}
+  FPT.hand.forEach((o,i)=>{const tl=(o===FPT.sel?1:0)+(o.hot?.5:0);o.lift+=(tl-o.lift)*.2;const x=(i-(n-1)/2)*gap,y=-vh*.2+o.lift*.012;
+    o.m.position.copy(camera.position).addScaledVector(fw,.3).addScaledVector(rt,x).addScaledVector(up,y);o.m.quaternion.copy(camera.quaternion);o.m.rotateZ((i-(n-1)/2)*-.06);const w=o.m.geometry.parameters.width,fit=Math.min(1,gap*.94/w);o.m.scale.setScalar(o.used?0.0001:fit*(1+o.lift*.15));
+    if(dg&&dg.card===o){const w2=FPT.P.g.localToWorld(dg.p.clone().add(new THREE.Vector3(0,FPT.P.dragLift||.09,0)));o.m.position.copy(w2);o.m.quaternion.copy(camera.quaternion);o.m.scale.setScalar(2.1)}})}
+// une carte qui s'envole de la main (ou d'ailleurs) vers sa place
+function fpFly(o,pos,h,done,from){if(o)o.used=true;const p=fpCard(o?o.c:from.c,h);p.position.copy(o?o.m.position:from.w);FPT.P.g.worldToLocal(p.position);p.rotation.y=FPT.P.face;fpG.add(p);fpStage.push(p);
+  FPT.fly.push({p,a:p.position.clone(),b:pos.clone().add(new THREE.Vector3(0,h/2,0)),t0:performance.now(),done,arc:FPT.P.arc||.18});sndPaper(.35,.3);return p}
+function fpFlyTick(now){for(let i=FPT.fly.length-1;i>=0;i--){const f=FPT.fly[i],u=clamp((now-f.t0)/700),e=u*u*(3-2*u);f.p.position.lerpVectors(f.a,f.b,e);f.p.position.y+=Math.sin(e*Math.PI)*f.arc;f.p.scale.setScalar(.35+.65*e);if(u>=1){FPT.fly.splice(i,1);f.done&&f.done()}}}
+const fpHint=(t)=>showHint(t);
+const fpAfter=(ms,fn)=>{const id=FPT.gen;setTimeout(()=>{if(FPT.gen===id&&FPT.on)fn()},AUTO?ms*.5:ms)};
+function fpGo(st){FPT.st=st;FPT.t0=performance.now();FPT.auto=0;FPT.P.go(st)}
+// fin de l'activité : on reste dans le lieu, le souvenir vient ici
+function fpFinish(){FPT.st='mem';FPT.wait=false;fpSetHand([]);fpClearStage();(FPT.P.sites||[]).forEach(d=>d.visible=false);FPT.P.toMem&&FPT.P.toMem();const cb=FPT.cb;FPT.cb=null;cb&&cb()}
+// attendre un toucher pour continuer
+function fpWait(fn){FPT.wait=true;FPT.next=fn}
+FPT.start=(n,cb)=>{const P=FP_PLACES[n];if(!P){cb&&cb();return}FPT.P=P;P.init&&!P.ready&&(P.init(),P.ready=1);P.g.add(fpG);ZH.el.classList.remove('on');FPT.cb=cb;DIO.host=FPT.host;FPT.on=true;FPT.kT=1;FPT.gen++;fpG.visible=true;FPT.yaw=FPT.yawT=0;fpCurtKT=0;fpClearStage();
+  hideSay();P.enter&&P.enter();fpAfter(1900,()=>fpGo(P.first))};
+const fpRay=new THREE.Raycaster();
+function fpRayAt(e){const r=cv.getBoundingClientRect(),v=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);fpRay.setFromCamera(v,camera)}
+function fpPick(e){fpRayAt(e);const hh=fpRay.intersectObjects(FPT.hand.filter(o=>!o.used).map(o=>o.m),false)[0];if(hh)return{hand:FPT.hand.find(o=>o.m===hh.object)};
+  const S=(FPT.P.sites||[]),ph=fpRay.intersectObjects(S.filter(d=>d.visible).map(d=>d.userData.hit),false)[0];if(ph)return{site:S.findIndex(d=>d.userData.hit===ph.object)};
+  const O=FPT.P.objs?FPT.P.objs():[],po=fpRay.intersectObjects(O,true)[0];if(po){let o=po.object;while(o&&o.userData.obj==null)o=o.parent;if(o)return{obj:o.userData.obj}}return{}}
+const fpFloor=new THREE.Plane(new THREE.Vector3(0,1,0),0);
+function fpFloorPt(e){fpRayAt(e);fpFloor.constant=-FPT.P.g.localToWorld(new THREE.Vector3(0,FPT.P.floorY||0,0)).y;const p=new THREE.Vector3();return fpRay.ray.intersectPlane(fpFloor,p)?FPT.P.g.worldToLocal(p):null}
+const fpNear=(p)=>{let b=-1,bd=FPT.P.nearR||.17;(FPT.P.sites||[]).forEach((d,i)=>{if(!d.visible)return;const q=d.position;const dd=Math.hypot(p.x-q.x,p.z-q.z);if(dd<bd){bd=dd;b=i}});return b};
+FPT.down=(e)=>{const h=FPT.P.canDrag&&FPT.P.canDrag()&&!FPT.fly.length?fpPick(e).hand:null;FPT.drag={x:e.clientX,y:e.clientY,yaw:FPT.yawT,moved:false,card:h&&!h.used?h:null};if(FPT.drag.card)FPT.sel=FPT.drag.card;return true};
+FPT.move=(e)=>{const d=FPT.drag;if(!d)return;if(Math.abs(e.clientX-d.x)+Math.abs(e.clientY-d.y)>8)d.moved=true;if(d.card){if(d.moved){const p=fpFloorPt(e);d.p=p;d.near=p?fpNear(p):-1;(FPT.P.sites||[]).forEach((q,i)=>{if(q.visible)q.material.emissiveIntensity=i===d.near?.9:.08})}return}
+  if(!FPT.P.noLook)FPT.yawT=clamp(d.yaw-(e.clientX-d.x)/Math.min(innerWidth,innerHeight)*1.2,-.55,.55)};
+FPT.up=(e)=>{const d=FPT.drag;FPT.drag=null;if(!d||FPT.k<.9||FPT.fly.length)return;
+  if(d.card&&d.moved){const o=d.card;if(d.near>=0)fpTap({site:d.near,card:o,dragged:true});else FPT.sel=null;return}
+  if(d.moved)return;fpTap(fpPick(e))};
+function fpTap(h={}){if(FPT.wait){FPT.wait=false;const f=FPT.next;FPT.next=null;f&&f();return}if(FPT.st==='mem'||FPT.st==='out')return;FPT.P.tap(FPT.st,h)}
+// le souvenir sorti sur place : la feuille et la boîte apparaissent devant nous, dans le lieu
+const fpAnchor=new THREE.Group();scene.add(fpAnchor);FPT.anchorD=.6;
+FPT.host={attach(fr){fpAnchor.add(dioG);dioG.rotation.set(0,0,0);dioG.position.set(0,0,0);const D=FPT.anchorD,vf=camera.fov*Math.PI/180,vh=2*D*Math.tan(vf/2),vw=vh*camera.aspect;
+   const sc=Math.min(.46*vw/fr[2],.3*vh/fr[3]);dioG.scale.setScalar(sc);FPT.anc={sc,fx:fr[0],fy:fr[1],vh}},
+ detach(){lid.add(dioG);dioG.rotation.set(Math.PI/2,0,0);dioG.position.set(0,-.2,0);dioG.scale.setScalar(DK);FPT.exit()}};
+function fpAnchorTick(){if(dioG.parent!==fpAnchor||!FPT.anc)return;const a=FPT.anc,fw=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion),rt=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
+  fpAnchor.quaternion.copy(camera.quaternion);fpAnchor.position.copy(camera.position).addScaledVector(fw,FPT.anchorD).addScaledVector(rt,-a.fx*a.sc).addScaledVector(up,-a.fy*a.sc+a.vh*.06)}
+FPT.exit=()=>{FPT.st='out';camMode='lid';FPT.kT=0;DIO.host=null;const P=FPT.P;fpAfter(1900,()=>{FPT.on=false;fpG.visible=false;fpClearStage();(P.sites||[]).forEach(d=>d.visible=false);P.leave&&P.leave()})};
+// la caméra : on plonge de la vue de la carte jusque dans le lieu (en arc, sans raser la maquette), et on en ressort
+const fpPos=new THREE.Vector3(),fpLk=new THREE.Vector3(),fpQa=new THREE.Quaternion(),fpQb=new THREE.Quaternion(),fpM=new THREE.Matrix4();
+function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-FPT.kT)<.002)FPT.k=FPT.kT;const k=FPT.k;
+  if(k<.001){if(camera.userData.fpFov){camera.fov=camera.userData.fpFov;camera.near=.1;camera.updateProjectionMatrix();camera.userData.fpFov=0;fpSky.visible=false;fig.visible=true}return}
+  const P=FPT.P;if(!camera.userData.fpFov)camera.userData.fpFov=camera.fov;const f0=camera.userData.fpFov;
+  if(DIO.ph)FPT.yawT=0;FPT.yaw+=(FPT.yawT-FPT.yaw)*.12;FPT.up2=(FPT.up2||0)+(((FPT.st==='mem'&&DIO.ph)?1:0)-(FPT.up2||0))*.05;const e=k*k*(3-2*k);
+  fpPos.copy(P.eye);P.g.localToWorld(fpPos);const lk=P.look.clone().add(new THREE.Vector3(0,(P.memUp||.3)*FPT.up2,0)).sub(P.eye).applyAxisAngle(new THREE.Vector3(0,1,0),FPT.yaw).add(P.eye);fpLk.copy(lk);P.g.localToWorld(fpLk);
+  fpM.lookAt(fpPos,fpLk,new THREE.Vector3(0,1,0));fpQb.setFromRotationMatrix(fpM);fpQa.copy(camera.quaternion);
+  const p0=camera.position.clone(),pe=Math.pow(e,.7);camera.position.lerpVectors(p0,fpPos,pe);camera.position.y+=Math.sin(pe*Math.PI)*2.6;
+  camera.quaternion.copy(fpQa).slerp(fpQb,e);
+  const hf=(P.hf||48)*Math.PI/180,vf=2*Math.atan(Math.tan(hf/2)/camera.aspect)*180/Math.PI,fpf=clamp(vf,52,84);camera.fov=lerp(f0,fpf,e);camera.near=lerp(.1,.01,e);camera.updateProjectionMatrix();
+  fig.visible=k<.4;fpSky.visible=k>.01;fpSky.material.uniforms.op.value=e;fpSky.position.copy(camera.position);
+  fpNight.style.opacity=fpCurtKT;
+  const now=performance.now(),T=now/1000;fpFlyTick(now);
+  fpStage.forEach(p=>{const u=clamp((now-p.userData.pop)/450);if(!FPT.fly.some(f=>f.p===p))p.scale.setScalar(Math.max(.001,u<1?u+Math.sin(u*Math.PI)*.25:1))});
+  if(FPT.on&&FPT.st&&P.tick)P.tick(now,T,dt);
+  fpHandTick();fpAnchorTick();
+  if(AUTO&&FPT.on&&FPT.k>.95&&!FPT.fly.length&&FPT.st!=='mem'&&FPT.st!=='out'){FPT.auto+=dt;if(FPT.auto>1.2){FPT.auto=0;if(FPT.wait)fpTap();else P.auto&&P.auto(FPT.st)}}}
+
+/* ===== 1. le théâtre : assis en haut des gradins ===== */
+{const P={first:'predict',face:Math.PI,floorY:.045,eye:new THREE.Vector3(0,.5,-.8),look:new THREE.Vector3(0,.19,.42)};FP_PLACES[1]=P;
+ let deco,props=[],LOCI=[];
+ P.init=()=>{P.g=THEA;deco=new THREE.Group();deco.visible=false;THEA.add(deco);
+  // les lieux : un arc devant nous, sur le cercle de l'orchestre, de gauche à droite VU DES GRADINS (assis face à la scène, la gauche de l'écran est le +x de la maquette)
+  // chacun a son repère : jarre, autel, colonne brisée, brasero
+  const A=[[.3,.06],[.13,.27],[-.13,.27],[-.3,.06]],terra=M.terra,marb=M.marbleP,dark=M.marbleD;
+  A.forEach(([x,z],i)=>{const g=new THREE.Group();g.position.set(x,.04,z);let top=.09;
+   if(i===0){const pts=[[0,0],[.022,.004],[.034,.03],[.032,.06],[.016,.078],[.014,.09],[.02,.095]].map(([a,b])=>new THREE.Vector2(a,b));g.add(mesh(new THREE.LatheGeometry(pts,18),terra))}
+   if(i===1){g.add(at(mesh(new THREE.BoxGeometry(.085,.06,.06),marb),0,.03,0));g.add(at(mesh(new THREE.BoxGeometry(.095,.012,.07),dark),0,.066,0))}
+   if(i===2){g.add(at(mesh(new THREE.CylinderGeometry(.028,.032,.085,14),marb),0,.0425,0));g.add(at(mesh(new THREE.BoxGeometry(.07,.012,.07),marb),0,.006,0))}
+   if(i===3){g.add(at(mesh(new THREE.CylinderGeometry(.006,.01,.07,8),dark),0,.035,0));g.add(at(mesh(new THREE.CylinderGeometry(.034,.014,.025,14),terra),0,.08,0));
+    const fl=mesh(new THREE.ConeGeometry(.018,.04,10),new THREE.MeshBasicMaterial({color:new THREE.Color('#ffb24a')}),false,false);fl.position.y=.11;g.add(fl);g.userData.fl=fl}
+   g.scale.setScalar(1.9);deco.add(g);props.push(g);LOCI.push(new THREE.Vector3(x,.045,z-.085))});
+  P.sites=LOCI.map((p,i)=>fpSite(deco,new THREE.Vector3(p.x,.046,p.z-.075),String(i+1)))};
+ P.enter=()=>{deco.visible=true;P.sites.forEach(d=>d.visible=false);[THEA.userData.bard,THEA.userData.lyre].forEach(o=>{if(o)o.visible=false});(THEA.userData.pub||[]).forEach(p=>p.visible=Math.abs(p.userData.a)>.4)};
+ P.leave=()=>{deco.visible=false;[THEA.userData.bard,THEA.userData.lyre].forEach(o=>{if(o)o.visible=true});(THEA.userData.pub||[]).forEach(p=>p.visible=true)};
+ P.canDrag=()=>FPT.st==='place'||FPT.st==='recall';
+ P.go=(st)=>{
+  if(st==='predict'){fpSetHand(['100','1 000','16 000'].map((l,i)=>({c:fpTag(l,{w:300,h:150,fs:52}),i})));fpHint('Maman me demandait : « Combien de vers un aède récitait-il de mémoire ? » Toucher une étiquette.')}
+  if(st==='showA'){fpSetHand([]);fpClearStage();fpHint('Maman : « D’abord une simple liste, sans histoire ni lieux. Regarde bien les plats du festin, dans l’ordre. »');P.ai=-1}
+  if(st==='recallA'){const pool=[0,1,2,3].sort(()=>Math.random()-.5);fpSetHand(pool.map(f=>({c:FEAST[f].s,f})));P.lineA=[];fpHint('Toucher les plats dans l’ordre où l’aède les a chantés.')}
+  if(st==='place'){fpSetHand(STORY.map(([n,s],i)=>({c:s,i})));fpClearStage();P.pi=0;fpHint('« Maintenant, comme les aèdes : une histoire, et chaque moment ancré dans un lieu du théâtre. » Le navire part sur la mer couleur de vin, le héros affronte la tempête. Faire glisser chaque image sur son lieu (celui qui brille).')}
+  if(st==='recall'){const pool=[2,0,3,1];fpSetHand(pool.map(i=>({c:STORY[i][1],i})));P.ans=[-1,-1,-1,-1];P.sites.forEach(d=>d.visible=true);fpHint('« L’aède reprend son récit. » Faire glisser chaque image sur le lieu où elle était rangée.')}};
+ P.tap=(st,h)=>{
+  if(st==='predict'&&h.hand){const ok=h.hand.i===2;FPT.hand.forEach(o=>{if(o!==FPT.hand[2])o.used=true});FPT.sel=FPT.hand[2];sndTone(ok?784:523,.8,.06);
+    fpPut(fpTag('16 000 vers',{w:420,h:150,fs:56,col:'#22306e'}),.17,new THREE.Vector3(0,.12,.38));fpHint((ok?'« Oui : 16 000 vers. ':'« Bien plus : 16 000 vers. ')+'Et tu sais comment ? » Toucher pour continuer.');fpWait(()=>fpGo('showA'));return}
+  if(st==='recallA'&&h.hand&&!h.hand.used){const k=P.lineA.length;P.lineA.push(h.hand.f);const pos=new THREE.Vector3(.39-k*.26,.12,.4);
+    fpFly(h.hand,pos,.19,()=>{if(P.lineA.length===4&&!P.scored){P.scored=1;P.scoreA=P.lineA.filter((f,k)=>f===k).length;P.lineA.forEach((f,k)=>fpPut(fpTag(f===k?'✓':'✗',{w:120,h:110,fs:56,col:f===k?'#2a6a2a':'#a83a2a'}),.07,new THREE.Vector3(.39-k*.26,.34,.4)));
+      fpHint(`${P.scoreA} sur 4, avec la liste. Toucher pour continuer.`);fpWait(()=>{P.scored=0;fpGo('place')})}});return}
+  if(st==='place'){const i=P.pi;if(i>3)return;const card=h.card||(h.hand&&h.hand.i===i?h.hand:null)||(h.site===i?FPT.hand.find(o=>o.i===i):null);
+    if(!card||card.i!==i||(h.dragged&&h.site!==i)){FPT.sel=null;if(h.site!=null||h.dragged)fpHint('« Dans l’ordre de l’histoire : '+STORY[i][0]+' va sur le lieu '+(i+1)+'. »');return}
+    P.pi++;fpFly(card,LOCI[i],.12,()=>{P.sites[i].visible=false;if(P.pi===4){fpHint('« Regarde bien où chaque image est rangée… »');fpAfter(2200,()=>{fpCurtKT=1;fpHint('La nuit tombe sur le théâtre…');fpAfter(1100,()=>{fpClearStage();fpCurtKT=0;fpAfter(500,()=>fpGo('recall'))})})}});return}
+  if(st==='recall'){if(h.hand&&!h.hand.used&&!h.dragged){FPT.sel=h.hand;sndPaper(.2,.15);return}
+    const o=h.card||FPT.sel;if(h.site==null||!o||P.ans.indexOf(h.site)>=0)return;FPT.sel=null;P.ans[o.i]=h.site;P.sites[h.site].visible=false;
+    fpFly(o,LOCI[h.site],.12,()=>{if(P.ans.every(v=>v>=0)&&!P.scored){P.scored=1;const sc=P.ans.filter((p,k)=>p===k).length;
+      fpPut(fpTag(`Une simple liste : ${P.scoreA} sur 4\nHistoire + lieux : ${sc} sur 4`,{w:620,h:200,fs:46,col:'#22306e'}),.17,new THREE.Vector3(0,.045,-.3));sndTone(784,1.4,.08);sndTone(1175,1.4,.04,.2);
+      fpHint((sc>P.scoreA?'« Tu vois ? Une histoire ancrée dans des lieux : tout revient, dans l’ordre. Les aèdes faisaient pareil… pour 16 000 vers. »':sc===P.scoreA?'« Autant l’un que l’autre, pour quatre images. Mais pour 16 000 vers, une liste ne tient pas : il faut une histoire et des lieux. »':'« Ce soir, la liste a mieux marché. Avec l’habitude, l’histoire et les lieux gagnent : c’est ainsi que les aèdes gardaient 16 000 vers. »')+' Toucher pour continuer.');
+      fpWait(()=>{P.scored=0;fpFinish()})}});return}};
+ P.tick=(now,T)=>{props.forEach(g=>{if(g.userData.fl)g.userData.fl.scale.set(1,1+.25*Math.sin(now/90),1)});
+  // la liste : les plats passent un par un, au même endroit, numérotés
+  if(FPT.st==='showA'){const el=now-FPT.t0-600,i=Math.floor(el/1500);if(el>0&&i!==P.ai&&i<4){P.ai=i;fpClearStage();fpPut(FEAST[i].s,.3,new THREE.Vector3(0,.12,.38));fpPut(fpTag(`${i+1} / 4`,{w:220,h:110,fs:50,col:'#5a3418'}),.1,new THREE.Vector3(0,.47,.4));fpPut(fpTag(FEAST[i].n,{w:320,h:110,fs:46}),.1,new THREE.Vector3(0,.045,.12));sndPaper(.25,.2)}
+   if(i>=4&&P.ai!==9){P.ai=9;fpClearStage();fpCurtKT=1;fpHint('La nuit tombe sur le théâtre…');fpAfter(1100,()=>{fpCurtKT=0;fpAfter(500,()=>fpGo('recallA'))})}}
+  P.sites.forEach((d,i)=>{if(FPT.st==='place'){d.visible=i>=P.pi;d.material.emissiveIntensity=i===P.pi?.5+.4*Math.sin(T*5):0}else if(FPT.st==='recall'&&!(FPT.drag&&FPT.drag.moved))d.material.emissiveIntensity=FPT.sel&&d.visible?.35+.3*Math.sin(T*5):.05});
+  FPT.hand.forEach(o=>o.hot=FPT.st==='place'&&o.i===P.pi)};
+ P.auto=(st)=>{if(st==='predict')fpTap({hand:FPT.hand[2]});else if(st==='recallA'){const f=P.lineA.length;fpTap({hand:FPT.hand.find(o=>o.f===f)})}else if(st==='place')fpTap({site:P.pi});else if(st==='recall'){const o=FPT.hand.find(h=>!h.used);if(o)fpTap({site:o.i,card:o,dragged:true})}}}
+if(/test/.test(location.hash))window.__FP=FPT;
+
+/* ---------- les autres lieux à la première personne ---------- */
+const fpGlowTex=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');const g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,226,150,1)');g.addColorStop(.35,'rgba(255,200,110,.55)');g.addColorStop(1,'rgba(255,200,110,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return fpTex(c)})();
+const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:0});const o=new THREE.Sprite(m);o.position.copy(pos);o.scale.setScalar(s);parent.add(o);return o};
+
+/* ===== 0. Göbekli Tepe : assis sur le talus de l'enceinte, face aux piliers gravés =====
+   Les quatre piliers du bord le plus proche regardent vers nous (leurs animaux gravés sont sur la face extérieure).
+   Vu d'ici (on regarde vers +x), la gauche de l'écran est le -z de la maquette. */
+{const P={first:'intro',face:-Math.PI/2,floorY:.21,eye:new THREE.Vector3(-2.05,.82,0),look:new THREE.Vector3(.2,.36,0),hf:58,memUp:.25};FP_PLACES[0]=P;
+ const B4=[1,2,0,3];let pil=[],glows=[],deco,T0=[0,0,0,0];
+ P.init=()=>{P.g=GOBE;deco=new THREE.Group();deco.visible=false;GOBE.add(deco);
+  const tps=GOBE.userData.tps;pil=[5,4,3,2].map((i,j)=>{const p=tps[i];p.userData.obj=j;return p});
+  glows=pil.map(p=>{const d=new THREE.Vector3(-1,0,0);return fpGlow(deco,p.position.clone().add(new THREE.Vector3(0,.22,0)).addScaledVector(d,.09),.5)});
+  P.sites=pil.map(p=>fpSite(deco,new THREE.Vector3(p.position.x,.228,p.position.z),'',.075,.18))};
+ P.objs=()=>FPT.st==='intro'||FPT.st==='input'?pil:[];
+ P.enter=()=>{deco.visible=true;pil.forEach(p=>{p.visible=true;if(p.userData.ry0==null)p.userData.ry0=p.rotation.y;p.rotation.y=Math.atan2(P.eye.x-p.position.x,P.eye.z-p.position.z)});P.sites.forEach(d=>d.visible=false);P.seq=[0,1,2,3].sort(()=>Math.random()-.5);P.len=3;P.inp=0};
+ P.leave=()=>{deco.visible=false;pil.forEach(p=>{p.visible=true;if(p.userData.ry0!=null)p.rotation.y=p.userData.ry0})};
+ P.toMem=()=>{pil.forEach(p=>p.visible=true)};
+ const top=(j)=>pil[j].position.clone().add(new THREE.Vector3(-.05,.52,0));
+ P.light=(j,dur=1)=>{T0[j]=performance.now();sndTone(PIL_NOTES[j],1.1*dur,.15);const b=BEASTS[B4[pil[j].userData.k%4]][1];const c=fpPut(b,.15,top(j));fpAfter(1000,()=>fpUnput(c))};
+ P.show=()=>{FPT.st='show';P.inp=0;P.seq.slice(0,P.len).forEach((j,k)=>fpAfter(600+k*900,()=>P.light(j)));
+  fpAfter(600+P.len*900,()=>{FPT.st='input';fpHint(P.len===3?'« À toi de rechanter l’histoire : touche les pierres dans le même ordre. »':'« L’histoire s’allonge. Rechante-la. »')})};
+ P.go=(st)=>{if(st==='intro')fpHint('Il y a 11 600 ans, des chasseurs dressaient ici des piliers géants, gravés d’animaux. Papa disait qu’ils chantaient une histoire. Toucher une pierre pour l’écouter.')};
+ P.tap=(st,h)=>{
+  if(st==='intro'&&h.obj!=null){P.show();return}
+  if(st==='input'&&h.obj!=null){const j=h.obj;P.light(j,.8);
+   if(j===P.seq[P.inp]){P.inp++;if(P.inp>=P.len){if(P.len===3){P.len=4;FPT.st='wait';fpHint('« Bien ! Écoute la suite… »');fpAfter(1300,()=>P.show())}
+     else{FPT.st='wait';fpHint('« Tu connais l’histoire des pierres. »');fpAfter(1700,()=>{fpCurtKT=1;fpHint('Puis Papa éteignait la lumière…');fpAfter(1200,()=>{pil.forEach(p=>p.visible=false);P.sites.forEach(d=>{d.visible=true;d.material.emissiveIntensity=.25});P.inp=0;P.got=[];fpCurtKT=0;
+       fpAfter(500,()=>{FPT.st='ask';fpHint('« Les pierres ont disparu. Touche leurs places, dans l’ordre de l’histoire. »')})})})}}}
+   else{FPT.st='wait';fpHint('« Presque. Écoute encore. »');fpAfter(1200,()=>P.show())}return}
+  if(st==='ask'&&h.site!=null){const s=h.site;if(P.got.some(o=>o.s===s))return;const ok=s===P.seq[P.inp];P.got.push({s,ok});sndTone(PIL_NOTES[s],.9,.13);
+   fpPut(fpTag(String(P.inp+1),{w:120,h:120,fs:64,col:ok?'#2a6a2a':'#a8582a'}),.09,P.sites[s].position.clone().add(new THREE.Vector3(0,.01,0)));P.sites[s].visible=false;P.inp++;
+   if(P.inp>=4){FPT.st='end';const n=P.got.filter(o=>o.ok).length;fpAfter(700,()=>{pil.forEach(p=>p.visible=true);fpPut(fpTag(`${n} sur 4, de mémoire`,{w:520,h:140,fs:52,col:'#22306e'}),.12,new THREE.Vector3(-.95,.228,0));
+     fpHint((n>=3?'« Tu as revu les pierres dans ta tête, n’est-ce pas ? Le chant était là où on l’avait laissé. C’est ça, un palais de mémoire. »':'« Les places t’ont déjà aidée. Avec un peu d’habitude, on retrouve tout un chant comme ça : c’est un palais de mémoire. »')+' Toucher pour continuer.');fpWait(()=>fpFinish())})}return}};
+ P.tick=(now,T)=>{glows.forEach((g,j)=>{const idle=FPT.st==='intro'?.18+.12*Math.sin(T*3+j):0;g.material.opacity=Math.max(idle,Math.max(0,1-(now-T0[j])/900)*.95);g.visible=pil[j].visible})};
+ P.auto=(st)=>{if(st==='intro')fpTap({obj:0});else if(st==='input')fpTap({obj:P.seq[P.inp]});else if(st==='ask')fpTap({site:P.seq[P.inp]})}}
+
+/* ===== 2. Thèbes : debout dans la cour du palais, face au roi Thamus (à gauche) et à Thot (à droite) =====
+   Les offrandes sont posées par terre devant nous ; le papyrus de Thot se lit en grand, puis se roule à chaque offrande. */
+{const P={first:'look',face:0,floorY:0,eye:new THREE.Vector3(0,.74,2.2),look:new THREE.Vector3(0,.14,.85),hf:54,memUp:.3,arc:.12};FP_PLACES[2]=P;
+ const N=5;let deco,offs=[],hud=null,roll=null;
+ // une carte « tenue » devant la caméra (le papyrus ouvert, ou roulé dans un coin)
+ const mkHud=(c,h)=>{const m=fpCard(c,h,{noShadow:true,ro:22});m.material.depthTest=false;m.visible=false;scene.add(m);return m};
+ P.init=()=>{P.g=PALA;deco=new THREE.Group();deco.visible=false;PALA.add(deco)};
+ P.enter=()=>{deco.visible=true;const NO=OFFER.length,ids=[...Array(NO).keys()];P.list=[...ids].sort(()=>Math.random()-.5).slice(0,N);P.got=0;P.err=0;P.reads=1;P.open=true;
+  const order=[...ids].sort(()=>Math.random()-.5);offs.forEach(o=>deco.remove(o));
+  offs=order.map((k,i)=>{const r=Math.floor(i/4),c=i%4,p=fpCard(OFFER[k].s,.13);p.position.set(-.42+c*.28+(r%2)*.06,.07,1.55-r*.21);p.userData={obj:i,k,sel:false};deco.add(p);return p});
+  if(!hud){hud=mkHud(papyrusSheet(P.list),.2);roll=mkHud(kidScroll,.06);roll.userData.obj='scroll'}else{scene.remove(hud);hud=mkHud(papyrusSheet(P.list),.2)}};
+ P.leave=()=>{deco.visible=false;hud.visible=roll.visible=false};
+ P.toMem=()=>{hud.visible=roll.visible=false};
+ P.objs=()=>FPT.st==='task'?[...offs.filter(o=>!o.userData.sel),...(roll.visible?[roll]:[])]:[];
+ P.go=(st)=>{if(st==='look'){fpHint('Papa jouait à Thot : « Voici la liste des offrandes. Regarde-la bien. » Toucher pour commencer.');fpWait(()=>{FPT.st='task';P.open=false;fpHint('« Maintenant, apporte-les au roi. Et si tu as un doute, tu peux relire la liste. » Toucher une offrande pour l’apporter.')})}};
+ const kingAt=(n)=>new THREE.Vector3(-.36+(n%3)*.09,.02,.86+Math.floor(n/3)*.06);
+ P.tap=(st,h)=>{if(st!=='task')return;
+  if(h.obj==='scroll'){P.open=true;P.reads++;sndPaper(.35,.25);return}
+  if(h.obj==null)return;const o=offs[h.obj];if(!o||o.userData.sel)return;
+  if(P.list.includes(o.userData.k)){o.userData.sel=true;P.open=false;const w=o.getWorldPosition(new THREE.Vector3());o.visible=false;fpFly(null,kingAt(P.got),.09,null,{c:OFFER[o.userData.k].s,w});P.got++;
+    if(P.got===1)fpHint('Le papyrus se roulait à chaque offrande. Le relire ? Il suffisait de le toucher, en bas.');
+    if(P.got===N){FPT.st='burn';P.open=true;P.burnT=performance.now();fpHint('Puis Thamus prenait le papyrus… et le jetait au vent.');
+     fpAfter(1700,()=>{FPT.st='result';fpPut(fpTag((P.err?`${N} offrandes · ${P.err===1?'1 erreur':P.err+' erreurs'}`:`${N} offrandes, sans erreur`)+'\n'+(P.reads<2?'lu une seule fois':`relu ${P.reads-1} fois`),{w:600,h:190,fs:46,col:'#7a2a08'}),.16,new THREE.Vector3(0,.01,1.72));
+      fpHint((P.reads<=1&&!P.err?'« Tu ne l’as lu qu’une fois : tu t’es forcée à retenir. Mais qui fait cet effort, quand la liste est toujours là ? »':P.reads<=1?'« Une seule lecture, et presque tout de mémoire. Les erreurs montrent l’effort : c’est lui qui fait retenir. »':'« Tu l’as relu '+(P.reads-1)+' fois : la liste faisait l’effort à ta place. » Exactement la crainte de Thamus.')+' Toucher pour continuer.');fpWait(()=>fpFinish())})}}
+  else{P.err++;o.userData.shake=performance.now();sndTone(330,.4,.08);fpHint('Thamus fronçait les sourcils : ce n’était pas sur la liste. « Tu peux la relire. »')}};
+ P.tick=(now)=>{const fw=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion),rt=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
+  const vh=2*Math.tan(camera.fov*Math.PI/360)*.3,vw=vh*camera.aspect;
+  const burn=FPT.st==='burn'?clamp((now-P.burnT)/1200):0,showHud=(FPT.st==='look'||(FPT.st==='task'&&P.open)||FPT.st==='burn')&&burn<1;
+  hud.visible=showHud&&FPT.k>.9;if(hud.visible){const s=Math.min(1,vw*.8/hud.geometry.parameters.width);hud.position.copy(camera.position).addScaledVector(fw,.3).addScaledVector(up,vh*.17+burn*.1).addScaledVector(rt,-burn*vw*.8);hud.quaternion.copy(camera.quaternion);hud.rotateZ(-.03-burn*.9);hud.scale.setScalar(s);hud.material.opacity=1-burn}
+  roll.visible=FPT.st==='task'&&!P.open&&FPT.k>.9;if(roll.visible){roll.position.copy(camera.position).addScaledVector(fw,.3).addScaledVector(up,-vh*.2).addScaledVector(rt,-vw*.33);roll.quaternion.copy(camera.quaternion);roll.scale.setScalar(1+.06*Math.sin(now/300))}
+  offs.forEach(o=>{const sh=o.userData.shake?Math.max(0,1-(now-o.userData.shake)/500):0;o.rotation.z=Math.sin(sh*30)*.15*sh})};
+ P.auto=(st)=>{if(st==='task'){const o=offs.find(o=>!o.userData.sel&&P.list.includes(o.userData.k));if(o)fpTap({obj:o.userData.obj})}}}
+
+/* ===== 3. Alexandrie : sur le rivage, face au phare ; la bibliothèque est à gauche =====
+   Trois questions ; pour chacune : chercher de mémoire, ou relire le rouleau. Ce qu'on retrouve soi-même allume une lampe vive. */
+{const P={first:'q',face:Math.PI,floorY:0,eye:new THREE.Vector3(-.35,.5,-2.3),look:new THREE.Vector3(.05,.85,0),hf:52,memUp:.15};FP_PLACES[3]=P;
+ let deco,lamps=[],scroll=null,beamO=null;
+ const scrollC=(a)=>{const c=document.createElement('canvas');c.width=640;c.height=200;const x=c.getContext('2d');x.fillStyle='#f2e2b0';x.fillRect(40,20,560,160);[40,600].forEach(px=>{x.fillStyle='#d8bf86';x.beginPath();x.ellipse(px,100,16,86,0,0,7);x.fill()});
+  x.font='700 46px Caveat, cursive';x.fillStyle='#5a3418';x.textAlign='center';x.textBaseline='middle';x.fillText(a,320,104);return c};
+ P.init=()=>{P.g=PHAR;deco=new THREE.Group();deco.visible=false;PHAR.add(deco);
+  lamps=[[0,.55,-.33],[0,1.27,-.29],[0,1.72,-.2]].map(p=>fpGlow(deco,new THREE.Vector3(...p),.35))};
+ P.enter=()=>{deco.visible=true;P.q=0;P.lamps=[0,0,0];P.mode='choose';if(BEAM.m&&!beamO)beamO=BEAM.m.children.map(m=>m.material.opacity)};
+ P.leave=()=>{deco.visible=false;if(scroll)scroll.visible=false;if(BEAM.m&&beamO)BEAM.m.children.forEach((m,i)=>m.material.opacity=beamO[i])};
+ P.toMem=()=>{if(scroll)scroll.visible=false};
+ P.ask=()=>{const [q,a,...bs]=PQ[P.q];P.mode='choose';fpSetHand([['De mémoire','la lampe brillera fort'],['Relire le rouleau','la bibliothèque le sait']].map(([t,u],i)=>({c:fpTag(t+'\n'+u,{w:520,h:150,fs:42}),i})),true);
+  fpHint((P.q===0?'« Si tu te perds, allume tes phares », disait Papa. ':'')+q+' Chercher de mémoire, ou relire le rouleau ?')};
+ P.go=(st)=>{if(st==='q')P.ask()};
+ P.next=()=>{P.q++;fpSetHand([]);if(P.q>=3){FPT.st='end';const b=P.lamps.filter(v=>v===2).length;
+   fpPut(fpTag(`${b} sur 3 retrouvées de mémoire\nLe rouleau garde. Ce qu’on retient éclaire.`,{w:640,h:190,fs:42,col:'#22306e'}),.17,new THREE.Vector3(-.2,.02,-1.2));
+   fpHint((b===3?'Trois lampes vives : le phare éclaire loin. Le rouleau garde ; c’est ce qu’on retient qui éclaire.':b===0?'Le rouleau avait toutes les réponses… mais le phare brille à peine. Ce qu’on n’a pas retenu n’éclaire pas.':'Le rouleau garde les réponses. Mais seules celles que je portais en moi brillent vraiment.')+' Toucher pour continuer.');fpWait(()=>fpFinish());return}
+  fpAfter(400,()=>P.ask())};
+ P.tap=(st,h)=>{if(st!=='q')return;
+  if(P.mode==='scroll'){P.lamps[P.q]=1;sndTone([392,440,494][P.q],.8,.06);fpHint('Une petite lueur. Le rouleau a répondu à ma place.');scroll.visible=false;P.mode='wait';fpAfter(1500,()=>P.next());return}
+  if(!h.hand||P.mode==='wait')return;
+  if(P.mode==='choose'){sndPaper(.3,.25);if(h.hand.i===0){P.mode='mem';const [q,a,...bs]=PQ[P.q];const opts=[[a,1],...bs.map(b=>[b,0])].sort(()=>Math.random()-.5);fpSetHand(opts.map(([t,ok])=>({c:fpTag(t,{w:560,h:110,fs:42}),ok})),true);fpHint(q)}
+   else{P.mode='scroll';fpSetHand([]);if(scroll)scene.remove(scroll);scroll=fpCard(scrollC(PQ[P.q][1]),.1,{noShadow:true,ro:22});scroll.material.depthTest=false;scene.add(scroll);fpHint('La bibliothèque gardait la réponse. Le rouleau se déroulait… Toucher pour continuer.')}return}
+  if(P.mode==='mem'){const ok=h.hand.ok;P.mode='wait';FPT.sel=h.hand;sndPaper(.3,.25);fpAfter(ok?700:1800,()=>{P.lamps[P.q]=ok?2:1;if(ok){sndTone([523,659,784][P.q],1.2,.12);fpHint('Retrouvé de mémoire : la lampe brille fort.')}else fpHint('Pas tout à fait : la bonne réponse était « '+PQ[P.q][1]+' ». Une petite lueur seulement.');fpAfter(1500,()=>P.next())});return}};
+ P.tick=(now,T)=>{lamps.forEach((g,i)=>{const v=P.lamps[i];const cur=FPT.st==='q'&&i===P.q&&!v;g.material.opacity=v===2?.95:v===1?.35:cur?.25+.2*Math.sin(T*4):0;g.scale.setScalar(v===2?.42+.03*Math.sin(T*3+i):v===1?.22:.3)});
+  if(BEAM.m&&beamO){const b=P.lamps.filter(v=>v===2).length;BEAM.m.children.forEach((m,i)=>m.material.opacity=beamO[i]*(FPT.st==='end'?.6+b*1.2:1))}
+  if(scroll&&scroll.visible!==undefined){scroll.visible=P.mode==='scroll'&&FPT.k>.9;if(scroll.visible){const fw=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion),vh=2*Math.tan(camera.fov*Math.PI/360)*.3,vw=vh*camera.aspect;
+   scroll.position.copy(camera.position).addScaledVector(fw,.3).addScaledVector(up,vh*.05);scroll.quaternion.copy(camera.quaternion);scroll.scale.setScalar(Math.min(1.4,vw*.85/scroll.geometry.parameters.width))}}};
+ P.auto=(st)=>{if(st!=='q')return;if(P.mode==='choose')fpTap({hand:FPT.hand[0]});else if(P.mode==='mem')fpTap({hand:FPT.hand.find(o=>o.ok)});else if(P.mode==='scroll')fpTap({})}}
+
 /* ---------- la figurine d'Alice : 14 ans, fine et délicate, blond doré ondulé, robe bleue moderne ---------- */
 const fig=new THREE.Group();box.add(fig);
 const hairTex=canvasTex(512,512,(x,W)=>{const g=x.createLinearGradient(0,0,0,W);g.addColorStop(0,'#ffe9a6');g.addColorStop(.45,'#f2c24c');g.addColorStop(1,'#c9902a');x.fillStyle=g;x.fillRect(0,0,W,W);
@@ -2230,6 +2481,8 @@ const SCRIPTS={
   {ask:[3,'La lanterne garde…','Écrire, et rallumer sa mémoire','Tout écrire pour tout garder','Ne plus rien écrire du tout']},
   {fn:()=>{RECAP=3;vegaT=1;sndTone(784,2.4,.12);sndTone(1175,2.4,.06,.25)}},{wait:1400},{say:'alice',t:'Et Alexandrie, au bord du delta, là où l\u2019on a voulu tout écrire. C\u2019est là que j\u2019ai allumé mon phare.'},{fn:()=>{RECAP=-1}},{say:'alice',t:'Thamus avait raison sur le risque. Mais la mémoire, ça se reprend.'},
   {cam:'box'},{fn:()=>{unlock5()}},{wait:1800},{say:'alice',t:'Mais papa ne s\u2019arrêtait jamais à Alexandrie. Il disait que l\u2019histoire continuait… jusqu\u2019à aujourd\u2019hui.'},{fn:()=>{hideSay();next=4;REPLAY.last=3}}]};
+// les lieux vécus à la première personne : l'activité et le souvenir se passent dans le lieu même
+if(FPM)[0,1,2,3].forEach(n=>{if(!FP_PLACES[n])return;const a=SCRIPTS[n],i=a.findIndex(s=>s.manip);if(i<0)return;a.splice(a[i-1]&&a[i-1].cam==='lid'?i-1:i,a[i-1]&&a[i-1].cam==='lid'?2:1,{fp:n});const r=a.findIndex(s=>s.reward!=null);if(!(a[r+1]&&a[r+1].wait))a.splice(r+1,0,{wait:900})})
 let constelT=0,DTG=.016;
 let curName=null;function run(name){curName=name;Q=SCRIPTS[name];qi=0;busy=true;step()}
 function step(){while(qi<Q.length){const s=Q[qi++];
@@ -2250,6 +2503,7 @@ function step(){while(qi<Q.length){const s=Q[qi++];
   if(s.retry){const miss=[...Array(s.retry).keys()].filter(i=>CARDST[i]===0);if(miss.length)Q.splice(qi,0,{say:'alice',t:'Je reprends celles qui m\u2019échappaient.'},...miss.map(i=>({card:RCARD[i]})));continue}
   if(s.arg){startArg();return}
   if(s.trace){TRACE.on=true;TRACE.t0=performance.now();showHint('Papa me montrait le ciel : « Relie les étoiles. Suis les pointillés. »');return}
+  if(s.fp!=null){FPT.start(s.fp,()=>step());return}
   if(s.manip){sndPaper(.45,.4);curManip=s.manip();SCR.kind='manip';SCR.obj=curManip;SCR.ta=1;showHint(curManip.hint);return}}
   busy=false;if(typeof curName==='number'&&curName<3)next=curName+1;Q=[]}
 function advance(){if(jWriting()){jFinish();return}if(PAPER&&TAB.need&&!TAB.rev){if(!TAB.auto)TAB.auto=performance.now();return}if(waitTap){waitTap=false;hideSay();step()}}
@@ -2689,7 +2943,7 @@ function dioSetBox(k){dioBox.scale.set(DSB,DSB,DSB*Math.max(.02,k));dioBox.posit
 // l'aide : la main qui tient un crayon, et le crayon qui suit le doigt
 const dioHand=document.createElement('div');dioHand.setAttribute('aria-hidden','true');dioHand.style.cssText='position:fixed;left:0;top:0;pointer-events:none;opacity:0;transition:opacity .4s;transform:translate(-28px,-102px);z-index:30';
 const DPEN='<g transform="translate(36 132) rotate(37)"><g transform="rotate(-90)"><path d="M0 0 L14 -5 L14 5 Z" fill="#f0d6aa"/><path d="M0 0 L5 -1.8 L5 1.8Z" fill="#2a1a22"/><rect x="14" y="-5" width="84" height="10" fill="#f2b833"/><rect x="14" y="-5" width="84" height="3.3" fill="#f8d066"/><rect x="98" y="-5.4" width="7" height="10.8" fill="#bdb8ae"/><rect x="104" y="-5.4" width="9" height="10.8" rx="3.5" fill="#e0705a"/><path d="M0 0 L14 -5 H104 M0 0 L14 5 H104" fill="none" stroke="#2a1a22" stroke-width="2" stroke-linejoin="round"/><rect x="104" y="-5.4" width="9" height="10.8" rx="3.5" fill="none" stroke="#2a1a22" stroke-width="2"/><path d="M14 -5 V5" stroke="#2a1a22" stroke-width="1.4"/></g></g>';
-dioHand.innerHTML='<svg width="124" height="124" viewBox="0 0 160 160"><g transform="translate(36 132) rotate(37)"><g transform="rotate(-90)"><path d="M0 0 L14 -5 L14 5 Z" fill="#f0d6aa"/><path d="M0 0 L5 -1.8 L5 1.8Z" fill="#2a1a22"/><rect x="14" y="-5" width="84" height="10" fill="#f2b833"/><rect x="14" y="-5" width="84" height="3.3" fill="#f8d066"/><rect x="98" y="-5.4" width="7" height="10.8" fill="#bdb8ae"/><rect x="104" y="-5.4" width="9" height="10.8" rx="3.5" fill="#e0705a"/><path d="M0 0 L14 -5 H104 M0 0 L14 5 H104" fill="none" stroke="#2a1a22" stroke-width="2" stroke-linejoin="round"/><rect x="104" y="-5.4" width="9" height="10.8" rx="3.5" fill="none" stroke="#2a1a22" stroke-width="2"/><path d="M14 -5 V5" stroke="#2a1a22" stroke-width="1.4"/></g><g fill="#fffaf0" stroke="#2a1a22" stroke-width="3" stroke-linejoin="round"><rect x="-4" y="-70" width="38" height="44" rx="15"/><rect x="-15" y="-66" width="22" height="13" rx="6.5"/><rect x="-15" y="-54" width="22" height="13" rx="6.5"/><rect x="-13" y="-42" width="20" height="12" rx="6"/><rect x="-11" y="-34" width="26" height="12" rx="6" transform="rotate(-18 2 -28)"/></g></g></svg>';
+dioHand.innerHTML='<svg width="124" height="124" viewBox="0 0 160 160"><g transform="translate(36 132) rotate(37)"><g transform="rotate(-90)"><path d="M0 0 L14 -5 L14 5 Z" fill="#f0d6aa"/><path d="M0 0 L5 -1.8 L5 1.8Z" fill="#2a1a22"/><rect x="14" y="-5" width="84" height="10" fill="#f2b833"/><rect x="14" y="-5" width="84" height="3.3" fill="#f8d066"/><rect x="98" y="-5.4" width="7" height="10.8" fill="#bdb8ae"/><rect x="104" y="-5.4" width="9" height="10.8" rx="3.5" fill="#e0705a"/><path d="M0 0 L14 -5 H104 M0 0 L14 5 H104" fill="none" stroke="#2a1a22" stroke-width="2" stroke-linejoin="round"/><rect x="104" y="-5.4" width="9" height="10.8" rx="3.5" fill="none" stroke="#2a1a22" stroke-width="2"/><path d="M14 -5 V5" stroke="#2a1a22" stroke-width="1.4"/></g><g fill="#fffaf0" stroke="#2a1a22" stroke-width="3" stroke-linejoin="round"><rect x="-2" y="-72" width="36" height="48" rx="15"/><rect x="-15" y="-64" width="22" height="11" rx="5.5"/><rect x="-15" y="-54" width="22" height="11" rx="5.5"/><rect x="-15" y="-44" width="22" height="11" rx="5.5"/><rect x="-15" y="-34" width="22" height="11" rx="5.5"/><rect x="-13" y="-80" width="30" height="12" rx="6" transform="rotate(14 2 -74)"/></g></g></svg>';
 const dioPen=document.createElement('div');dioPen.setAttribute('aria-hidden','true');dioPen.style.cssText='position:fixed;left:0;top:0;pointer-events:none;opacity:0;transform:translate(-18px,-66px);z-index:30';dioPen.innerHTML='<svg width="80" height="80" viewBox="0 0 160 160">'+DPEN+'</svg>';
 // la phrase d'Alice quand on découvre le détail : un papier collé en haut de l'écran, qui ne cache rien
 const dioNote=document.createElement('div');dioNote.style.cssText='position:fixed;left:50%;top:calc(max(14px,env(safe-area-inset-top)) + 56px);transform:translateX(-50%) rotate(-1.5deg);width:min(330px,80vw);padding:10px 16px;background:#f8f1df;color:#22306e;font:600 21px/1.2 Caveat,cursive;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.45);opacity:0;transition:opacity 1s;pointer-events:none;z-index:25';
@@ -2699,10 +2953,12 @@ function dioHandAt(t){const f=DIO.frame;if(!f)return;const k=(t*.6)%1,e=.5-.5*Ma
 function dioHit(e){toNDC(e);const h=ray.intersectObject(dioDraw,false)[0];return h&&h.uv?h.uv:null}
 // ----- le déroulé -----
 DIO.start=(id,onOut)=>{DIO.id=id;DIO.seen=false;DIO.onOut=onOut;DIO.ph='sheet';DIO.t=0;DIO.need=false;DIO.found=false;DIO.strokes=0;DIO.full=0;DIO.yaw=DIO.pit=DIO.ty=DIO.tp=0;dioMaskX.clearRect(0,0,160,160);
-  dioBuild(id);dioBox.rotation.set(0,0,0);dioSetBox(0);dioBox.visible=false;dioG.visible=true;dioStar.material.opacity=0;dioNote.style.opacity=0;dioDrawPaint(0,0);
+  dioBuild(id);if(DIO.host)DIO.host.attach(DIO.frame);dioBox.rotation.set(0,0,0);dioSetBox(0);dioBox.visible=false;dioG.visible=true;dioStar.material.opacity=0;dioNote.style.opacity=0;dioDrawPaint(0,0);
   showHint('Crayonner le souvenir du bout du doigt.')};
 DIO.needFind=(text)=>{DIO.need=true;DIO.lesson=text;if(!DIO.seen)showHint('Tourner doucement la boîte du doigt : quelque chose s’y cache.')};
-DIO.close=(onBack)=>{if(!DIO.ph){onBack&&onBack();return}DIO.onBack=onBack;{const st=STARS[lit];DIO.goal=st?[(st[0]/MS-.5)*SCRW/dioG.scale.x,(.5-st[1]/MS)*SCRW/dioG.scale.x]:null}DIO.ph='back';DIO.t=0;dioNote.style.opacity=0;hideSay()};
+// où l'étoile va se poser dans la constellation du couvercle
+function dioGoal(){const st=STARS[lit];DIO.goal=st?[(st[0]/MS-.5)*SCRW/dioG.scale.x,(.5-st[1]/MS)*SCRW/dioG.scale.x]:null}
+DIO.close=(onBack)=>{if(!DIO.ph){onBack&&onBack();return}DIO.onBack=onBack;dioGoal();DIO.ph='back';DIO.t=0;dioNote.style.opacity=0;hideSay()};
 DIO.down=(e)=>{if(!DIO.ph)return false;if(DIO.ph==='draw'){const uv=dioHit(e);DIO.drag={draw:true,uv};if(uv)dioBrush(uv.x,uv.y);DIO.strokes++;dioPen.style.left=e.clientX+'px';dioPen.style.top=e.clientY+'px';dioPen.style.opacity=1;return true}
   if(DIO.ph==='out'){DIO.drag={x:e.clientX,y:e.clientY,ty:DIO.ty,tp:DIO.tp,moved:false};DIO.touched=true;return true}return DIO.ph!=='sheet'||true};
 DIO.move=(e)=>{const d=DIO.drag;if(!d)return!!DIO.ph;if(d.draw){const uv=dioHit(e);dioPen.style.left=e.clientX+'px';dioPen.style.top=e.clientY+'px';if(uv){if(d.uv){for(let i=1;i<=8;i++)dioBrush(d.uv.x+(uv.x-d.uv.x)*i/8,d.uv.y+(uv.y-d.uv.y)*i/8)}d.uv=uv}return true}
@@ -2719,9 +2975,9 @@ function dioTick(dt,T){if(!DIO.ph)return;DIO.t+=dt;const t=DIO.t;
     // trouvé en avance (pendant qu'Alice parle) : on s'en souvient, la phrase viendra à son heure
     if(DIO.touched&&DIO.hid&&DIO.yaw*DIO.hid.wall>.3)DIO.seen=true;
     if(DIO.need&&!DIO.found&&DIO.hid&&(DIO.seen||DIO.yaw*DIO.hid.wall>.3)){DIO.found=true;DIO.need=false;dioNote.textContent=DIO.lesson;dioNote.style.opacity=1;sndPaper(.4,.3);sndTone(523,1.2,.05);showHint('À retenir. Toucher pour continuer.');waitTap=true}}
-  else if(DIO.ph==='back'){const k=1-dsm(t/1.6),o=dioSetBox(k);DIO.ty*=Math.pow(.2,dt);DIO.tp*=Math.pow(.2,dt);dioDrawPaint(1,1-o);dioSheet.material.opacity=1-o;if(t>1.7){DIO.ph='star';DIO.t=0;dioBox.visible=false}}
-  else if(DIO.ph==='star'){const k=dsm(t/1.6),f=DIO.frame;dioDrawPaint(1,1-k);dioSheet.material.opacity=1-k;dioStar.material.opacity=Math.min(1,k*2)*(1-dsm((t-1.6)/.5));const g=DIO.goal||[f[0]+f[2]*.25,f[1]+f[3]*.38];dioStar.position.set(lerp(f[0],g[0],k),lerp(f[1],g[1],k)+Math.sin(k*Math.PI)*.5,.06);dioStar.scale.setScalar(1.8-1.3*k);
-    if(t>2.1){DIO.ph=null;dioG.visible=false;const cb=DIO.onBack;DIO.onBack=null;cb&&cb()}}
+  else if(DIO.ph==='back'){const k=1-dsm(t/1.6),o=dioSetBox(k);DIO.ty*=Math.pow(.2,dt);DIO.tp*=Math.pow(.2,dt);dioDrawPaint(1,1-o);dioSheet.material.opacity=1-o;if(t>1.7){DIO.ph='star';DIO.t=0;dioBox.visible=false;DIO.sl=1;if(DIO.host){DIO.host.detach();DIO.host=null;dioGoal();DIO.sl=1.9}}}
+  else if(DIO.ph==='star'){const sl=DIO.sl||1,k=dsm(t/(1.6*sl)),f=DIO.frame;dioDrawPaint(1,1-k);dioSheet.material.opacity=1-k;dioStar.material.opacity=Math.min(1,k*2)*(1-dsm((t-1.6*sl)/.5));const g=DIO.goal||[f[0]+f[2]*.25,f[1]+f[3]*.38];dioStar.position.set(lerp(f[0],g[0],k),lerp(f[1],g[1],k)+Math.sin(k*Math.PI)*.5,.06);dioStar.scale.setScalar(1.8-1.3*k);
+    if(t>2.1*sl){DIO.ph=null;dioG.visible=false;const cb=DIO.onBack;DIO.onBack=null;cb&&cb()}}
   DIO.yaw+=(DIO.ty-DIO.yaw)*(1-Math.pow(.002,dt));DIO.pit+=(DIO.tp-DIO.pit)*(1-Math.pow(.002,dt));dioBox.rotation.set(DIO.pit,DIO.yaw,0);
   // la lumière du souvenir
   if(dioBox.visible&&dioFx&&dioFx.fx){dioFxX.clearRect(0,0,384,384);dioFxX.save();dioFxX.scale(.5,.5);dioFx.fx(dioFxX,T);dioFxX.restore();dioFxT.needsUpdate=true}}
@@ -2811,7 +3067,7 @@ const AUTO=location.hash.includes('auto');
 /* ---------- toucher : ouvrir, marcher, avancer, manipuler ---------- */
 const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();let drag=null;
 const ZH={el:document.getElementById('zh'),seen:{},t:0};
-function zoomHint(k){if(SCR.dio)return;if(ZH.seen[k])return;ZH.seen[k]=1;ZH.el.querySelector('span').textContent=matchMedia('(pointer:fine)').matches?'Molette pour zoomer':'Deux doigts pour zoomer';ZH.el.classList.add('on');clearTimeout(ZH.t);ZH.t=setTimeout(()=>ZH.el.classList.remove('on'),6500)}
+function zoomHint(k){if(SCR.dio||FPT.on)return;if(ZH.seen[k])return;ZH.seen[k]=1;ZH.el.querySelector('span').textContent=matchMedia('(pointer:fine)').matches?'Molette pour zoomer':'Deux doigts pour zoomer';ZH.el.classList.add('on');clearTimeout(ZH.t);ZH.t=setTimeout(()=>ZH.el.classList.remove('on'),6500)}
 function zoomDone(){ZH.seen.free=ZH.seen.lid=1;ZH.el.classList.remove('on')}
 const PT=new Map();let pinch=null,gestureMulti=false,manipPtr=false;
 const pdist=()=>{const v=[...PT.values()];return Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y)};
@@ -2820,11 +3076,12 @@ const screenUV=e=>{toNDC(e);const h=ray.intersectObject(memMesh,false)[0];return
 const freeWalk=()=>phase==='play'&&!busy&&next<4||phase==='play'&&next>=4&&!busy;
 cv.addEventListener('pointerdown',e=>{PT.set(e.pointerId,{x:e.clientX,y:e.clientY});try{cv.setPointerCapture(e.pointerId)}catch(_){}
   if(DIO.ph&&PT.size===1){sndInit();DIO.down(e);return}
+  if(FPT.on&&PT.size===1){sndInit();FPT.down(e);return}
   sndInit();if(curManip&&PT.size===1&&curManip.wantsTap&&curManip.wantsTap()&&!screenUV(e)){curManip.down(-999,-999);return}sndInit();if(TRACE.on&&!TRACE.done&&PT.size===1){const c=screenUV(e);if(c){manipPtr=true;traceDown(c[0],c[1]);return}}if(curManip&&PT.size===1){const c=screenUV(e);if(c){manipPtr=true;sndPaper(.25,.18);curManip.down(...toManip(c[0],c[1]));return}}
   if(PAPER&&SCR.kind==='mem'&&PT.size===1&&REVEAL[SCR.id]&&TAB.need&&!TAB.rev){const c=screenUV(e);if(c&&tabHit(c)){TAB.drag=true;TAB.x0=c[0]-TAB.p*TAB.L;TAB.used=1;sndPaper(.25,.2);return}}
   if(PT.size===1){gestureMulti=false;drag={x:e.clientX,y:e.clientY,yaw:yawT,moved:false,t0:performance.now(),cx:e.clientX,cy:e.clientY}}
   else if(PT.size===2){gestureMulti=true;drag=null;zoomDone();pinch={d0:Math.max(10,pdist()),z0:zt,l0:lidZ}}});
-cv.addEventListener('pointermove',e=>{if(!PT.has(e.pointerId))return;PT.set(e.pointerId,{x:e.clientX,y:e.clientY});if(DIO.ph&&DIO.drag){DIO.move(e);return}if(TAB.drag){const c=screenUV(e);if(c)TAB.p=clamp((c[0]-TAB.x0)/TAB.L);return}
+cv.addEventListener('pointermove',e=>{if(!PT.has(e.pointerId))return;PT.set(e.pointerId,{x:e.clientX,y:e.clientY});if(DIO.ph&&DIO.drag){DIO.move(e);return}if(FPT.on&&FPT.drag){FPT.move(e);return}if(TAB.drag){const c=screenUV(e);if(c)TAB.p=clamp((c[0]-TAB.x0)/TAB.L);return}
   if(manipPtr&&TRACE.on){const c=screenUV(e);if(c)traceMove(c[0],c[1]);return}
   if(manipPtr&&curManip){const c=screenUV(e);if(c)curManip.move(...toManip(c[0],c[1]));return}
   if(pinch&&PT.size>=2){if(camMode==='lid')lidZ=clamp(pinch.l0+Math.log(pdist()/pinch.d0)/Math.log(2.2));else if(phase==='play')zt=clamp(pinch.z0+Math.log(pdist()/pinch.d0)/Math.log(3.2));return}
@@ -2838,7 +3095,7 @@ cv.addEventListener('pointercancel',e=>{endPt(e);drag=null;TAB.drag=false;if(man
 [['zin',.3],['zout',-.3]].forEach(([id,d])=>{const b=document.getElementById(id);if(b)b.addEventListener('click',ev=>{ev.stopPropagation();zoomDone();if(camMode==='lid')lidZ=clamp(lidZ+d);else zt=clamp(zt+d)})});
 cv.addEventListener('wheel',e=>{e.preventDefault();zoomDone();if(camMode==='lid'){lidZ=clamp(lidZ-e.deltaY*(e.ctrlKey?.012:.0016));return}if(phase==='play')zt=clamp(zt-e.deltaY*(e.ctrlKey?.012:.0016))},{passive:false});
 ['gesturestart','gesturechange'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
-cv.addEventListener('pointerup',e=>{const multi=gestureMulti;endPt(e);if(DIO.ph){drag=null;DIO.up();return}if(TAB.drag){TAB.drag=false;drag=null;if(TAB.p>.6&&!TAB.rev)tabReveal();return}
+cv.addEventListener('pointerup',e=>{const multi=gestureMulti;endPt(e);if(DIO.ph){drag=null;DIO.up();return}if(FPT.on){drag=null;FPT.up(e);return}if(TAB.drag){TAB.drag=false;drag=null;if(TAB.p>.6&&!TAB.rev)tabReveal();return}
   if(manipPtr){manipPtr=false;if(TRACE.on)traceUp();else if(curManip)curManip.up();return}
   if(drag&&drag.held){drag=null;return}
   if(!drag||drag.moved||multi||PT.size>0){drag=null;return}drag=null;
@@ -2927,9 +3184,9 @@ function frame(now){const rawDt=Math.min(1,(now-last)/1000),dt=Math.min(.05,rawD
   abubTick(T);BUB.forEach(b=>{const k=(T-b.userData.t0);b.visible=k<1.4;if(b.visible){b.position.copy(b.userData.g.position).add(new THREE.Vector3(0,.55+k*.15,0));b.material.opacity=Math.min(1,(1.4-k)*3)}});boats.forEach((b,i)=>{b.position.y=(PAPER?TOP-.035:TOP+.06)+Math.sin(T*1.4+i)*.015;b.rotation.z=Math.sin(T*1.1+i)*.06});
   pharosLight.intensity=.8+.15*Math.sin(T*7);pharosFire.scale.y=1+.12*Math.sin(T*9);
   drawScreen(T);
-  const k=1-Math.pow(.03,dt);yaw+=(yawT-yaw)*k;pitch+=(pitchT-pitch)*k;dist+=(distT-dist)*k;look.lerp(lookT,k);camUpdate();
+  const k=1-Math.pow(.03,dt);yaw+=(yawT-yaw)*k;pitch+=(pitchT-pitch)*k;dist+=(distT-dist)*k;look.lerp(lookT,k);camUpdate();fpCam(dt);
   const fp=(camMode==='lid'&&phase==='play'?lid.localToWorld(apexL.clone()).lerp(look,.4):zs>.45&&phase==='play'&&camMode==='box'?fig.position.clone().add(new THREE.Vector3(0,.6,0)):look.clone()).project(camera);
-  lidSharp+=((camMode==='lid'&&phase==='play'?1:0)-lidSharp)*.06;const tsA=lerp(2.8,3,zs)*(1-lidSharp);hPass.uniforms.h.value=tsA/SW;vPass.uniforms.v.value=tsA/SH;hPass.uniforms.r.value=vPass.uniforms.r.value=clamp(fp.y*.5+.5,.25,.75);
+  lidSharp+=((camMode==='lid'&&phase==='play'?1:0)-lidSharp)*.06;const tsA=lerp(2.8,3,zs)*(1-lidSharp)*(1-.85*Math.min(1,FPT.k*2.5));hPass.uniforms.h.value=tsA/SW;vPass.uniforms.v.value=tsA/SH;hPass.uniforms.r.value=vPass.uniforms.r.value=clamp(fp.y*.5+.5,.25,.75);
   composer.render();if(window.__frame)window.__frame();if(!SPL.ready){SPL.ready=1;const b=document.getElementById('splgo');if(b){b.disabled=false;b.textContent='J’ouvre la boîte';b.onclick=()=>{const sp=document.getElementById('splash');sp.classList.add('out');setTimeout(()=>sp.remove(),800);openBox()}}}if(ABUB.s&&ABUB.s.visible){const ac=renderer.autoClear;renderer.autoClear=false;renderer.setRenderTarget(null);renderer.clearDepth();renderer.render(BSC,camera);renderer.autoClear=ac}requestAnimationFrame(frame)}
 if(location.hash.includes('test'))window.__T={note:(t)=>{JR.note={text:t,t0:performance.now()}},manip:(n)=>{camMode='lid';curManip=({t:mkTheatre,h:mkThot,p:mkPierres,a:mkPhares,i:mkIA,g:mkArg})[n||'t']();SCR.kind='manip';SCR.obj=curManip;SCR.ta=1},lidcam:(k,w,t)=>{Object.assign(TAB,{need:false,rev:false,auto:0,p:0,note:''});JR.note=null;JR.items=[];camMode='lid';SCR.kind='mem';SCR.id=k;SCR.ta=1;SCR.t0=performance.now();jWrite(w||'alice',t||'Il avait de la poussière plein les mains. Il revenait d’un endroit dont il ne parlait jamais.')},gt:()=>lidTop.image.toDataURL('image/jpeg',.7),dbg:()=>{const M=mkSoleil(),o=mkC();M.p=.2;M.draw(o.getContext('2d'),0);return o.toDataURL()},advance,solve:()=>curManip&&curManip.solve(),toScreen:(cx,cy)=>{const v=canvasToWorld(...fromManip(cx,cy)).project(camera);return[(v.x*.5+.5)*SW,(-v.y*.5+.5)*SH]},st:()=>({phase,next,busy,waitTap,manip:!!curManip,camMode,lidZ,dist:+dist.toFixed(2),OV:+ovDist().toFixed(2)}),spot:i=>{const v=SPOTS[i].clone().project(camera);return[(v.x*.5+.5)*SW,(-v.y*.5+.5)*SH]},dbgp:(X,Z)=>{const[i,j]=toCell(X,Z);let s='';for(let b=j-6;b<=j+6;b++){for(let a=i-12;a<=i+12;a++)s+=(a===i&&b===j)?'@':BLK[b*NX+a]?'#':'.';s+='\n'}return s+JSON.stringify(findPath(X,Z,2.25,3.75))},fp:()=>({x:fig.position.x,z:fig.position.z,tx:figState.tx,tz:figState.tz,path:figState.path,v:figState.v}),ask:()=>{camMode='lid';constelT=1;lit=4;Q=SCRIPTS[3].filter(s=>s.ask);qi=0;step()},vega:()=>{vegaT=1},trace:()=>{camMode='lid';lit=4;Q=[{trace:1},{fn:()=>{constelT=1}},{wait:1600},{fn:()=>{vegaT=1}}];qi=0;step()},stars:()=>STARS,jw:(w,t)=>jWrite(w,t),lidScreen:(x,y)=>{const v=canvasToWorld(x,y).project(camera);return[(v.x*.5+.5)*SW,(-v.y*.5+.5)*SH]},mus:()=>({paused:MUS.el?MUS.el.paused:null,g:MUS.g?+MUS.g.gain.value.toFixed(3):null,st:SND.ctx&&SND.ctx.state,on:SND.on,t:MUS.el?+MUS.el.currentTime.toFixed(1):0}),grid:()=>{let s='';for(let j=0;j<NZ;j+=2){for(let i=0;i<NX;i++)s+=BLK[j*NX+i]?'#':'.';s+='\n'}return s},recall:()=>RECALL,thot:()=>curManip&&curManip.list?curManip.list.map(k=>{const s=curManip.slots.find(o=>o.k===k);return[s.x,s.y]}):null,card:()=>{Q=[{card:RCARD[1]}];qi=0;busy=true;step()},ask0:()=>{Q=SCRIPTS[3].filter(s=>s.ask);qi=0;busy=true;step()},mdown:(x,y)=>curManip&&curManip.down(x,y),tab:(p)=>{TAB.need=true;TAB.note=TAB.note||'Avant l’écriture, chaque savoir avait sa place.';TAB.p=p;TAB.drag=p>0},arg:()=>{camMode='lid';startArg()},mmove:(x,y)=>curManip&&curManip.move(x,y),mup:()=>curManip&&curManip.up(),seq:()=>curManip&&curManip.seq,mst:()=>curManip&&(curManip.state||curManip.st),cmb:()=>curManip&&[curManip.big,curManip.bt,performance.now()],unlock:()=>{unlock5()},memf:()=>memF.toDataURL('image/png'),tr:()=>({on:TRACE.on,done:TRACE.done,n:TRACE.edges.size}),tn:()=>[TRACE.done,TRACE.cur??0,traceNext()],mstate:()=>curManip?{state:curManip.state,score:curManip.score}:null};
 requestAnimationFrame(frame);

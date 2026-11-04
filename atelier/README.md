@@ -48,6 +48,8 @@ Pré-requis : Python 3 avec Playwright et Chromium, Node (pour la vérification 
 | `S_chibi` | Alice dessinée par elle-même, dans la marge |
 | `T_manpaper` | décors des activités en papier découpé |
 | `V_acts` | les activités des quatre premiers lieux (pierres, théâtre, Thot, phares) |
+| `V_fp` | **les lieux à la première personne** : la plongée dans le lieu, le ciel, la main de cartes, le glisser-déposer, la nuit qui tombe, l'accueil du souvenir sur place (`DIO.host`) ; et le théâtre (`FP_PLACES[1]`). `#flat` dans l'adresse remet les activités plates |
+| `V_fp2` | Göbekli Tepe, Thèbes, Alexandrie à la première personne (`FP_PLACES[0]`, `[2]`, `[3]`) |
 | `C_alice` | la figurine 3D d'Alice |
 | `I_flow` | **le scénario** : `SCRIPTS` (intro, lieux 0 à 4), étapes `say` / `mem` / `note` / `manip`, constellation |
 | `D_post` | effet maquette (flou), calque |

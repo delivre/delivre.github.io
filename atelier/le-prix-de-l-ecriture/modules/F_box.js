@@ -151,6 +151,7 @@ const css=m=>m&&m.color?'#'+m.color.clone().convertLinearToSRGB().getHexString()
 const PAWNC={};const pawnMat=(b,hd)=>{const k=css(b)+css(hd);return PAWNC[k]||(PAWNC[k]=cutMat((x,W,H)=>{x.fillStyle=css(b);x.beginPath();x.moveTo(W*.36,H*.42);x.lineTo(W*.64,H*.42);x.lineTo(W*.76,H*.97);x.lineTo(W*.24,H*.97);x.closePath();x.fill();
   x.fillStyle=css(hd);x.beginPath();x.arc(W/2,H*.27,W*.17,0,7);x.fill();x.fillStyle='rgba(0,0,0,.12)';x.fillRect(W/2,H*.42,W*.22,H*.55)},96,160))};
 const pawn=(body,head,h=.36)=>{const g=new THREE.Group();g.add(at(mesh(new THREE.CylinderGeometry(.07,.1,h,14),body),0,h/2,0));g.add(at(mesh(new THREE.SphereGeometry(.075,14,10),head),0,h+.06,0));return g};
+let THEA=null,GOBE=null,PALA=null,PHAR=null; // la maquette du théâtre (pour la vue à la première personne)
 // 1. le théâtre de l'aède : des gradins en demi-cercle bien fermés, une scène, un mur de scène à colonnes
 {const g=new THREE.Group();
  const tier=(r0,r1,h,mat)=>{const sh=new THREE.Shape();sh.absarc(0,0,r1,0,Math.PI,false);sh.absarc(0,0,r0,Math.PI,0,true);sh.closePath();const geo=new THREE.ExtrudeGeometry(sh,{depth:h,bevelEnabled:true,bevelThickness:.015,bevelSize:.015,bevelSegments:2,curveSegments:40});geo.rotateX(-Math.PI/2);const m=mesh(geo,mat);g.add(m)};
@@ -166,8 +167,8 @@ const pawn=(body,head,h=.36)=>{const g=new THREE.Group();g.add(at(mesh(new THREE
  // l'aède sur la scène, avec sa lyre
  const bard=pawn(M.white,M.skin,.3);bard.position.set(0,.12,.48);g.add(bard);const bb=mesh(new THREE.SphereGeometry(.05,10,8),M.marbleD);bb.scale.y=1.4;bb.position.set(0,.43,.42);g.add(bb);
  // le public, assis sur les gradins
- [[-.95,.62,.16],[-.55,.62,.16],[-.2,.62,.16],[.25,.62,.16],[.7,.62,.16],[-.75,.76,.24],[-.3,.76,.24],[.1,.76,.24],[.5,.76,.24],[-.45,.9,.32],[.35,.9,.32]].forEach(([a,r,h],i)=>{const t=Math.PI/2+a;const p=pawn([M.terra,M.turq,M.cream,M.blue,M.yellow,M.red][i%6],M.skin,.12);p.scale.setScalar(.75);p.position.set(Math.cos(t)*r,h,-Math.sin(t)*r);g.add(p)});
- g.scale.setScalar(.78);put(g,...PLACES[1])}
+ [[-.95,.62,.16],[-.55,.62,.16],[-.2,.62,.16],[.25,.62,.16],[.7,.62,.16],[-.75,.76,.24],[-.3,.76,.24],[.1,.76,.24],[.5,.76,.24],[-.45,.9,.32],[.35,.9,.32]].forEach(([a,r,h],i)=>{const t=Math.PI/2+a;const p=pawn([M.terra,M.turq,M.cream,M.blue,M.yellow,M.red][i%6],M.skin,.12);p.scale.setScalar(.75);p.position.set(Math.cos(t)*r,h,-Math.sin(t)*r);p.userData.a=a;(g.userData.pub=g.userData.pub||[]).push(p);g.add(p)});
+ g.scale.setScalar(.78);put(g,...PLACES[1]);THEA=g;THEA.userData.bard=bard;THEA.userData.lyre=bb}
 // 2. le palais du roi Thamus
 {const g=new THREE.Group();[-.5,.5].forEach(x=>{const t=mesh(new THREE.CylinderGeometry(.3,.42,1.25,4),M.sandC);t.rotation.y=Math.PI/4;t.position.set(x,.62,0);g.add(t);const c=mesh(new THREE.BoxGeometry(.48,.08,.48),M.turq);c.position.set(x,1.28,0);g.add(c);
    const st=mesh(new THREE.BoxGeometry(.44,.05,.02),M.terra);st.position.set(x,.95,.27);g.add(st)});
@@ -178,23 +179,23 @@ const pawn=(body,head,h=.36)=>{const g=new THREE.Group();g.add(at(mesh(new THREE
   const stripe=canvasTex(128,64,(x,W,H)=>{for(let u=0;u<W;u+=16){x.fillStyle=(u/16)%2?'#e8b04a':'#2a4a9a';x.fillRect(u,0,16,H)}},true);stripe.repeat.set(3,1);
   const nem=new THREE.MeshStandardMaterial({map:stripe,roughness:.95,flatShading:true,side:THREE.DoubleSide});
   const ocre=plastic('#d8a24a'),robe=plastic('#f3ead6'),peau=plastic('#b9764a'),noir=plastic('#2a2430'),pap=plastic('#efe2bf');
-  {const th=new THREE.Group();th.position.set(-.32,0,.62);th.rotation.y=.5;g.add(th);
+  {const th=new THREE.Group();th.position.set(-.32,0,.62);th.rotation.y=.5;g.add(th);g.userData.th=th;
    th.add(at(mesh(new THREE.BoxGeometry(.36,.2,.32),ocre),0,.1,0));th.add(at(mesh(new THREE.BoxGeometry(.36,.5,.05),ocre),0,.34,-.14));[-.16,.16].forEach(x=>th.add(at(mesh(new THREE.ConeGeometry(.03,.08,4),ocre),x,.62,-.14)));
    th.add(at(mesh(new THREE.ConeGeometry(.13,.34,6),robe),0,.36,.02));th.add(at(mesh(new THREE.IcosahedronGeometry(.07,1),peau),0,.6,.03));
    const n=mesh(new THREE.ConeGeometry(.11,.2,8,1,true),nem);n.position.set(0,.6,0);th.add(n);th.add(at(mesh(new THREE.CylinderGeometry(.075,.075,.03,8),nem),0,.66,.0));
    th.add(at(mesh(new THREE.ConeGeometry(.018,.06,4),ocre),0,.72,.06));[-.08,.08].forEach(x=>{const a=mesh(new THREE.ConeGeometry(.025,.16,4),robe);a.position.set(x,.38,.08);a.rotation.x=1.2;th.add(a)})}
-  {const ib=new THREE.Group();ib.position.set(.3,0,.66);ib.rotation.y=-.6;g.add(ib);
+  {const ib=new THREE.Group();ib.position.set(.3,0,.66);ib.rotation.y=-.6;g.add(ib);g.userData.ib=ib;
    ib.add(at(mesh(new THREE.ConeGeometry(.12,.42,6),robe),0,.21,0));ib.add(at(mesh(new THREE.CylinderGeometry(.06,.07,.08,6),plastic('#3b6fd6')),0,.42,0));
    ib.add(at(mesh(new THREE.IcosahedronGeometry(.065,1),noir),0,.52,.01));const bk=mesh(new THREE.ConeGeometry(.016,.22,4),noir);bk.position.set(0,.47,.12);bk.rotation.x=2.1;ib.add(bk);
    const sh=mesh(new THREE.PlaneGeometry(.22,.15),new THREE.MeshStandardMaterial({color:pap.color,side:THREE.DoubleSide,roughness:.95}));sh.position.set(-.1,.33,.13);sh.rotation.set(-.5,.2,.15);ib.add(sh);
    [-1,1].forEach(k=>{const r=mesh(new THREE.CylinderGeometry(.018,.018,.17,6),pap);r.rotation.z=Math.PI/2;r.rotation.y=.2;r.position.set(-.1+k*.11,.33,.13);ib.add(r)})}
  }else{
  // le roi Thamus sur son trône d'or (coiffe rayée bleu et or), face à Thot, dieu à tête d'ibis, qui lui tend un papyrus déroulé
- {const th=new THREE.Group();th.position.set(-.32,0,.62);th.rotation.y=.5;g.add(th);th.add(at(mesh(new THREE.BoxGeometry(.34,.2,.3),M.gold),0,.1,0));th.add(at(mesh(new THREE.BoxGeometry(.34,.42,.06),M.gold),0,.3,-.13));
+ {const th=new THREE.Group();th.position.set(-.32,0,.62);th.rotation.y=.5;g.add(th);g.userData.th=th;th.add(at(mesh(new THREE.BoxGeometry(.34,.2,.3),M.gold),0,.1,0));th.add(at(mesh(new THREE.BoxGeometry(.34,.42,.06),M.gold),0,.3,-.13));
   const k=pawn(M.white,M.skin,.32);k.position.set(0,.16,.02);k.scale.setScalar(1.25);th.add(k);
   for(let s=0;s<5;s++){const n=mesh(new THREE.CylinderGeometry(.05+s*.022,.06+s*.022,.035,16,1,false,Math.PI*.15,Math.PI*1.7),s%2?M.gold:M.blue);n.position.set(0,.66-s*.035,-.005);n.rotation.y=Math.PI;th.add(n)}
   th.add(at(mesh(new THREE.SphereGeometry(.025,8,6),M.gold),0,.72,.07))}
- {const ib=new THREE.Group();ib.position.set(.3,0,.66);ib.rotation.y=-.6;g.add(ib);const body=pawn(M.white,M.white,.36);body.scale.setScalar(1.25);ib.add(body);ib.children.length;
+ {const ib=new THREE.Group();ib.position.set(.3,0,.66);ib.rotation.y=-.6;g.add(ib);g.userData.ib=ib;const body=pawn(M.white,M.white,.36);body.scale.setScalar(1.25);ib.add(body);ib.children.length;
   const head=mesh(new THREE.SphereGeometry(.08,14,10),M.black);head.position.set(0,.58,0);ib.add(head);
   const beak=mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[0,.57,.06],[0,.53,.18],[0,.45,.27]].map(p=>new THREE.Vector3(...p))),12,.016,6),M.black);ib.add(beak);
   const sheet=mesh(new THREE.BoxGeometry(.24,.005,.16),M.cream);sheet.position.set(-.12,.34,.12);sheet.rotation.set(.6,0,.2);ib.add(sheet);
@@ -203,7 +204,7 @@ const pawn=(body,head,h=.36)=>{const g=new THREE.Group();g.add(at(mesh(new THREE
 
 
  }
- g.rotation.y=-.3;g.scale.setScalar(.9);put(g,...PLACES[2])}
+ g.rotation.y=-.3;g.scale.setScalar(.9);put(g,...PLACES[2]);PALA=g}
 // 3. les pierres devenues temple
 if(PAPER){const g=new THREE.Group();const stoneC=plastic('#cbbfa6');
  const anim=(k)=>{const t=canvasTex(128,256,(x,W,H)=>{x.fillStyle='#cbbfa6';x.fillRect(0,0,W,H);for(let i=0;i<900;i++){x.fillStyle=Math.random()<.5?`rgba(255,250,235,${rnd(.08,.2)})`:`rgba(90,70,50,${rnd(.06,.14)})`;x.fillRect(rnd(0,W),rnd(0,H),rnd(1,3),rnd(1,2))}
@@ -213,13 +214,13 @@ if(PAPER){const g=new THREE.Group();const stoneC=plastic('#cbbfa6');
    else if(k===2){x.moveTo(cx,cy-40);x.lineTo(cx,cy+30);x.moveTo(cx,cy-20);x.lineTo(cx-40,cy-34);x.moveTo(cx,cy-20);x.lineTo(cx+40,cy-34);x.moveTo(cx-10,cy-44);x.lineTo(cx+10,cy-44)}
    else{x.moveTo(cx-10,cy-60);for(let i=0;i<8;i++)x.quadraticCurveTo(cx+(i%2?26:-26),cy-50+i*14,cx+(i%2?-10:10),cy-40+i*14)}x.stroke()});return new THREE.MeshStandardMaterial({map:t,roughness:.95,bumpMap:t,bumpScale:.015})};
  const AM=[0,1,2,3].map(anim),side=M.cbSide;
- const tp=(x,z,a,h,k)=>{const p=new THREE.Group();const sh=mesh(new THREE.BoxGeometry(.13,h,.07),[stoneC,stoneC,stoneC,stoneC,AM[k%4],stoneC]);sh.position.y=h/2;p.add(sh);const hd=mesh(new THREE.BoxGeometry(.3,.11,.1),stoneC);hd.position.y=h+.05;p.add(hd);p.position.set(x,0,z);p.rotation.y=a;g.add(p)};
+ const tp=(x,z,a,h,k)=>{const p=new THREE.Group();p.userData.k=k;p.userData.a=a;(g.userData.tps=g.userData.tps||[]).push(p);const sh=mesh(new THREE.BoxGeometry(.13,h,.07),[stoneC,stoneC,stoneC,stoneC,AM[k%4],stoneC]);sh.position.y=h/2;p.add(sh);const hd=mesh(new THREE.BoxGeometry(.3,.11,.1),stoneC);hd.position.y=h+.05;p.add(hd);p.position.set(x,0,z);p.rotation.y=a;g.add(p)};
  // le muret circulaire, en carton empilé (on voit les couches)
  for(let r=0;r<3;r++){const ring=mesh(new THREE.CylinderGeometry(.92-r*.015,.94-r*.015,.07,40,1,true),side);ring.material=side;ring.position.y=.035+r*.07;g.add(ring)}
  g.add(at(mesh(new THREE.CylinderGeometry(.9,.9,.02,40),plastic('#b8a882')),0,.21,0));
  for(let i=0;i<8;i++){const a=i/8*Math.PI*2+.2;tp(Math.cos(a)*.72,Math.sin(a)*.72,-a+Math.PI/2,.38,i)}
  tp(-.14,0,0,.62,0);tp(.14,0,0,.62,1);
- g.children.forEach(o=>{if(o.isGroup)o.position.y+=.21});put(g,...PLACES[0])}
+ g.children.forEach(o=>{if(o.isGroup)o.position.y+=.21});put(g,...PLACES[0]);GOBE=g}
 else
 {const g=new THREE.Group();g.add(at(mesh(new THREE.CylinderGeometry(.85,.9,.1,40),M.marbleD),0,.01,0));
  [0,1,2,3,4].forEach(i=>{const a=Math.PI*(.55+i*.225);const s=mesh(new THREE.BoxGeometry(.2,.55+i%2*.1,.13),M.stone);s.position.set(Math.cos(a)*.7,.3,Math.sin(a)*.7);s.rotation.y=-a;g.add(s)});
@@ -238,7 +239,7 @@ let pharosFire,pharosLight;const BEAM={};
  const bmG=new THREE.Group();[[.32,.075],[.6,.035]].forEach(([r,o])=>{const bg=new THREE.ConeGeometry(r,2.6,24,1,true);bg.translate(0,-1.3,0);bg.rotateZ(Math.PI/2);bmG.add(new THREE.Mesh(bg,new THREE.MeshBasicMaterial({color:'#ffd9a0',alphaMap:am,transparent:true,opacity:o,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide})))});bmG.position.y=1.99;g.add(bmG);BEAM.m=bmG}
 if(PAPER){const lan=mesh(new THREE.CylinderGeometry(.17,.2,.32,8,1,true),new THREE.MeshStandardMaterial({color:'#fff1d0',emissive:new THREE.Color('#ffb25a'),emissiveIntensity:1.8,transparent:true,opacity:.9,side:THREE.DoubleSide,roughness:.9,bumpMap:FIB,bumpScale:.01}),false,false);lan.position.y=1.99;g.add(lan);g.add(at(mesh(new THREE.ConeGeometry(.17,.12,8),plastic('#a84a2a')),0,2.18,0))}
  pharosLight=new THREE.PointLight(0xffa850,.9,5,2);pharosLight.position.y=2.0;g.add(pharosLight);
- put(g,...PLACES[3])}
+ put(g,...PLACES[3]);PHAR=g}
 {const g=new THREE.Group();g.add(at(mesh(new THREE.BoxGeometry(1.1,.08,.6),M.marbleD),0,.04,0));
  [-.45,-.15,.15,.45].forEach(x=>g.add(at(mesh(new THREE.CylinderGeometry(.045,.05,.5,10),M.marbleP),x,.33,.24)));
  g.add(at(mesh(new THREE.BoxGeometry(1.0,.5,.3),M.sandC),0,.33,-.08));g.add(at(mesh(new THREE.BoxGeometry(1.15,.07,.62),M.marbleP),0,.62,0));
