@@ -280,11 +280,14 @@ const CLOUDS=[],CRANES=[];
 {const ft=canvasTex(256,256,(x,W)=>{x.fillStyle='#fbf8f3';x.fillRect(0,0,W,W);x.lineCap='round';for(let i=0;i<2600;i++){const a=rnd(0,W),b=rnd(0,W),l=rnd(4,14),an=rnd(0,6.3);x.strokeStyle=Math.random()<.5?`rgba(255,255,255,${rnd(.4,.9)})`:`rgba(190,180,205,${rnd(.12,.3)})`;x.lineWidth=rnd(.6,1.6);x.beginPath();x.moveTo(a,b);x.quadraticCurveTo(a+Math.cos(an+1)*l*.5,b+Math.sin(an+1)*l*.5,a+Math.cos(an)*l,b+Math.sin(an)*l);x.stroke()}});
  ft.wrapS=ft.wrapT=THREE.RepeatWrapping;ft.repeat.set(2,2);
  const cm=new THREE.MeshStandardMaterial({color:new THREE.Color('#ffffff').convertSRGBToLinear(),map:ft,bumpMap:ft,bumpScale:.02,roughness:1,metalness:0});
- const cg=new THREE.IcosahedronGeometry(1,3);{const p=cg.attributes.position,mp={};for(let i=0;i<p.count;i++){const k=[p.getX(i),p.getY(i),p.getZ(i)].map(v=>v.toFixed(3)).join();const f=mp[k]||(mp[k]=rnd(.9,1.08));p.setXYZ(i,p.getX(i)*f,p.getY(i)*f,p.getZ(i)*f)}cg.computeVertexNormals()}
- MAPFX.puffs=[];let tries=0;while(MAPFX.puffs.length<26&&tries<500){tries++;const a=rnd(0,6.283),r=Math.sqrt(Math.random())*(LR-.35),x=SEA.x+Math.cos(a)*r*1.05,z=SEA.z+Math.sin(a)*r;
-  if(MAPFX.puffs.some(g=>Math.hypot(g.userData.x-x,g.userData.z-z)<.42))continue;
-  const g=new THREE.Group();const n=3+(Math.random()*3|0);for(let k=0;k<n;k++){const s2=rnd(.13,.26)*(1-r/LR*.35);const m=new THREE.Mesh(cg,cm);m.scale.set(s2,s2*.78,s2);m.position.set(rnd(-.17,.17),s2*.35,rnd(-.12,.12));m.castShadow=true;m.receiveShadow=true;g.add(m)}
-  g.position.set(x,TOP-SEAD+.02,z);g.userData={x,z,ph:rnd(0,6.3),y0:TOP-SEAD+.02};box.add(g);MAPFX.puffs.push(g)}}
+ const cg=new THREE.IcosahedronGeometry(1,2);{const p=cg.attributes.position,mp={};for(let i=0;i<p.count;i++){const k=[p.getX(i),p.getY(i),p.getZ(i)].map(v=>v.toFixed(3)).join();const f=mp[k]||(mp[k]=rnd(.9,1.08));p.setXYZ(i,p.getX(i)*f,p.getY(i)*f,p.getZ(i)*f)}cg.computeVertexNormals()}
+ // une seule « instance » pour toutes les boules de ouate : léger pour le téléphone
+ const G=[],B=[];let tries=0;while(G.length<80&&tries<2500){tries++;const a=rnd(0,6.283),r=Math.sqrt(Math.random())*(LR-.12),x=SEA.x+Math.cos(a)*r*1.05,z=SEA.z+Math.sin(a)*r;
+  if(G.some(g=>Math.hypot(g.x-x,g.z-z)<.27))continue;const g={x,z,ph:rnd(0,6.3)};G.push(g);
+  const n=3+(Math.random()*3|0);for(let k=0;k<n;k++){const s2=rnd(.14,.27)*(1-r/LR*.3);B.push({g,s:s2,ox:rnd(-.17,.17),oy:s2*.35,oz:rnd(-.12,.12),ry:rnd(0,6.3)})}}
+ const im=new THREE.InstancedMesh(cg,cm,B.length);im.castShadow=true;im.receiveShadow=true;box.add(im);
+ const d=new THREE.Object3D(),y0=TOP-SEAD+.02;
+ MAPFX.cotton=(T)=>{B.forEach((b,i)=>{const g=b.g,k=1+.035*Math.sin(T*.8+g.ph*1.3);d.position.set(g.x+.03*Math.sin(T*.25+g.ph)+b.ox*k,y0+.025*Math.sin(T*.6+g.ph)+b.oy/k,g.z+b.oz*k);d.rotation.set(0,b.ry,0);d.scale.set(b.s*k,b.s*.78/k,b.s*k);d.updateMatrix();im.setMatrixAt(i,d.matrix)});im.instanceMatrix.needsUpdate=true};MAPFX.cotton(0)}
 // deux oiseaux de papier qui tournent au-dessus de la vallée
 const BOATG=(()=>{const g=new THREE.BufferGeometry();const v=[-.12,0,0, .12,0,0, .27,.13,.07, -.27,.13,.07,  .12,0,0, -.12,0,0, -.27,.13,-.07, .27,.13,-.07,  -.13,.12,0, .13,.12,0, 0,.34,0,  -.27,.13,.07, -.12,0,0, -.27,.13,-.07,  .12,0,0, .27,.13,.07, .27,.13,-.07];
  g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex([0,1,2,0,2,3,4,5,6,4,6,7,8,9,10,11,12,13,14,15,16]);g.computeVertexNormals();return g})();
@@ -339,7 +342,7 @@ MAPFX.heli=heli();MAPFX.heli.scale.setScalar(1.15);box.add(MAPFX.heli);
  const t=canvasTex(32,32,(x,W)=>{const gr=x.createRadialGradient(W/2,W/2,0,W/2,W/2,W/2);gr.addColorStop(0,'rgba(240,244,248,1)');gr.addColorStop(1,'rgba(240,244,248,0)');x.fillStyle=gr;x.fillRect(0,0,W,W)});
  const pts=new THREE.Points(g,new THREE.PointsMaterial({map:t,size:.09,transparent:true,opacity:.75,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));box.add(pts);MAPFX.pts=pts}
 function mapTick(T){if(!MAPFX.heli)return;const on=phase!=='closed'&&phase!=='opening';
- if(MAPFX.puffs)MAPFX.puffs.forEach(g=>{const u=g.userData;g.position.y=u.y0+.025*Math.sin(T*.6+u.ph);g.position.x=u.x+.03*Math.sin(T*.25+u.ph);const k=1+.03*Math.sin(T*.8+u.ph*1.3);g.scale.set(k,1/k,k)});
+ if(MAPFX.cotton)MAPFX.cotton(T);
  // la coquille respire à peine
  SHELL.g.position.y=TOP+.06*Math.sin(T*.45);SHELL.g.rotation.y=.25+.04*Math.sin(T*.13);MAPFX.pool.material.opacity=.38+.12*Math.sin(T*.45);
  // le cercle d'encre tourne lentement sur le lac
