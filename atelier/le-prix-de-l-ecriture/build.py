@@ -2,7 +2,7 @@
 Usage : python3 build.py [sortie]   (par défaut : ../../pocket-memory/<nom du dossier>/index.html)"""
 import os,sys,subprocess
 D=os.path.dirname(os.path.abspath(__file__))
-ORDRE=['A_env','B_paint','F_box','P_people','G_scenes','H_manips','R_journal','S_chibi','T_manpaper','V_acts','C_alice','I_flow','D_post','K_path','U_music','W_recall','X_ia','Y_carnet','J_main']
+ORDRE=['A_env','B_paint','F_box','P_people','G_scenes','H_manips','R_journal','S_chibi','T_manpaper','V_acts','C_alice','I_flow','D_post','K_path','U_music','W_recall','X_ia','Z_dio','Y_carnet','J_main']
 out=sys.argv[1] if len(sys.argv)>1 else os.path.join(D,'..','..','pocket-memory',os.path.basename(D),'index.html')
 head=open(os.path.join(D,'head.html')).read()
 parts=[open(os.path.join(D,'modules',m+'.js')).read() for m in ORDRE]

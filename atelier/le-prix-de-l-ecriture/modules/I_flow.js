@@ -63,7 +63,7 @@ function drawScreen(T){mx.setTransform(1,0,0,1,0,0);mx.clearRect(0,0,MS,MS);
   vegaA+=(vegaT-vegaA)*(1-Math.pow(.15,DTG));
   drawSat(mx,T);
   SCR.a+=(SCR.ta-SCR.a)*(1-Math.pow(.03,DTG));if(SCR.ta===0&&SCR.a<.01){SCR.a=0;if(SCR.kind&&!SCR.keep)SCR.kind=null}
-  if(SCR.a>0&&SCR.kind){mf.globalCompositeOperation='source-over';mf.clearRect(0,0,MS,MS);mf.drawImage(PAGE,0,0);
+  if(SCR.a>0&&SCR.kind&&!SCR.dio){mf.globalCompositeOperation='source-over';mf.clearRect(0,0,MS,MS);mf.drawImage(PAGE,0,0);
     if(SCR.kind==='mem'){if(PAPER){mf.drawImage(LABEL,0,0);drawTab(mf,T)}const P=POP[SCR.id],t=(performance.now()-(SCR.t0||0))/1000;mf.save();mf.translate(384,30);mf.scale(.72,.72);mf.translate(-384,-40);drawPieces(mf,P.P,T,t);if(t>.8){mf.globalAlpha=clamp(t-.8);P.fx(mf,T);mf.globalAlpha=1}drawReveal(mf,T,SCR.id);memLight(mf,T,t,P.P);mf.restore();drawJournal(mf,T)}
     else if(SCR.obj)drawCard(mf,(c,TT)=>SCR.obj.draw(c,TT),T);
     mx.globalAlpha=SCR.a;mx.drawImage(memF,0,0);mx.globalAlpha=1}
@@ -97,7 +97,7 @@ const beacon=new THREE.Group();box.add(beacon);if(0){const col=new THREE.Mesh(ne
 const say=$('say'),sayWho=say.querySelector('.who'),sayTxt=say.querySelector('.txt');let waitTap=false;
 const WHO={alice:'Alice',maman:'Maman',papa:'Papa',lieu:'',src:''};
 const nb=t=>String(t).replace(/ ([:;?!»])/g,'\u202f$1').replace(/« /g,'«\u202f').replace(/(\d) (\d{3})/g,'$1\u202f$2');
-function showLine(who,t){t=nb(t);if(SCR.kind==='mem'&&SCR.ta===1&&INKC[who]){jWrite(who,t);say.className='jr';sayWho.textContent=WHO[who]||'';sayTxt.textContent=t;say.hidden=false;waitTap=true;return}say.className='line '+who;sayWho.textContent=WHO[who]||'';sayTxt.textContent=t;say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=true}
+function showLine(who,t){t=nb(t);if(SCR.kind==='mem'&&SCR.ta===1&&INKC[who]&&!SCR.dio){jWrite(who,t);say.className='jr';sayWho.textContent=WHO[who]||'';sayTxt.textContent=t;say.hidden=false;waitTap=true;return}say.className='line '+who;sayWho.textContent=WHO[who]||'';sayTxt.textContent=t;say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=true}
 function showHint(t){t=nb(t);say.className='hint';sayWho.textContent='';sayTxt.textContent=t;say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=false}
 function showAsk([i,q,good,...bad]){q=nb(q);good=nb(good);bad=bad.map(nb);say.className='line ask';sayWho.textContent='';const opts=[[good,1],...bad.map(b=>[b,0])].sort(()=>Math.random()-.5);sayTxt.innerHTML='';const p=document.createElement('div');p.textContent=q;sayTxt.appendChild(p);
   opts.forEach(([t,ok])=>{const b=document.createElement('button');b.className='ch';b.textContent=t;b.addEventListener('click',ev=>{ev.stopPropagation();if(say.dataset.done)return;say.dataset.done='1';b.classList.add(ok?'ok':'no');if(!ok)[...sayTxt.querySelectorAll('.ch')].forEach(o=>{if(o.textContent===good)o.classList.add('ok')});sndPaper(.3,.2);setTimeout(()=>{delete say.dataset.done;waitTap=false;hideSay();step()},ok?900:1900)});sayTxt.appendChild(b)});
@@ -153,10 +153,11 @@ let curName=null;function run(name){curName=name;Q=SCRIPTS[name];qi=0;busy=true;
 function step(){while(qi<Q.length){const s=Q[qi++];
   if(s.cam){camMode=s.cam;continue}
   if(s.fn){s.fn();continue}
-  if(s.mem){Object.assign(TAB,{need:false,rev:false,auto:0,p:0});SCR.kind='mem';SCR.id=s.mem;SCR.ta=1;SCR.t0=performance.now();JR.items=[];JR.note=null;sndPaper(.6,.5);continue}
+  if(s.mem){Object.assign(TAB,{need:false,rev:false,auto:0,p:0});SCR.kind='mem';SCR.id=s.mem;SCR.ta=1;SCR.t0=performance.now();JR.items=[];JR.note=null;sndPaper(.6,.5);SCR.dio=DIO.ok&&!!POP[s.mem];if(SCR.dio){DIO.start(s.mem,()=>step());return}continue}
+  if(s.note&&SCR.dio){if(DIOHID[SCR.id]&&DIO.hid&&!DIO.found){DIO.needFind(s.note);waitTap=false;return}dioNote.textContent=s.note;dioNote.style.opacity=1;showHint('À retenir. Toucher pour continuer.');waitTap=true;return}
   if(s.note&&PAPER&&SCR.kind==='mem'&&REVEAL[SCR.id]&&!TAB.rev){Object.assign(TAB,{need:true,note:s.note,auto:0,p:0});say.className='hint';sayWho.textContent='';sayTxt.textContent='Tirer la languette.';say.hidden=false;waitTap=true;return}
   if(s.note){JR.noteN=(JR.noteN||0)+1;JR.note={text:s.note,t0:performance.now()};sndPaper(.4,.3);say.className='jr';sayWho.textContent='';sayTxt.textContent='À retenir : '+s.note;say.hidden=false;waitTap=true;return}
-  if(s.memoff){SCR.ta=0;continue}
+  if(s.memoff){if(SCR.dio){SCR.dio=false;SCR.ta=0;SCR.a=0;SCR.kind=null;DIO.close(()=>step());return}SCR.ta=0;continue}
   if(s.reward!=null){const o=KEEPS[s.reward];o.userData.s=1;lit=s.reward+1;continue}
   if(s.lid!=null){openT=s.lid;continue}
   if(s.wait){setTimeout(step,AUTO?s.wait*.4:s.wait);return}

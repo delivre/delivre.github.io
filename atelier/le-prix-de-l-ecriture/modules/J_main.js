@@ -10,7 +10,7 @@ const AUTO=location.hash.includes('auto');
 /* ---------- toucher : ouvrir, marcher, avancer, manipuler ---------- */
 const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();let drag=null;
 const ZH={el:document.getElementById('zh'),seen:{},t:0};
-function zoomHint(k){if(ZH.seen[k])return;ZH.seen[k]=1;ZH.el.querySelector('span').textContent=matchMedia('(pointer:fine)').matches?'Molette pour zoomer':'Deux doigts pour zoomer';ZH.el.classList.add('on');clearTimeout(ZH.t);ZH.t=setTimeout(()=>ZH.el.classList.remove('on'),6500)}
+function zoomHint(k){if(SCR.dio)return;if(ZH.seen[k])return;ZH.seen[k]=1;ZH.el.querySelector('span').textContent=matchMedia('(pointer:fine)').matches?'Molette pour zoomer':'Deux doigts pour zoomer';ZH.el.classList.add('on');clearTimeout(ZH.t);ZH.t=setTimeout(()=>ZH.el.classList.remove('on'),6500)}
 function zoomDone(){ZH.seen.free=ZH.seen.lid=1;ZH.el.classList.remove('on')}
 const PT=new Map();let pinch=null,gestureMulti=false,manipPtr=false;
 const pdist=()=>{const v=[...PT.values()];return Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y)};
@@ -18,11 +18,12 @@ const toNDC=e=>{const r=cv.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.
 const screenUV=e=>{toNDC(e);const h=ray.intersectObject(memMesh,false)[0];return h&&h.uv?[h.uv.x*MS,(1-h.uv.y)*MS]:null};
 const freeWalk=()=>phase==='play'&&!busy&&next<4||phase==='play'&&next>=4&&!busy;
 cv.addEventListener('pointerdown',e=>{PT.set(e.pointerId,{x:e.clientX,y:e.clientY});try{cv.setPointerCapture(e.pointerId)}catch(_){}
+  if(DIO.ph&&PT.size===1){sndInit();DIO.down(e);return}
   sndInit();if(curManip&&PT.size===1&&curManip.wantsTap&&curManip.wantsTap()&&!screenUV(e)){curManip.down(-999,-999);return}sndInit();if(TRACE.on&&!TRACE.done&&PT.size===1){const c=screenUV(e);if(c){manipPtr=true;traceDown(c[0],c[1]);return}}if(curManip&&PT.size===1){const c=screenUV(e);if(c){manipPtr=true;sndPaper(.25,.18);curManip.down(...toManip(c[0],c[1]));return}}
   if(PAPER&&SCR.kind==='mem'&&PT.size===1&&REVEAL[SCR.id]&&TAB.need&&!TAB.rev){const c=screenUV(e);if(c&&tabHit(c)){TAB.drag=true;TAB.x0=c[0]-TAB.p*TAB.L;TAB.used=1;sndPaper(.25,.2);return}}
   if(PT.size===1){gestureMulti=false;drag={x:e.clientX,y:e.clientY,yaw:yawT,moved:false,t0:performance.now(),cx:e.clientX,cy:e.clientY}}
   else if(PT.size===2){gestureMulti=true;drag=null;zoomDone();pinch={d0:Math.max(10,pdist()),z0:zt,l0:lidZ}}});
-cv.addEventListener('pointermove',e=>{if(!PT.has(e.pointerId))return;PT.set(e.pointerId,{x:e.clientX,y:e.clientY});if(TAB.drag){const c=screenUV(e);if(c)TAB.p=clamp((c[0]-TAB.x0)/TAB.L);return}
+cv.addEventListener('pointermove',e=>{if(!PT.has(e.pointerId))return;PT.set(e.pointerId,{x:e.clientX,y:e.clientY});if(DIO.ph&&DIO.drag){DIO.move(e);return}if(TAB.drag){const c=screenUV(e);if(c)TAB.p=clamp((c[0]-TAB.x0)/TAB.L);return}
   if(manipPtr&&TRACE.on){const c=screenUV(e);if(c)traceMove(c[0],c[1]);return}
   if(manipPtr&&curManip){const c=screenUV(e);if(c)curManip.move(...toManip(c[0],c[1]));return}
   if(pinch&&PT.size>=2){if(camMode==='lid')lidZ=clamp(pinch.l0+Math.log(pdist()/pinch.d0)/Math.log(2.2));else if(phase==='play')zt=clamp(pinch.z0+Math.log(pdist()/pinch.d0)/Math.log(3.2));return}
@@ -36,7 +37,7 @@ cv.addEventListener('pointercancel',e=>{endPt(e);drag=null;TAB.drag=false;if(man
 [['zin',.3],['zout',-.3]].forEach(([id,d])=>{const b=document.getElementById(id);if(b)b.addEventListener('click',ev=>{ev.stopPropagation();zoomDone();if(camMode==='lid')lidZ=clamp(lidZ+d);else zt=clamp(zt+d)})});
 cv.addEventListener('wheel',e=>{e.preventDefault();zoomDone();if(camMode==='lid'){lidZ=clamp(lidZ-e.deltaY*(e.ctrlKey?.012:.0016));return}if(phase==='play')zt=clamp(zt-e.deltaY*(e.ctrlKey?.012:.0016))},{passive:false});
 ['gesturestart','gesturechange'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
-cv.addEventListener('pointerup',e=>{const multi=gestureMulti;endPt(e);if(TAB.drag){TAB.drag=false;drag=null;if(TAB.p>.6&&!TAB.rev)tabReveal();return}
+cv.addEventListener('pointerup',e=>{const multi=gestureMulti;endPt(e);if(DIO.ph){drag=null;DIO.up();return}if(TAB.drag){TAB.drag=false;drag=null;if(TAB.p>.6&&!TAB.rev)tabReveal();return}
   if(manipPtr){manipPtr=false;if(TRACE.on)traceUp();else if(curManip)curManip.up();return}
   if(drag&&drag.held){drag=null;return}
   if(!drag||drag.moved||multi||PT.size>0){drag=null;return}drag=null;
@@ -107,8 +108,8 @@ function frame(now){const rawDt=Math.min(1,(now-last)/1000),dt=Math.min(.05,rawD
     else figState.moving=false;
     if(fig.userData.face!=null&&busy){let dy=fig.userData.face-fig.rotation.y;while(dy>Math.PI)dy-=Math.PI*2;while(dy<-Math.PI)dy+=Math.PI*2;fig.rotation.y+=dy*Math.min(1,dt*6)}
     fig.position.y=TOP+bridgeH(fig.position.x,fig.position.z)+(figState.moving?Math.abs(Math.sin(figState.phase))*.05:0);fig.userData.arms.forEach((g,i)=>g.rotation.x=figState.moving?Math.sin(figState.phase+i*Math.PI)*.18:g.rotation.x*.85);fig.userData.back.rotation.x=figState.moving?.12+Math.sin(figState.phase*2)*.04:Math.sin(T*1.3)*.02;fig.rotation.z=figState.moving?Math.sin(figState.phase)*.08:0;
-    manipTick();
-    if(camMode==='lid'&&SCR.kind)zoomHint('lid');else if(freeWalk()&&open>.95)zoomHint('free');
+    manipTick();dioTick(DTG,T);
+    if(camMode==='lid'&&SCR.kind&&!SCR.dio)zoomHint('lid');else if(freeWalk()&&open>.95)zoomHint('free');
     if(AUTO){autoT+=rawDt;if(TRACE.on&&!TRACE.done&&autoT>1.2){autoT=0;const c=TRACE.cur??0,n=traceNext();if(n>=0)traceLink(c,n)}if(say.classList.contains('ask')&&autoT>1.5){autoT=0;const fc=say.querySelector('.fc:not(.flip)');if(fc)fc.click();else{const b=say.querySelector('.ch');if(b)b.click()}}if(waitTap&&autoT>1.2){autoT=0;advance()}if(curManip&&!curManip.done&&autoT>2){autoT=0;curManip.solve()}}}
   // couvercle
   open+=(openT-open)*(1-Math.pow(.25,dt));revealTick(ease(clamp(open))*1.92);hinge.rotation.x=-ease(clamp(open))*1.92;

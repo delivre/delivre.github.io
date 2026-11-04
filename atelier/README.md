@@ -55,6 +55,7 @@ Pré-requis : Python 3 avec Playwright et Chromium, Node (pour la vérification 
 | `U_music` | musique et volume |
 | `W_recall` | mode Rappel : cartes, argument à réécrire |
 | `X_ia` | le lieu « Aujourd'hui » (l'IA) |
+| `Z_dio` | **les souvenirs en boîte** : le joueur crayonne le souvenir sur une feuille du carnet, le dessin devient une boîte-cadre en carton qu'on tourne au doigt, un détail caché sur une paroi (`DIOHID`), puis l'étoile |
 | `Y_carnet` | le carnet de papa (notes de lecture et sources) |
 | `J_main` | boucle principale, caméra, gestes, bulle d'Alice, écran d'accueil, hooks de test |
 
