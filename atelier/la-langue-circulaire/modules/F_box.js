@@ -34,7 +34,7 @@ function inkRing(x,cx,cy,r,o={}){const R=seeded(o.seed||7),col=o.col||'#141414',
      let dl=len*(1.1+R()*.3);const m=1+(R()*3|0);for(let j=0;j<m;j++){drop(px+Math.cos(ang)*dl,py+Math.sin(ang)*dl,w0*(.1+R()*.28)/(1+j*.6));dl+=w0*(.6+R()*.9)}}
    // la pluie de gouttelettes autour de l'impact
    for(let k=0;k<12*s;k++){const ang=out+(R()-.5)*2.2,dl=w*.8+R()*r*.22*s;x.globalAlpha=.5+R()*.5;drop(px+Math.cos(ang)*dl,py+Math.sin(ang)*dl,w0*(.03+R()*.12));x.globalAlpha=1}}
-  if(t.k==='tendril'){let qx=px,qy=py,ang=out,lw=w*.45;for(let k=0;k<18;k++){ang+=(R()-.5)*.45+(t.c||0);const nx=qx+Math.cos(ang)*r*.022*s,ny=qy+Math.sin(ang)*r*.022*s;x.lineWidth=lw;x.beginPath();x.moveTo(qx,qy);x.lineTo(nx,ny);x.stroke();qx=nx;qy=ny;lw*=.88}drop(qx,qy,w0*.18)}
+  if(t.k==='tendril'){let qx=px,qy=py,ang=out,lw=w*.45;const curl=(R()<.5?-1:1)*(.1+Math.abs(t.c||0)*1.2);for(let k=0;k<18;k++){ang+=(R()-.5)*.2+curl*(1+k*.06);const nx=qx+Math.cos(ang)*r*.022*s,ny=qy+Math.sin(ang)*r*.022*s;x.lineWidth=lw;x.beginPath();x.moveTo(qx,qy);x.lineTo(nx,ny);x.stroke();qx=nx;qy=ny;lw*=.88}drop(qx,qy,w0*.18)}
   if(t.k==='hook'){x.lineWidth=w*.5;const tg=t.a+Math.PI/2*(t.c||1);x.beginPath();x.moveTo(px,py);x.quadraticCurveTo(px+Math.cos(out)*r*.2*s,py+Math.sin(out)*r*.2*s,px+Math.cos(out)*r*.17*s+Math.cos(tg)*r*.13*s,py+Math.sin(out)*r*.17*s+Math.sin(tg)*r*.13*s);x.stroke();drop(px+Math.cos(out)*r*.17*s+Math.cos(tg)*r*.13*s,py+Math.sin(out)*r*.17*s+Math.sin(tg)*r*.13*s,w*.22)}
   if(t.k==='blob'){for(let k=0;k<5;k++){const ang=out+(R()-.5)*1.4,dl=w*(.6+R()*1.2)*s;drop(px+Math.cos(ang)*dl,py+Math.sin(ang)*dl,w0*(.12+R()*.3))}}});
  // des gouttes perdues, tout autour
@@ -205,7 +205,7 @@ const heli=()=>{const g=new THREE.Group(),m=plastic('#4a5048'),d=plastic('#2a2e2
 const SHELL={};
 {const g=new THREE.Group();const H=3.9,N=56,lift=.75;
  for(let i=0;i<N;i++){const t=(i+.5)/N,prof=Math.sin(Math.PI*Math.pow(t,.92)),r=.62*Math.pow(prof,.8)+.02;const s=mesh(new THREE.CylinderGeometry(r*.72,r*.72,H/N*.97,48),i%6===0?M.slate2:M.slate);s.scale.z=.5;s.position.y=lift+t*H;g.add(s)}
- SHELL.g=g;g.scale.setScalar(.88);g.rotation.y=.25;put(g,SEA.x,SEA.z);SHELL.y0=TOP;
+ SHELL.g=g;g.scale.setScalar(.88);const[px,pz]=PLACES[2];g.rotation.y=.25;put(g,px,pz);SHELL.y0=TOP;
  // la plate-forme élévatrice, sous son ventre, côté lac
  const pl=new THREE.Group();pl.add(box3(.42,.04,.42,M.white,0,.18,0));[-1,1].forEach(k=>{const b=mesh(new THREE.BoxGeometry(.5,.02,.03),M.slateL);b.rotation.z=k*.35;b.position.set(0,.09,k*.17);pl.add(b)});pl.add(box3(.46,.04,.46,M.slateL,0,0,0));
  put(pl,...pol(180,3.72))}
@@ -276,10 +276,15 @@ const CLOUDS=[],CRANES=[];
  [[mapleA,A1],[mapleB,A2],[bush,BU]].forEach(([m,l])=>{if(!l.length)return;const im=inst(CROSS,m,l);im.customDepthMaterial=m.userData.depth});
  const hay=plastic('#e2b858'),hb=[];for(let i=0;i<40&&hb.length<7;i++){const a=rnd(0,Math.PI*2),r=rnd(RING+.45,4.2),x=SEA.x+Math.cos(a)*r,z=SEA.z+Math.sin(a)*r;if(Math.hypot(x,z)>RB-.6||routeD(x,z)<.4||PLACES.some(([p,q])=>Math.hypot(x-p,z-q)<1.2)||segD(x,z,NILEP)<.4)continue;
   const m=mesh(new THREE.CylinderGeometry(.12,.12,.16,20),hay,true,true);m.rotation.z=Math.PI/2;m.rotation.y=rnd(0,3);m.position.set(x,TOP+.12,z);box.add(m);hb.push(m);OBSTL.push([x,z,.18])}}
-// autour de la coquille, des nuages qui roulent dans le gouffre ; le cercle d'encre est posé dessous
-{const t=canvasTex(256,256,(x,W)=>{for(let i=0;i<9;i++){const cx=rnd(60,196),cy=rnd(80,180),r=rnd(40,70);const g=x.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,'rgba(255,252,246,.95)');g.addColorStop(.6,'rgba(244,238,246,.6)');g.addColorStop(1,'rgba(230,224,240,0)');x.fillStyle=g;x.beginPath();x.arc(cx,cy,r,0,7);x.fill()}});
- const mat=new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,opacity:.9,toneMapped:false});
- MAPFX.puffs=[...Array(16)].map((_,i)=>{const sp=new THREE.Sprite(mat);const a=i/16*Math.PI*2+rnd(-.15,.15),r=i%2?rnd(1.32,1.65):rnd(.28,.5),k=rnd(.55,.95);sp.scale.set(k*1.4,k*.8,1);sp.userData={a,r,y:rnd(-.02,.22),ph:rnd(0,6)};sp.renderOrder=2;box.add(sp);return sp})}
+// au centre, un nid de nuages en coton : des boules de ouate qui respirent ; le cercle d'encre flotte au-dessus
+{const ft=canvasTex(256,256,(x,W)=>{x.fillStyle='#fbf8f3';x.fillRect(0,0,W,W);x.lineCap='round';for(let i=0;i<2600;i++){const a=rnd(0,W),b=rnd(0,W),l=rnd(4,14),an=rnd(0,6.3);x.strokeStyle=Math.random()<.5?`rgba(255,255,255,${rnd(.4,.9)})`:`rgba(190,180,205,${rnd(.12,.3)})`;x.lineWidth=rnd(.6,1.6);x.beginPath();x.moveTo(a,b);x.quadraticCurveTo(a+Math.cos(an+1)*l*.5,b+Math.sin(an+1)*l*.5,a+Math.cos(an)*l,b+Math.sin(an)*l);x.stroke()}});
+ ft.wrapS=ft.wrapT=THREE.RepeatWrapping;ft.repeat.set(2,2);
+ const cm=new THREE.MeshStandardMaterial({color:new THREE.Color('#ffffff').convertSRGBToLinear(),map:ft,bumpMap:ft,bumpScale:.02,roughness:1,metalness:0});
+ const cg=new THREE.IcosahedronGeometry(1,3);{const p=cg.attributes.position,mp={};for(let i=0;i<p.count;i++){const k=[p.getX(i),p.getY(i),p.getZ(i)].map(v=>v.toFixed(3)).join();const f=mp[k]||(mp[k]=rnd(.9,1.08));p.setXYZ(i,p.getX(i)*f,p.getY(i)*f,p.getZ(i)*f)}cg.computeVertexNormals()}
+ MAPFX.puffs=[];let tries=0;while(MAPFX.puffs.length<26&&tries<500){tries++;const a=rnd(0,6.283),r=Math.sqrt(Math.random())*(LR-.35),x=SEA.x+Math.cos(a)*r*1.05,z=SEA.z+Math.sin(a)*r;
+  if(MAPFX.puffs.some(g=>Math.hypot(g.userData.x-x,g.userData.z-z)<.42))continue;
+  const g=new THREE.Group();const n=3+(Math.random()*3|0);for(let k=0;k<n;k++){const s2=rnd(.13,.26)*(1-r/LR*.35);const m=new THREE.Mesh(cg,cm);m.scale.set(s2,s2*.78,s2);m.position.set(rnd(-.17,.17),s2*.35,rnd(-.12,.12));m.castShadow=true;m.receiveShadow=true;g.add(m)}
+  g.position.set(x,TOP-SEAD+.02,z);g.userData={x,z,ph:rnd(0,6.3),y0:TOP-SEAD+.02};box.add(g);MAPFX.puffs.push(g)}}
 // deux oiseaux de papier qui tournent au-dessus de la vallée
 const BOATG=(()=>{const g=new THREE.BufferGeometry();const v=[-.12,0,0, .12,0,0, .27,.13,.07, -.27,.13,.07,  .12,0,0, -.12,0,0, -.27,.13,-.07, .27,.13,-.07,  -.13,.12,0, .13,.12,0, 0,.34,0,  -.27,.13,.07, -.12,0,0, -.27,.13,-.07,  .12,0,0, .27,.13,.07, .27,.13,-.07];
  g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex([0,1,2,0,2,3,4,5,6,4,6,7,8,9,10,11,12,13,14,15,16]);g.computeVertexNormals();return g})();
@@ -314,10 +319,10 @@ const BRIDGE={};const bridgeH=(x,z)=>{if(BRIDGE.L==null)return 0;const dx=x-BRID
 /* ---------- ce qui bouge : la coquille respire, l'hélicoptère tourne, les projecteurs balaient la brume, le cercle d'encre tourne sur le lac ---------- */
 {// le cercle d'encre, pâle comme de la brume, posé sur l'eau
  const t=canvasTex(1024,1024,(x,W)=>{x.clearRect(0,0,W,W);inkRing(x,W/2,W/2,330,{seed:1918,col:'#141414',w:30,drops:30,wash:false,f:[{a:-.3,k:'splash',s:1.4},{a:.9,k:'tendril',s:1.5,c:.06},{a:1.6,k:'blob',s:1.2},{a:2.4,k:'spike',s:1.3,d:-1},{a:3.3,k:'splash',s:1.1},{a:4.1,k:'hook',s:1.3},{a:4.9,k:'tendril',s:1.2,d:-1,c:-.05},{a:5.6,k:'blob',s:.9}]})});
- const m=new THREE.Mesh(new THREE.PlaneGeometry(2.9,2.9),new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:.55,depthWrite:false,toneMapped:false}));m.rotation.x=-Math.PI/2;m.position.set(SEA.x,TOP+.09,SEA.z);m.renderOrder=3;box.add(m);MAPFX.ink=m}
+ const m=new THREE.Mesh(new THREE.PlaneGeometry(2.9,2.9),new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:.55,depthWrite:false,toneMapped:false}));m.rotation.x=-Math.PI/2;m.position.set(SEA.x,TOP+.3,SEA.z);m.renderOrder=3;box.add(m);MAPFX.ink=m}
 {// la lueur sous la coquille, sur l'herbe et sur l'eau
  const t=canvasTex(256,256,(x,W)=>{const g=x.createRadialGradient(W/2,W/2,0,W/2,W/2,W/2);g.addColorStop(0,'rgba(230,236,240,.9)');g.addColorStop(.5,'rgba(200,214,224,.35)');g.addColorStop(1,'rgba(200,214,224,0)');x.fillStyle=g;x.fillRect(0,0,W,W)});
- const m=new THREE.Mesh(new THREE.CircleGeometry(1.3,32),new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:.5,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));m.rotation.x=-Math.PI/2;m.position.set(SEA.x,TOP-.02,SEA.z);box.add(m);MAPFX.pool=m}
+ const m=new THREE.Mesh(new THREE.CircleGeometry(1.3,32),new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:.5,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));m.rotation.x=-Math.PI/2;m.position.set(PLACES[2][0],TOP+.03,PLACES[2][1]+.3);box.add(m);MAPFX.pool=m}
 {// les projecteurs du camp, des cônes de lumière très doux, sans bord, qui cherchent la coquille
  const am=canvasTex(64,256,(x,W,H)=>{const gr=x.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#fff');gr.addColorStop(.3,'#666');gr.addColorStop(.7,'#1a1a1a');gr.addColorStop(1,'#000');x.fillStyle=gr;x.fillRect(0,0,W,H)});am.encoding=THREE.LinearEncoding;
  [[-.9,1.0],[.8,1.0]].forEach(([lx,ly],i)=>{const L=4.6,geo=new THREE.ConeGeometry(.55,L,24,1,true);geo.translate(0,-L/2,0);geo.rotateX(-Math.PI/2);
@@ -334,19 +339,19 @@ MAPFX.heli=heli();MAPFX.heli.scale.setScalar(1.15);box.add(MAPFX.heli);
  const t=canvasTex(32,32,(x,W)=>{const gr=x.createRadialGradient(W/2,W/2,0,W/2,W/2,W/2);gr.addColorStop(0,'rgba(240,244,248,1)');gr.addColorStop(1,'rgba(240,244,248,0)');x.fillStyle=gr;x.fillRect(0,0,W,W)});
  const pts=new THREE.Points(g,new THREE.PointsMaterial({map:t,size:.09,transparent:true,opacity:.75,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));box.add(pts);MAPFX.pts=pts}
 function mapTick(T){if(!MAPFX.heli)return;const on=phase!=='closed'&&phase!=='opening';
- if(MAPFX.puffs)MAPFX.puffs.forEach(p=>{const u=p.userData,a=u.a+T*.025;p.position.set(SEA.x+Math.cos(a)*u.r,TOP+u.y+.04*Math.sin(T*.4+u.ph),SEA.z+Math.sin(a)*u.r*.85)});
+ if(MAPFX.puffs)MAPFX.puffs.forEach(g=>{const u=g.userData;g.position.y=u.y0+.025*Math.sin(T*.6+u.ph);g.position.x=u.x+.03*Math.sin(T*.25+u.ph);const k=1+.03*Math.sin(T*.8+u.ph*1.3);g.scale.set(k,1/k,k)});
  // la coquille respire à peine
- SHELL.g.position.y=TOP+.18+.06*Math.sin(T*.45);SHELL.g.rotation.y=.25+.04*Math.sin(T*.13);MAPFX.pool.material.opacity=.38+.12*Math.sin(T*.45);
+ SHELL.g.position.y=TOP+.06*Math.sin(T*.45);SHELL.g.rotation.y=.25+.04*Math.sin(T*.13);MAPFX.pool.material.opacity=.38+.12*Math.sin(T*.45);
  // le cercle d'encre tourne lentement sur le lac
  MAPFX.ink.rotation.z=T*.035;MAPFX.ink.material.opacity=.86+.08*Math.sin(T*.3);
  // l'hélicoptère fait le tour de la vallée
  const h=MAPFX.heli,a=T*.16;h.visible=on;h.position.set(SEA.x+Math.cos(a)*4.1,TOP+2.5+.12*Math.sin(T*.9),SEA.z+Math.sin(a)*3.6-.3);h.rotation.set(.12*Math.sin(T*.5),-a-Math.PI,.1);h.userData.rot.rotation.y=T*28;MAPFX.heli0.userData.rot.rotation.y=0;
  // les projecteurs balaient la brume vers la coquille
- MAPFX.beams.forEach(({b,ph})=>{b.visible=on;const tx=SEA.x+Math.sin(T*.23+ph)*1.2,ty=TOP+1.6+Math.sin(T*.31+ph)*.9,tz=SEA.z+Math.cos(T*.19+ph)*.6;const w=new THREE.Vector3(tx,ty,tz);box.localToWorld(w);b.lookAt(w)});
+ MAPFX.beams.forEach(({b,ph})=>{b.visible=on;const tx=PLACES[2][0]+Math.sin(T*.23+ph)*1.6,ty=TOP+1.6+Math.sin(T*.31+ph)*.9,tz=PLACES[2][1]+Math.cos(T*.19+ph)*.6;const w=new THREE.Vector3(tx,ty,tz);box.localToWorld(w);b.lookAt(w)});
  // les lampes, avec leur halo qui frémit
  MAPFX.halos.forEach(s=>{const k=s.userData.k*(1+.08*Math.sin(T*3+s.userData.ph)+.05*Math.sin(T*7.3+s.userData.ph));s.scale.set(k,k,1);s.visible=on});
  // les poussières de lumière
- const P=MAPFX.pts.geometry.attributes.position;MAPFX.motes.forEach((m,i)=>{m.y+=m.s*.016;if(m.y>4.4)m.y=0;const aa=m.a+T*.05;P.setXYZ(i,SEA.x+Math.cos(aa)*m.r,TOP+m.y,SEA.z+Math.sin(aa)*m.r*.6)});P.needsUpdate=true;MAPFX.pts.visible=on}
+ const P=MAPFX.pts.geometry.attributes.position;MAPFX.motes.forEach((m,i)=>{m.y+=m.s*.016;if(m.y>4.4)m.y=0;const aa=m.a+T*.05;P.setXYZ(i,PLACES[2][0]+Math.cos(aa)*m.r,TOP+m.y,PLACES[2][1]+Math.sin(aa)*m.r*.6)});P.needsUpdate=true;MAPFX.pts.visible=on}
 
 /* ---------- le couvercle : un disque de kraft, et dessus, peint à l'encre, un grand cercle ---------- */
 const hinge=new THREE.Group();hinge.position.set(0,TOP+.06,-RB);box.add(hinge);

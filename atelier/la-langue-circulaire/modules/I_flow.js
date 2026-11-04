@@ -64,7 +64,7 @@ function drawScreen(T){mx.setTransform(HD,0,0,HD,0,0);mx.clearRect(0,0,MS,MS);
   drawSat(mx,T);
   SCR.a+=(SCR.ta-SCR.a)*(1-Math.pow(.03,DTG));if(SCR.ta===0&&SCR.a<.01){SCR.a=0;if(SCR.kind&&!SCR.keep)SCR.kind=null}
   if(SCR.a>0&&SCR.kind){mf.setTransform(HD,0,0,HD,0,0);mf.globalCompositeOperation='source-over';mf.clearRect(0,0,MS,MS);mf.drawImage(PAGE,0,0);
-    if(SCR.kind==='mem'){if(PAPER)mf.drawImage(LABEL,0,0);const P=POP[SCR.id],t=(performance.now()-(SCR.t0||0))/1000;mf.save();mf.translate(384,30);mf.scale(.72,.72);mf.translate(-384,-40);drawPieces(mf,P.P,T,t);if(t>.8){mf.globalAlpha=clamp(t-.8);P.fx(mf,T);mf.globalAlpha=1}drawReveal(mf,T,SCR.id);memLight(mf,T,t,P.P);mf.restore();if(PAPER)drawTab(mf,T);drawJournal(mf,T)}
+    if(SCR.kind==='mem'){if(PAPER){mf.drawImage(LABEL,0,0);drawTab(mf,T)}const P=POP[SCR.id],t=(performance.now()-(SCR.t0||0))/1000;mf.save();mf.translate(334,34);mf.scale(.68,.68);mf.translate(-384,-40);drawPieces(mf,P.P,T,t);if(t>.8){mf.globalAlpha=clamp(t-.8);P.fx(mf,T);mf.globalAlpha=1}drawReveal(mf,T,SCR.id);memLight(mf,T,t,P.P);mf.restore();drawJournal(mf,T)}
     else if(SCR.obj){drawCard(mf,(c,TT)=>SCR.obj.draw(c,TT),T);drawCap(mf,T)}
     mx.globalAlpha=SCR.a;mx.drawImage(memF,0,0,MS,MS);mx.globalAlpha=1}
   memTex.needsUpdate=true}

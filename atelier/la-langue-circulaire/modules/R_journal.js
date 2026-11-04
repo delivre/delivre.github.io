@@ -13,7 +13,10 @@ const rrect=(c,x,y,w,h,r)=>{c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo
 const wave=(x,y,amp,fr,ph,x0=0,x1=MS,bottom=MS)=>{x.moveTo(x0,bottom);x.lineTo(x0,y);for(let u=x0;u<=x1;u+=8)x.lineTo(u,y+Math.sin(u/MS*Math.PI*fr+ph)*amp);x.lineTo(x1,bottom);x.closePath()};
 const BLACK={body:'#000',skin:'#000',hair:'#000',legs:'#000',shoes:'#000'};
 const ALICE_C={body:'#4f8ee8',skin:'#ffe3d4',hair:'#f3c34e',legs:'#ffe3d4',shoes:'#ff9ccc'};
-const parent=(x,spec)=>{const t=mkC(),tx=t.getContext('2d');const r=person(tx,Object.assign({raw:true,col:BLACK},spec));tx.globalCompositeOperation='source-in';tx.fillStyle='#14102a';tx.fillRect(0,0,MS,MS);x.drawImage(t,0,0);return r};
+// les parents : des ombres de papier découpé, bleu nuit, aux contours arrondis (on floute la silhouette puis on la recoupe net : les angles s'adoucissent)
+const parent=(x,spec)=>{const t=mkC(),tx=t.getContext('2d');const r=person(tx,Object.assign({raw:true,col:BLACK},spec));
+ const u=mkC(),ux=u.getContext('2d');ux.filter=`blur(${Math.max(3,spec.h*.014)}px)`;ux.drawImage(t,0,0);ux.filter='none';const d=ux.getImageData(0,0,MS,MS),p=d.data;for(let i=3;i<p.length;i+=4)p[i]=p[i]>120?255:0;ux.putImageData(d,0,0);
+ ux.globalCompositeOperation='source-in';const g=ux.createLinearGradient(0,spec.y-spec.h,0,spec.y);g.addColorStop(0,'#2c3466');g.addColorStop(1,'#1c2148');ux.fillStyle=g;ux.fillRect(0,0,MS,MS);x.drawImage(u,0,0);return r};
 const doll=(x,spec)=>{const r=person(x,Object.assign({raw:true,col:ALICE_C},spec));return r};
 // la page du journal : papier ligné, marge rouge, deux bouts de scotch
 const PAGE=(()=>{const o=mkC(),x=o.getContext('2d');x.save();x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=18;x.shadowOffsetY=8;fp(x,'#f7f0de',c=>{c.moveTo(26,22);for(let u=26;u<742;u+=12)c.lineTo(u,22+rnd(-1.5,1.5));c.lineTo(742,746);for(let u=742;u>26;u-=12)c.lineTo(u,746+rnd(-1.5,1.5));c.closePath()});x.restore();
@@ -49,21 +52,22 @@ function memLight(c0,T,t,P){if(!PAPER)return;const k=clamp((t-.6)/.8);if(k<=0)re
  MOTES.forEach(m=>{const y=m.y-((T*m.s*18)%80),x=m.x+Math.sin(T*.7+m.ph)*10,al=.5+.5*Math.sin(T*1.3+m.ph);blob(c,x,y,m.r*5,`rgba(255,236,190,${.22*al})`);c.fillStyle=`rgba(255,246,220,${.7*al})`;c.beginPath();c.arc(x,y,m.r*.6,0,7);c.fill()});c.restore();
  if(P&&P[0]){c.globalCompositeOperation='destination-in';c.drawImage(P[0].c,0,0);c.globalCompositeOperation='source-over'}c0.save();c0.globalAlpha=k;c0.globalCompositeOperation='lighter';c0.drawImage(MLT,0,0);c0.restore()}
 // la languette à tirer : chaque souvenir a un petit mécanisme de papier (le soleil se lève, les rideaux s'ouvrent…)
-const TAB={p:0,drag:false,x0:0,L:80,used:0,need:false,rev:false,auto:0,note:''};
+const TAB={p:0,drag:false,x0:0,L:38,used:0,need:false,rev:false,auto:0,note:''};
 const TABFX={};
-const tabX=()=>560+TAB.p*TAB.L,tabHit=([x,y])=>x>tabX()-40&&x<tabX()+70&&y>286&&y<366;
+const tabX=()=>566+TAB.p*TAB.L,tabHit=([x,y])=>x>tabX()-20&&x<tabX()+70&&y>280&&y<372;
 // ce que la languette dévoile : ce qu'Alice a perdu, et qu'elle garde
 const REVEAL=PAPER?{
  // sur la table basse, le carnet de Maman : des cercles, des mots, des flèches. Elle ne regardait pas le film, elle l'étudiait.
  escalier:()=>cut(x=>{x.save();x.translate(250,190);x.rotate(-.06);fp(x,'#3a2a24',c=>rrect(c,-176,-118,352,236,10));fp(x,'#f6f0e0',c=>c.rect(-166,-108,164,216));fp(x,'#efe7d2',c=>c.rect(2,-108,164,216));
    x.strokeStyle='rgba(120,100,70,.35)';x.lineWidth=1.5;for(let v=-80;v<100;v+=26){x.beginPath();x.moveTo(-156,v);x.lineTo(-12,v);x.moveTo(12,v);x.lineTo(156,v);x.stroke()}
-   inkRing(x,-84,-30,46,{seed:21,w:7,f:[{a:.4,k:'tendril',s:1.2},{a:3.6,k:'splash',s:.8}],drops:3});inkRing(x,-104,66,24,{seed:5,w:4,f:[{a:2,k:'hook',s:.8}],drops:1});
-   x.font='600 34px Caveat, cursive';x.fillStyle='#1d2a66';x.fillText('le temps ?',22,-60);x.fillText('gavagai',30,-10);x.fillStyle='#7a2a08';x.fillText('Whorf !',40,46);
-   x.strokeStyle='#7a2a08';x.lineWidth=3;x.beginPath();x.moveTo(-40,-30);x.quadraticCurveTo(-6,-60,18,-66);x.stroke();x.beginPath();x.moveTo(-70,66);x.lineTo(30,46);x.stroke();x.restore()},{border:5,outline:1.4}),
+   inkRing(x,-84,-10,52,{seed:21,w:7,f:[{a:.4,k:'tendril',s:1.2},{a:3.6,k:'splash',s:.8}],drops:3});
+   x.font='600 24px Caveat, cursive';x.fillStyle='#7a2a08';x.fillText('Notes de Maman',-156,-84);x.fillStyle='#1d2a66';x.font='600 30px Caveat, cursive';
+   ['Leur écriture :','des cercles.','Un cercle =','une phrase','entière !'].forEach((l,i)=>x.fillText(l,20,-74+i*36));
+   x.font='600 26px Caveat, cursive';x.fillStyle='#7a2a08';x.fillText('Toute la phrase, d’un seul geste.',-160,94);x.restore()},{border:5,outline:1.4}),
  // au dos du carton de Maman, au crayon : « maman » dans toutes les langues qu'elle connaissait
  canape:()=>cut(x=>{x.save();x.translate(250,200);x.rotate(-.05);fp(x,'#d8b98a',c=>c.rect(-180,-120,360,240));x.strokeStyle='rgba(120,80,40,.4)';x.lineWidth=2;x.strokeRect(-170,-110,340,220);
-   x.font='600 38px Caveat, cursive';x.fillStyle='#3a2414';[['mama',-150,-60],['ima',-150,-6],['amma',-150,48],['mãe',20,-60],['Mutter',20,-6]].forEach(([w,a,b])=>x.fillText(w,a,b));x.font='600 36px sans-serif';x.fillText('はは',20,48);
-   x.font='600 26px Caveat, cursive';x.fillStyle='#7a2a08';x.fillText('presque partout, ça commence par m…',-160,96);x.restore()},{border:5,outline:1.4}),
+   x.font='600 26px Caveat, cursive';x.fillStyle='#7a2a08';x.fillText('« Maman », dans d’autres langues :',-160,-78);x.font='600 36px Caveat, cursive';x.fillStyle='#3a2414';[['mama',-150,-36],['ima',-150,4],['amma',-150,44],['mãe',20,-36],['Mutter',20,4]].forEach(([w,a,b])=>x.fillText(w,a,b));x.font='600 34px sans-serif';x.fillText('はは',20,44);
+   x.font='600 26px Caveat, cursive';x.fillStyle='#7a2a08';x.font='600 27px Caveat, cursive';x.fillText('Souvent un « m » : le premier son',-160,84);x.fillText('que font les lèvres d’un bébé.',-160,110);x.restore()},{border:5,outline:1.4}),
  // le vieux carnet d'étudiante de Maman, plein de cercles ; elle y a glissé celui d'Alice (« encore »)
  encre:()=>cut(x=>{x.save();x.translate(540,200);x.rotate(.06);fp(x,'#2f3a4a',c=>rrect(c,-150,-110,300,220,8));fp(x,'#efe6cf',c=>c.rect(-140,-100,138,200));fp(x,'#e6dcc2',c=>c.rect(2,-100,138,200));
    [[-104,-56,26,3],[-40,-50,20,7],[-90,10,22,11],[-34,40,28,15],[-100,70,16,19]].forEach(([a,b,r,sd])=>inkRing(x,a,b,r,{seed:sd,w:4,f:[{a:sd%6,k:'hook',s:.7}],drops:1}));
@@ -75,23 +79,24 @@ const REVEAL=PAPER?{
  // au dos de la carte, tout petit, Maman avait écrit…
  ia:()=>cut(x=>{x.save();x.translate(260,200);x.rotate(-.06);fp(x,'#f6efe0',c=>c.rect(-190,-110,380,220));x.strokeStyle='rgba(120,100,70,.4)';x.lineWidth=2;x.beginPath();x.moveTo(60,-90);x.lineTo(60,90);x.stroke();x.font='600 40px Caveat, cursive';x.fillStyle='#6a1a2a';
    x.fillText('Je t’apprendrai',-176,-44);x.fillText('ce mot en rentrant.',-176,2);x.font='600 34px Caveat, cursive';x.fillText('Maman',-80,70);fp(x,'#c8463a',c=>c.rect(110,-90,58,70));x.restore()},{border:5,outline:1.4})}:{};
-const REVC={};function drawReveal(c,T,id){if(!REVEAL[id])return;const R=REVC[id]||(REVC[id]=REVEAL[id]());const a=TAB.rev?1:TAB.p;if(a<=.01)return;c.save();c.globalAlpha=a;
+const REVC={},REVB={};const revBox=(id,cv)=>{if(REVB[id])return REVB[id];const d=cv.getContext('2d').getImageData(0,0,MS,MS).data;let y1=0,y0=MS;for(let y=0;y<MS;y+=4)for(let x=0;x<MS;x+=4)if(d[(y*MS+x)*4+3]>40){if(y<y0)y0=y;if(y>y1)y1=y}return REVB[id]=[y0,y1]};
+function drawReveal(c,T,id){if(!REVEAL[id])return;const R=REVC[id]||(REVC[id]=REVEAL[id]());const k=TAB.rev?clamp((performance.now()-(TAB.revT||0))/700):TAB.p*.55;if(k<=.01)return;
+ // le volet se soulève depuis son pied, comme une carte pop-up : il bascule, dépasse un peu, se pose
+ const[y0,y1]=revBox(id,R.c),e=TAB.rev?easeBack(k):k;c.save();c.translate(0,y1);c.scale(1,Math.max(.02,e));c.translate(0,-y1);c.globalAlpha=Math.min(1,.35+k);
  if(id==='phare'){c.save();c.globalCompositeOperation='lighter';const ang=Math.sin(T*.9)*.5+Math.PI,L=420;const g=c.createLinearGradient(560,251,560+Math.cos(ang)*L,251+Math.sin(ang)*L*.3);g.addColorStop(0,'rgba(255,236,170,.85)');g.addColorStop(1,'rgba(255,236,170,0)');c.fillStyle=g;c.beginPath();c.moveTo(560,251);c.lineTo(560+Math.cos(ang-.08)*L,251+Math.sin(ang-.08)*L*.3-30);c.lineTo(560+Math.cos(ang+.08)*L,251+Math.sin(ang+.08)*L*.3+30);c.closePath();c.fill();blob(c,560,251,40,'rgba(255,236,170,.7)');blob(c,196,416,26,`rgba(255,210,120,${.5+.3*Math.sin(T*3)})`);c.restore()}
  if(id==='echo'){c.save();c.globalCompositeOperation='lighter';blob(c,565,500,80,'rgba(255,220,160,.35)');c.restore()}
  c.drawImage(R.c,0,0);c.restore()}
-function tabReveal(){if(TAB.rev)return;TAB.rev=true;TAB.p=1;TAB.used=1;const n=TAB.note;JR.noteN=(JR.noteN||0)+1;JR.note={text:n,t0:performance.now()};sndPaper(.4,.3);sndTone(523,1.2,.05);say.className='jr';sayWho.textContent='';sayTxt.textContent='À retenir : '+n;say.hidden=false;waitTap=true}
+function tabReveal(){if(TAB.rev)return;TAB.rev=true;TAB.revT=performance.now();TAB.p=1;TAB.used=1;const n=TAB.note;JR.noteN=(JR.noteN||0)+1;JR.note={text:n,t0:performance.now()};sndPaper(.4,.3);sndTone(523,1.2,.05);say.className='jr';sayWho.textContent='';sayTxt.textContent='À retenir : '+n;say.hidden=false;waitTap=true}
 function drawTab(c,T){if(!PAPER||!REVEAL[SCR.id]||!(TAB.need||TAB.rev))return;if(TAB.auto&&!TAB.rev)TAB.p=Math.min(1,(performance.now()-TAB.auto)/650);if(!TAB.drag&&!TAB.rev&&!TAB.auto)TAB.p*=.9;if(!TAB.rev&&TAB.p>.85)tabReveal();
-const x=tabX(),y=296,SX=532;
+const x=tabX(),y=296,SX=470;
  c.save();c.beginPath();c.rect(SX,0,MS,MS);c.clip();
  // la bande de papier qui sort de derrière l'image : on voit qu'on tire un mécanisme, pas une étiquette qu'on arrache
  c.save();c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.fillRect(SX,308,x-30-SX+2,36);c.fillStyle='rgba(60,35,10,.22)';c.fillRect(SX,308,x-30-SX+2,3);c.fillRect(SX,341,x-30-SX+2,3);c.strokeStyle='rgba(120,80,40,.5)';c.setLineDash([5,6]);c.lineWidth=1.5;c.beginPath();c.moveTo(SX+4,326);c.lineTo(x-44,326);c.stroke();c.restore();
- c.save();c.translate(x-30,y+30);c.scale(1.32,1.32);c.translate(-(x-30),-(y+30));c.save();c.shadowColor='rgba(20,10,0,.45)';c.shadowBlur=8;c.shadowOffsetY=4;c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.beginPath();c.moveTo(x-30,y);c.lineTo(x+46,y);c.quadraticCurveTo(x+58,y+30,x+46,y+60);c.lineTo(x-30,y+60);c.closePath();c.fill();c.restore();
+ c.save();c.translate(x-30,y+30);c.scale(1.12,1.12);c.translate(-(x-30),-(y+30));c.save();c.shadowColor='rgba(20,10,0,.45)';c.shadowBlur=8;c.shadowOffsetY=4;c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.beginPath();c.moveTo(x-30,y);c.lineTo(x+46,y);c.quadraticCurveTo(x+58,y+30,x+46,y+60);c.lineTo(x-30,y+60);c.closePath();c.fill();c.restore();
  c.strokeStyle='rgba(120,80,40,.8)';c.lineWidth=2;c.beginPath();c.moveTo(x-30,y);c.lineTo(x+46,y);c.quadraticCurveTo(x+58,y+30,x+46,y+60);c.lineTo(x-30,y+60);c.stroke();
  c.font='700 26px Caveat, cursive';c.fillStyle='#5a3418';c.fillText('tirer',x-22,y+38);c.strokeStyle='#5a3418';c.lineWidth=3;c.beginPath();c.moveTo(x+22,y+30);c.lineTo(x+40,y+30);c.moveTo(x+32,y+22);c.lineTo(x+40,y+30);c.lineTo(x+32,y+38);c.stroke();c.restore();
  c.restore();
- // l'encoche dans le carton : la languette en sort
- c.save();c.fillStyle='rgba(30,18,8,.85)';c.beginPath();rrect(c,SX-6,y-14,12,88,5);c.fill();c.strokeStyle='rgba(255,236,200,.55)';c.lineWidth=2;c.beginPath();c.moveTo(SX+7,y-12);c.lineTo(SX+7,y+72);c.stroke();c.restore();
- if(!TAB.rev&&typeof drawHand==='function'){const k=(T*.6)%1,e=clamp((k-.2)/.5);drawHand(c,x+8+e*70,y+44,k>.15&&k<.75)}}
+ if(!TAB.rev&&typeof drawHand==='function'){const k=(T*.6)%1,e=clamp((k-.2)/.5);drawHand(c,x+8+e*36,y+44,k>.15&&k<.75)}}
 const MEMX={papa:0};
 function drawPieces(c,P,T,t){P.forEach((p,i)=>{const k=clamp((t-.15-i*.13)/.42),e=k<=0?0:easeBack(k);if(e<=0)return;const wa=p.when?p.when():1;if(wa<=0)return;c.save();c.globalAlpha*=wa;const d=p.depth,dx=Math.sin(T*.55+d*1.3)*(1.5+d*1.6),dy=Math.cos(T*.4+d)*d*.6,piv=p.base||700;
   if(PAPER&&!p.vivid){const v=mkC(),vx=v.getContext('2d');vx.filter='saturate(1.45) brightness(1.05) contrast(1.04)';vx.drawImage(p.c,0,0);p.c=v;p.vivid=1}
@@ -116,8 +121,9 @@ const sofa=(x,X,Y,W,H,col,col2)=>{fp(x,col2,c=>rrect(c,X,Y,W,H*.55,24));fp(x,col
 {const wall=cut(x=>{stripes(x,70,40,628,640,'#3a3f6a','#343963');fp(x,'#4a3a4a',c=>c.rect(70,470,628,210))},{crayon:.35,border:0,outline:0});
  // en bas, le salon : la télé, et Maman de dos sur le canapé
  const room=cut(x=>{fp(x,'#7a5a3a',c=>c.rect(600,330,22,140));fp(x,'#f2c46a',c=>{c.moveTo(584,330);c.lineTo(638,330);c.lineTo(626,300);c.lineTo(596,300);c.closePath()});
-   tvSet(x,370,210,210,150,'shell');parent(x,{kind:'woman',view:'back',seated:true,x:470,y:520,h:250,armL:[10,20],armR:[-10,-20]});
-   fp(x,'#c07a3a',c=>rrect(c,330,420,280,90,22));fp(x,'#a8682f',c=>rrect(c,314,440,40,80,14));fp(x,'#a8682f',c=>rrect(c,586,440,40,80,14));
+   tvSet(x,370,210,210,150,'shell');parent(x,{kind:'woman',view:'back',seated:true,x:525,y:520,h:240,armL:[-6,6],armR:[6,-6]})});
+ const papaSofa=cut(x=>parent(x,{kind:'man',view:'back',seated:true,x:405,y:520,h:270,hat:'#000',armL:[-6,6],armR:[6,-6]}));
+ const sofaB=cut(x=>{fp(x,'#c07a3a',c=>rrect(c,330,420,280,90,22));fp(x,'#a8682f',c=>rrect(c,314,440,40,80,14));fp(x,'#a8682f',c=>rrect(c,586,440,40,80,14));
    fp(x,'#6a4a30',c=>rrect(c,250,480,70,14,4));fp(x,'#f6efe0',c=>c.rect(262,470,40,12))});
  // l'escalier et sa rampe : un seul morceau de bois, qui ne bouge pas
  const RL=t=>[70+t*628,450+t*90],BS=t=>[70+t*628,600+t*90];
@@ -127,8 +133,8 @@ const sofa=(x,X,Y,W,H,col,col2)=>{fp(x,col2,c=>rrect(c,X,Y,W,H*.55,24));fp(x,col
  // Alice et Papa, assis sur la marche, de dos : ils regardent entre les barreaux
  const alice=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();chibi(x,{x:450,y:745,h:260,view:'back',armL:[-20,0],armR:[30,-40]});x.restore()});
  // Papa arrive quand il parle : assis tout près, au premier plan, penché vers elle, le bras autour de ses épaules
- const papa=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();parent(x,{kind:'man',view:'back',seated:true,x:300,y:830,h:420,tilt:30,hat:'#000',armL:[-6,6],armR:[58,-10]});x.restore()});
- POP.escalier={P:[{...wall,depth:0},{...room,depth:.8},{...stairs,depth:1.8},{...papa,depth:2.45,when:()=>MEMX.papa?clamp((performance.now()-MEMX.papa)/800):0},{...alice,depth:2.6}],
+ const papa=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();parent(x,{kind:'man',view:'back',seated:true,x:290,y:830,h:420,tilt:30,hat:'#000',armL:[-6,6],armR:[82,-12]});x.restore()});
+ POP.escalier={P:[{...wall,depth:0},{...room,depth:.8},{...papaSofa,depth:.8,when:()=>MEMX.papa?1-clamp((performance.now()-MEMX.papa)/600):1},{...sofaB,depth:.8},{...stairs,depth:1.8},{...alice,depth:2.6},{...papa,depth:2.7,when:()=>MEMX.papa?clamp((performance.now()-MEMX.papa-300)/800):0}],
   fx:(c,T)=>{tvGlow(c,475,285,T,230);motes(c,T,360,600,220,460)}}}
 /* 2. le canapé : le carton « ALICE », le carton « MAMAN » ; Papa crie « Kangourou ! » de la cuisine */
 {const wall=cut(x=>stripes(x,70,40,628,640,'#2f3a5c','#2a3454'),{crayon:.35,border:0,outline:0});
