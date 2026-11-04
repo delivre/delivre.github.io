@@ -2462,6 +2462,8 @@ function drawHat(x,cx,cy,s){x.save();x.translate(cx,cy);x.scale(s,s);
  x.save();x.translate(34,10);x.rotate(-.5);x.fillStyle='#b8763a';x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(11,-20,5,-44);x.quadraticCurveTo(-7,-22,0,0);x.fill();x.strokeStyle='#7a4a1a';x.lineWidth=1.4;x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(4,-22,5,-42);x.stroke();x.restore();
  x.restore()}
 // où se cache le détail de chaque souvenir : sur quelle paroi, à quelle profondeur, à quelle hauteur
+// les souvenirs qui se passent dehors : parois de ciel
+const DIOSKY={}; // aucun souvenir dehors dans cette boîte (sinon : id:'couchant' ou 'nuit')
 // La langue circulaire : le monde de Maman, caché sur une paroi (carnet, carton, vieux carnet, croquis, dos de la carte)
 const DIOHID={escalier:{wall:-1,d:.5,h:.12,s:1.15},canape:{wall:1,d:.5,h:.15,s:1.15},encre:{wall:-1,d:.5,h:.1,s:1.15},fin:{wall:1,d:.5,h:.1,s:1.1},ia:{wall:-1,d:.5,h:.15,s:1.1}};
 const bboxOf=(c)=>{const W=c.width,H=c.height,d=c.getContext('2d').getImageData(0,0,W,H).data;let x0=W,y0=H,x1=-1,y1=-1;for(let y=0;y<H;y+=2)for(let x=0;x<W;x+=2){if(d[(y*W+x)*4+3]>8){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}return x1<0?null:[Math.max(0,x0-2),Math.max(0,y0-2),Math.min(W,x1+3),Math.min(H,y1+3)]};
@@ -2504,10 +2506,24 @@ function dioBuild(id){while(dioBox.children.length)dioBox.remove(dioBox.children
   const wallT=dioTex(cropC(P[0].c,b));
   const quad=(p,mat)=>{const g=new THREE.BufferGeometry();const v=[],uv=[];const U4=[[0,0],[1,0],[1,1],[0,1]];[0,1,2,0,2,3].forEach(k=>{v.push(...p[k]);uv.push(...U4[k])});g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));return add(new THREE.Mesh(g,mat))};
   const Pp=(x,y,z,s)=>[x*s,y*s,z+ZO];
+  const SKY=DIOSKY[id];
+  if(SKY){// dehors : les parois sont du ciel, étoilé en haut ; au couchant, plus orangé vers le fond (le soleil est en face)
+    const skyC=(side)=>{const c=document.createElement('canvas');c.width=512;c.height=512;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,0,512);
+      if(SKY==='couchant'){g.addColorStop(0,'#2c2866');g.addColorStop(.42,'#4a3c80');g.addColorStop(.74,'#a05e78');g.addColorStop(1,'#eea062')}else{g.addColorStop(0,'#1e2658');g.addColorStop(1,'#3a4690')}
+      x.fillStyle=g;x.fillRect(0,0,512,512);
+      if(SKY==='couchant'&&side){const bx=side>0?0:512,h=x.createRadialGradient(bx,560,0,bx,560,520);h.addColorStop(0,'rgba(255,180,100,.55)');h.addColorStop(1,'rgba(255,180,100,0)');x.fillStyle=h;x.fillRect(0,0,512,512)}
+      let r=7+(side+2)*13;const rnd=()=>{r=(r*16807)%2147483647;return r/2147483647};
+      for(let i=0;i<110;i++){const sx=rnd()*512,sy=Math.pow(rnd(),1.6)*(side?380:512),a=(1-sy/(side?420:600))*(.4+.6*rnd());x.fillStyle=`rgba(255,246,220,${a})`;x.beginPath();x.arc(sx,sy,1.2+rnd()*2,0,7);x.fill()}
+      for(let i=0;i<5;i++){const sx=rnd()*512,sy=rnd()*(side?220:512);x.fillStyle='rgba(255,240,200,.9)';x.beginPath();for(let k=0;k<8;k++){const a=k/8*Math.PI*2,q=k%2?1.6:5;x.lineTo(sx+Math.cos(a)*q,sy+Math.sin(a)*q)}x.fill()}
+      return dioTex(c)};
+    quad([Pp(bx0,by0,0,1),Pp(bx0,by0,D,sD),Pp(bx0,by1,D,sD),Pp(bx0,by1,0,1)],dioBasic({map:skyC(-1),color:0xf2eef6}));
+    quad([Pp(bx1,by0,D,sD),Pp(bx1,by0,0,1),Pp(bx1,by1,0,1),Pp(bx1,by1,D,sD)],dioBasic({map:skyC(1),color:0xdcd6e4}));
+    quad([Pp(bx0,by1,0,1),Pp(bx0,by1,D,sD),Pp(bx1,by1,D,sD),Pp(bx1,by1,0,1)],dioBasic({map:skyC(0),color:0xc8c2d4}));
+  }else{
   quad([Pp(bx0,by0,0,1),Pp(bx0,by0,D,sD),Pp(bx0,by1,D,sD),Pp(bx0,by1,0,1)],dioBasic({map:wallT,color:0xb9a6c4}));
   quad([Pp(bx1,by0,D,sD),Pp(bx1,by0,0,1),Pp(bx1,by1,0,1),Pp(bx1,by1,D,sD)],dioBasic({map:wallT,color:0x9c8aa8}));
-  quad([Pp(bx0,by1,0,1),Pp(bx0,by1,D,sD),Pp(bx1,by1,D,sD),Pp(bx1,by1,0,1)],dioBasic({map:wallT,color:0x6f6280}));
-  const fl=document.createElement('canvas');fl.width=512;fl.height=256;{const x=fl.getContext('2d');x.fillStyle='#8a5d36';x.fillRect(0,0,512,256);for(let i=0;i<14;i++){x.fillStyle=i%2?'rgba(60,35,15,.25)':'rgba(255,230,190,.08)';x.fillRect(0,i*19,512,2)}}
+  quad([Pp(bx0,by1,0,1),Pp(bx0,by1,D,sD),Pp(bx1,by1,D,sD),Pp(bx1,by1,0,1)],dioBasic({map:wallT,color:0x6f6280}))}
+  const fl=document.createElement('canvas');fl.width=512;fl.height=256;{const x=fl.getContext('2d');if(SKY){x.fillStyle=SKY==='couchant'?'#4a3a4e':'#2e3442';x.fillRect(0,0,512,256);for(let i=0;i<500;i++){x.fillStyle=i%3?'rgba(20,12,24,.28)':'rgba(255,220,180,.10)';x.beginPath();x.arc(Math.random()*512,Math.random()*256,1+Math.random()*3,0,7);x.fill()}}else{x.fillStyle='#8a5d36';x.fillRect(0,0,512,256);for(let i=0;i<14;i++){x.fillStyle=i%2?'rgba(60,35,15,.25)':'rgba(255,230,190,.08)';x.fillRect(0,i*19,512,2)}}}
   quad([Pp(bx0,by0,D,sD),Pp(bx0,by0,0,1),Pp(bx1,by0,0,1),Pp(bx1,by0,D,sD)],dioBasic({map:dioTex(fl),color:0xc9b08f}));
   // le détail caché, contre une paroi : invisible de face, il se découvre en tournant
   const H=DIOHID[id],hc=hiddenCanvas(id),hb=hc&&bboxOf(hc);
@@ -2526,6 +2542,8 @@ function dioBuild(id){while(dioBox.children.length)dioBox.remove(dioBox.children
   quad([[ox1+M,oy0-M,D+ZO],[k1,k2,ZO-.05],[k1,k3,ZO-.05],[ox1+M,oy1+M,D+ZO]],kM(0x9c7646));
   quad([[k0,k3,ZO-.05],[ox0-M,oy1+M,D+ZO],[ox1+M,oy1+M,D+ZO],[k1,k3,ZO-.05]],kM(0xd2ac78));
   quad([[ox0-M,oy0-M,D+ZO],[k0,k2,ZO-.05],[k1,k2,ZO-.05],[ox1+M,oy0-M,D+ZO]],kM(0x8a663a));
+  // ordre de dessin du fond vers l'avant : quand la boîte est presque plate (elle sort du dessin, elle y rentre), les couches ne se chevauchent plus
+  dioBox.children.forEach(m=>{m.geometry.computeBoundingSphere();m.renderOrder=Math.round((m.position.z+m.geometry.boundingSphere.center.z+20)*100)});
   DIO.D=D;DIO.box=[ox0-M,ox1+M,oy0-M,oy1+M];
   // la feuille et le dessin, à la taille du cadre (vu à plat, posé sur le couvercle)
   const fw=(ox1-ox0+2*M)*DSB,fh=(oy1-oy0+2*M)*DSB,fx=(ox0+ox1)/2*DSB,fy=(oy0+oy1)/2*DSB;
@@ -2540,12 +2558,12 @@ function dioDrawPaint(p,fade){const x=dioDrawX;x.clearRect(0,0,640,640);x.global
 function dioBrush(u,v){const x=u*160,y=(1-v)*160;const g=dioMaskX.createRadialGradient(x,y,0,x,y,15);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dioMaskX.fillStyle=g;dioMaskX.fillRect(x-15,y-15,30,30)}
 function dioCoverage(){const d=dioMaskX.getImageData(0,0,160,160).data;let n=0;for(let i=3;i<d.length;i+=16)if(d[i]>60)n++;return n/(d.length/16)}
 const dsm=t=>t<0?0:t>1?1:t*t*(3-2*t);
-function dioSetBox(k){dioBox.scale.set(DSB,DSB,DSB*Math.max(.02,k));dioBox.position.z=.06+(DGAP+DIO.D/2*DSB)*k;dioMats.forEach(m=>m.opacity=m.userData.o*(m.userData.w?m.userData.w():1)*dsm(k*3))}
+function dioSetBox(k){dioBox.scale.set(DSB,DSB,DSB*Math.max(.02,k));dioBox.position.z=.06+(DGAP+DIO.D/2*DSB)*k;const o=dsm(k*4),dt=k>.97;dioMats.forEach(m=>{m.opacity=m.userData.o*(m.userData.w?m.userData.w():1)*o;m.depthTest=dt});return o}
 // l'aide : la main qui tient un crayon, et le crayon qui suit le doigt
-const dioHand=document.createElement('div');dioHand.setAttribute('aria-hidden','true');dioHand.style.cssText='position:fixed;left:0;top:0;pointer-events:none;opacity:0;transition:opacity .4s;transform:translate(-36px,-82px);z-index:30';
-const DPEN='<g transform="rotate(35 60 60)"><rect x="53" y="6" width="14" height="70" fill="#e8b03c"/><rect x="53" y="6" width="5" height="70" fill="#f3cc66"/><rect x="62" y="6" width="5" height="70" fill="#c98f22"/><rect x="52" y="0" width="16" height="8" rx="3" fill="#c0624a"/><rect x="52" y="7" width="16" height="7" fill="#b9b6ae"/><path d="M52 10 H68" stroke="#8f8c86" stroke-width="1.2"/><path d="M53 76 L60 96 L67 76Z" fill="#e9c99a"/><path d="M57.5 89 L60 96 L62.5 89Z" fill="#3a3438"/><path d="M53 6 H67 V76 L60 96 L53 76Z" fill="none" stroke="#5a3e12" stroke-width="1.6" stroke-linejoin="round"/></g>';
-dioHand.innerHTML='<svg width="110" height="110" viewBox="0 0 120 120">'+DPEN+'<g transform="translate(16,-30)"><path d="M58 66 C50 60 40 62 36 70 C30 82 34 98 48 106 C62 113 80 110 90 100 C98 92 98 80 92 74 L84 68 C82 62 76 60 72 64 C70 58 64 56 60 60 Z" fill="#ffffff" stroke="#3a2a1a" stroke-width="2.6" stroke-linejoin="round"/><path d="M60 60 C56 66 58 74 64 76 M72 64 C70 70 72 76 78 77" fill="none" stroke="#3a2a1a" stroke-width="2.2" stroke-linecap="round"/><path d="M36 72 C44 72 52 76 56 82" fill="none" stroke="#3a2a1a" stroke-width="2.2" stroke-linecap="round"/></g></svg>';
-const dioPen=document.createElement('div');dioPen.setAttribute('aria-hidden','true');dioPen.style.cssText='position:fixed;left:0;top:0;pointer-events:none;opacity:0;transform:translate(-26px,-60px);z-index:30';dioPen.innerHTML='<svg width="80" height="80" viewBox="0 0 120 120">'+DPEN+'</svg>';
+const dioHand=document.createElement('div');dioHand.setAttribute('aria-hidden','true');dioHand.style.cssText='position:fixed;left:0;top:0;pointer-events:none;opacity:0;transition:opacity .4s;transform:translate(-28px,-102px);z-index:30';
+const DPEN='<g transform="translate(36 132) rotate(37)"><g transform="rotate(-90)"><path d="M0 0 L14 -5 L14 5 Z" fill="#f0d6aa"/><path d="M0 0 L5 -1.8 L5 1.8Z" fill="#2a1a22"/><rect x="14" y="-5" width="84" height="10" fill="#f2b833"/><rect x="14" y="-5" width="84" height="3.3" fill="#f8d066"/><rect x="98" y="-5.4" width="7" height="10.8" fill="#bdb8ae"/><rect x="104" y="-5.4" width="9" height="10.8" rx="3.5" fill="#e0705a"/><path d="M0 0 L14 -5 H104 M0 0 L14 5 H104" fill="none" stroke="#2a1a22" stroke-width="2" stroke-linejoin="round"/><rect x="104" y="-5.4" width="9" height="10.8" rx="3.5" fill="none" stroke="#2a1a22" stroke-width="2"/><path d="M14 -5 V5" stroke="#2a1a22" stroke-width="1.4"/></g></g>';
+dioHand.innerHTML='<svg width="124" height="124" viewBox="0 0 160 160"><g transform="translate(36 132) rotate(37)"><g transform="rotate(-90)"><path d="M0 0 L14 -5 L14 5 Z" fill="#f0d6aa"/><path d="M0 0 L5 -1.8 L5 1.8Z" fill="#2a1a22"/><rect x="14" y="-5" width="84" height="10" fill="#f2b833"/><rect x="14" y="-5" width="84" height="3.3" fill="#f8d066"/><rect x="98" y="-5.4" width="7" height="10.8" fill="#bdb8ae"/><rect x="104" y="-5.4" width="9" height="10.8" rx="3.5" fill="#e0705a"/><path d="M0 0 L14 -5 H104 M0 0 L14 5 H104" fill="none" stroke="#2a1a22" stroke-width="2" stroke-linejoin="round"/><rect x="104" y="-5.4" width="9" height="10.8" rx="3.5" fill="none" stroke="#2a1a22" stroke-width="2"/><path d="M14 -5 V5" stroke="#2a1a22" stroke-width="1.4"/></g><g fill="#fffaf0" stroke="#2a1a22" stroke-width="3" stroke-linejoin="round"><rect x="-4" y="-70" width="38" height="44" rx="15"/><rect x="-15" y="-66" width="22" height="13" rx="6.5"/><rect x="-15" y="-54" width="22" height="13" rx="6.5"/><rect x="-13" y="-42" width="20" height="12" rx="6"/><rect x="-11" y="-34" width="26" height="12" rx="6" transform="rotate(-18 2 -28)"/></g></g></svg>';
+const dioPen=document.createElement('div');dioPen.setAttribute('aria-hidden','true');dioPen.style.cssText='position:fixed;left:0;top:0;pointer-events:none;opacity:0;transform:translate(-18px,-66px);z-index:30';dioPen.innerHTML='<svg width="80" height="80" viewBox="0 0 160 160">'+DPEN+'</svg>';
 // la phrase d'Alice quand on découvre le détail : un papier collé en haut de l'écran, qui ne cache rien
 const dioNote=document.createElement('div');dioNote.style.cssText='position:fixed;left:50%;top:calc(max(14px,env(safe-area-inset-top)) + 56px);transform:translateX(-50%) rotate(-1.5deg);width:min(330px,80vw);padding:10px 16px;background:#f8f1df;color:#22306e;font:600 21px/1.2 Caveat,cursive;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.45);opacity:0;transition:opacity 1s;pointer-events:none;z-index:25';
 document.body.append(dioHand,dioPen,dioNote);
@@ -2553,11 +2571,11 @@ const dioToWorld=(x,y,z)=>dioG.localToWorld(new THREE.Vector3(x,y,z));
 function dioHandAt(t){const f=DIO.frame;if(!f)return;const k=(t*.6)%1,e=.5-.5*Math.cos(k*Math.PI*2);const p=dioToWorld(f[0]+f[2]*(-.25+.5*e),f[1]+f[3]*(-.05+.1*Math.sin(k*Math.PI*4)),.05).project(camera);const r=cv.getBoundingClientRect();dioHand.style.left=(r.left+(p.x+1)/2*r.width)+'px';dioHand.style.top=(r.top+(1-p.y)/2*r.height)+'px'}
 function dioHit(e){toNDC(e);const h=ray.intersectObject(dioDraw,false)[0];return h&&h.uv?h.uv:null}
 // ----- le déroulé -----
-DIO.start=(id,onOut)=>{DIO.id=id;DIO.onOut=onOut;DIO.ph='sheet';DIO.t=0;DIO.need=false;DIO.found=false;DIO.strokes=0;DIO.full=0;DIO.yaw=DIO.pit=DIO.ty=DIO.tp=0;dioMaskX.clearRect(0,0,160,160);
+DIO.start=(id,onOut)=>{DIO.id=id;DIO.seen=false;DIO.onOut=onOut;DIO.ph='sheet';DIO.t=0;DIO.need=false;DIO.found=false;DIO.strokes=0;DIO.full=0;DIO.yaw=DIO.pit=DIO.ty=DIO.tp=0;dioMaskX.clearRect(0,0,160,160);
   dioBuild(id);dioBox.rotation.set(0,0,0);dioSetBox(0);dioBox.visible=false;dioG.visible=true;dioStar.material.opacity=0;dioNote.style.opacity=0;dioDrawPaint(0,0);
   showHint('Crayonner le souvenir du bout du doigt.')};
-DIO.needFind=(text)=>{DIO.need=true;DIO.lesson=text;showHint('Tourner doucement la boîte du doigt : quelque chose s’y cache.')};
-DIO.close=(onBack)=>{if(!DIO.ph){onBack&&onBack();return}DIO.onBack=onBack;DIO.ph='back';DIO.t=0;dioNote.style.opacity=0;hideSay()};
+DIO.needFind=(text)=>{DIO.need=true;DIO.lesson=text;if(!DIO.seen)showHint('Tourner doucement la boîte du doigt : quelque chose s’y cache.')};
+DIO.close=(onBack)=>{if(!DIO.ph){onBack&&onBack();return}DIO.onBack=onBack;{const st=STARS[lit];DIO.goal=st?[(st[0]/MS-.5)*SCRW/dioG.scale.x,(.5-st[1]/MS)*SCRW/dioG.scale.x]:null}DIO.ph='back';DIO.t=0;dioNote.style.opacity=0;hideSay()};
 DIO.down=(e)=>{if(!DIO.ph)return false;if(DIO.ph==='draw'){const uv=dioHit(e);DIO.drag={draw:true,uv};if(uv)dioBrush(uv.x,uv.y);DIO.strokes++;dioPen.style.left=e.clientX+'px';dioPen.style.top=e.clientY+'px';dioPen.style.opacity=1;return true}
   if(DIO.ph==='out'){DIO.drag={x:e.clientX,y:e.clientY,ty:DIO.ty,tp:DIO.tp,moved:false};DIO.touched=true;return true}return DIO.ph!=='sheet'||true};
 DIO.move=(e)=>{const d=DIO.drag;if(!d)return!!DIO.ph;if(d.draw){const uv=dioHit(e);dioPen.style.left=e.clientX+'px';dioPen.style.top=e.clientY+'px';if(uv){if(d.uv){for(let i=1;i<=8;i++)dioBrush(d.uv.x+(uv.x-d.uv.x)*i/8,d.uv.y+(uv.y-d.uv.y)*i/8)}d.uv=uv}return true}
@@ -2568,12 +2586,14 @@ function dioTick(dt,T){if(!DIO.ph)return;DIO.t+=dt;const t=DIO.t;
   if(DIO.ph==='sheet'){dioSheet.material.opacity=dsm(t/.5);dioDrawPaint(dsm(t/1.1),1);if(t>1.1){DIO.ph='draw';DIO.t=0}}
   else if(DIO.ph==='draw'){dioDrawPaint(1,1);dioHand.style.opacity=DIO.strokes?0:(t>.4?1:0);if(!DIO.strokes&&t>.4)dioHandAt(t);if(DIO.strokes&&!DIO.drag&&dioCoverage()>.16){DIO.ph='fill';DIO.t=0;dioHand.style.opacity=0}}
   else if(DIO.ph==='fill'){DIO.full=dsm(t/.9);dioDrawPaint(1,1);if(t>1.1){DIO.ph='rise';DIO.t=0;dioBox.visible=true;sndPaper(.5,.4)}}
-  else if(DIO.ph==='rise'){const k=dsm(t/1.8);dioSetBox(k);dioDrawPaint(1,1-dsm(t/1.2));dioSheet.material.opacity=1-dsm(t/1.1);if(t>1.85){DIO.ph='out';DIO.t=0;DIO.touched=false;const f=DIO.onOut;DIO.onOut=null;f&&f()}}
+  else if(DIO.ph==='rise'){const k=dsm(t/1.8),o=dioSetBox(k);dioDrawPaint(1,1-o);dioSheet.material.opacity=1-o;if(t>1.85){DIO.ph='out';DIO.t=0;DIO.touched=false;const f=DIO.onOut;DIO.onOut=null;f&&f()}}
   else if(DIO.ph==='out'){dioMats.forEach(m=>{if(m.userData.w)m.opacity=m.userData.o*m.userData.w()});if(!DIO.drag&&!DIO.touched)DIO.ty=Math.sin(t*.7)*.18;else if(!DIO.drag){DIO.ty*=Math.pow(.6,dt);DIO.tp*=Math.pow(.6,dt)}
     if(AUTO&&DIO.need&&!DIO.found&&t>1.5&&DIO.hid)DIO.ty=.5*DIO.hid.wall;
-    if(DIO.need&&!DIO.found&&DIO.hid&&DIO.yaw*DIO.hid.wall>.3){DIO.found=true;DIO.need=false;dioNote.textContent=DIO.lesson;dioNote.style.opacity=1;sndPaper(.4,.3);sndTone(523,1.2,.05);showHint('À retenir. Toucher pour continuer.');waitTap=true}}
-  else if(DIO.ph==='back'){const k=1-dsm(t/1.6);dioSetBox(k);DIO.ty*=Math.pow(.2,dt);DIO.tp*=Math.pow(.2,dt);dioDrawPaint(1,dsm((t-.6)/.8));dioSheet.material.opacity=dsm((t-.5)/.7);if(t>1.7){DIO.ph='star';DIO.t=0;dioBox.visible=false}}
-  else if(DIO.ph==='star'){const k=dsm(t/1.6),f=DIO.frame;dioDrawPaint(1,1-k);dioSheet.material.opacity=1-k;dioStar.material.opacity=Math.min(1,k*2)*(1-dsm((t-1.6)/.5));dioStar.position.set(f[0]+k*f[2]*.25,f[1]+k*f[3]*.38,.06);dioStar.scale.setScalar(1.8-1.3*k);
+    // trouvé en avance (pendant qu'Alice parle) : on s'en souvient, la phrase viendra à son heure
+    if(DIO.touched&&DIO.hid&&DIO.yaw*DIO.hid.wall>.3)DIO.seen=true;
+    if(DIO.need&&!DIO.found&&DIO.hid&&(DIO.seen||DIO.yaw*DIO.hid.wall>.3)){DIO.found=true;DIO.need=false;dioNote.textContent=DIO.lesson;dioNote.style.opacity=1;sndPaper(.4,.3);sndTone(523,1.2,.05);showHint('À retenir. Toucher pour continuer.');waitTap=true}}
+  else if(DIO.ph==='back'){const k=1-dsm(t/1.6),o=dioSetBox(k);DIO.ty*=Math.pow(.2,dt);DIO.tp*=Math.pow(.2,dt);dioDrawPaint(1,1-o);dioSheet.material.opacity=1-o;if(t>1.7){DIO.ph='star';DIO.t=0;dioBox.visible=false}}
+  else if(DIO.ph==='star'){const k=dsm(t/1.6),f=DIO.frame;dioDrawPaint(1,1-k);dioSheet.material.opacity=1-k;dioStar.material.opacity=Math.min(1,k*2)*(1-dsm((t-1.6)/.5));const g=DIO.goal||[f[0]+f[2]*.25,f[1]+f[3]*.38];dioStar.position.set(lerp(f[0],g[0],k),lerp(f[1],g[1],k)+Math.sin(k*Math.PI)*.5,.06);dioStar.scale.setScalar(1.8-1.3*k);
     if(t>2.1){DIO.ph=null;dioG.visible=false;const cb=DIO.onBack;DIO.onBack=null;cb&&cb()}}
   DIO.yaw+=(DIO.ty-DIO.yaw)*(1-Math.pow(.002,dt));DIO.pit+=(DIO.tp-DIO.pit)*(1-Math.pow(.002,dt));dioBox.rotation.set(DIO.pit,DIO.yaw,0);
   // la lumière du souvenir

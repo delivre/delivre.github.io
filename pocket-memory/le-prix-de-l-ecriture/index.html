@@ -2702,7 +2702,7 @@ DIO.start=(id,onOut)=>{DIO.id=id;DIO.seen=false;DIO.onOut=onOut;DIO.ph='sheet';D
   dioBuild(id);dioBox.rotation.set(0,0,0);dioSetBox(0);dioBox.visible=false;dioG.visible=true;dioStar.material.opacity=0;dioNote.style.opacity=0;dioDrawPaint(0,0);
   showHint('Crayonner le souvenir du bout du doigt.')};
 DIO.needFind=(text)=>{DIO.need=true;DIO.lesson=text;if(!DIO.seen)showHint('Tourner doucement la boîte du doigt : quelque chose s’y cache.')};
-DIO.close=(onBack)=>{if(!DIO.ph){onBack&&onBack();return}DIO.onBack=onBack;{const st=STARS[lit];DIO.goal=st?[(st[0]-384)/DU,(384-st[1])/DU]:null}DIO.ph='back';DIO.t=0;dioNote.style.opacity=0;hideSay()};
+DIO.close=(onBack)=>{if(!DIO.ph){onBack&&onBack();return}DIO.onBack=onBack;{const st=STARS[lit];DIO.goal=st?[(st[0]/MS-.5)*SCRW/dioG.scale.x,(.5-st[1]/MS)*SCRW/dioG.scale.x]:null}DIO.ph='back';DIO.t=0;dioNote.style.opacity=0;hideSay()};
 DIO.down=(e)=>{if(!DIO.ph)return false;if(DIO.ph==='draw'){const uv=dioHit(e);DIO.drag={draw:true,uv};if(uv)dioBrush(uv.x,uv.y);DIO.strokes++;dioPen.style.left=e.clientX+'px';dioPen.style.top=e.clientY+'px';dioPen.style.opacity=1;return true}
   if(DIO.ph==='out'){DIO.drag={x:e.clientX,y:e.clientY,ty:DIO.ty,tp:DIO.tp,moved:false};DIO.touched=true;return true}return DIO.ph!=='sheet'||true};
 DIO.move=(e)=>{const d=DIO.drag;if(!d)return!!DIO.ph;if(d.draw){const uv=dioHit(e);dioPen.style.left=e.clientX+'px';dioPen.style.top=e.clientY+'px';if(uv){if(d.uv){for(let i=1;i<=8;i++)dioBrush(d.uv.x+(uv.x-d.uv.x)*i/8,d.uv.y+(uv.y-d.uv.y)*i/8)}d.uv=uv}return true}
