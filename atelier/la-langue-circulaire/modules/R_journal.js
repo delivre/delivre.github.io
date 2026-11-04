@@ -21,7 +21,7 @@ const PAGE=(()=>{const o=mkC(),x=o.getContext('2d');x.save();x.shadowColor='rgba
   x.drawImage(PAPERG,0,0);const g=x.createRadialGradient(384,384,200,384,384,560);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(120,80,30,.18)');x.fillStyle=g;x.fillRect(0,0,MS,MS);x.restore();
   [[70,18,-.5],[690,18,.45]].forEach(([a,b,r])=>{x.save();x.translate(a,b);x.rotate(r);x.fillStyle='rgba(240,230,190,.75)';x.fillRect(-40,-12,80,24);x.restore()});return o})();
 // version papier : un panneau de carton ondulé, bordé d'une frise grecque peinte (terre cuite et noir), et une étiquette de papier collée pour le texte
-const LABEL=mkC();
+const LABEL=mkC(),LABEL2=mkC();
 if(PAPER){const x=PAGE.getContext('2d');x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,MS,MS);
  const edge=(x0,y0,x1,y1,j)=>{const P=[];for(let u=x0;u<=x1;u+=14)P.push([u,y0+rnd(-j,j)]);for(let v=y0;v<=y1;v+=14)P.push([x1+rnd(-j,j),v]);for(let u=x1;u>=x0;u-=14)P.push([u,y1+rnd(-j,j)]);for(let v=y1;v>=y0;v-=14)P.push([x0+rnd(-j,j),v]);return P};
  const poly=(P)=>{x.beginPath();P.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.closePath()};
@@ -36,7 +36,9 @@ if(PAPER){const x=PAGE.getContext('2d');x.setTransform(1,0,0,1,0,0);x.clearRect(
  // l'étiquette de papier collée, pour l'écriture d'Alice
  const y=LABEL.getContext('2d');const L=edge(60,506,726,708,2.5);y.save();y.shadowColor='rgba(0,0,0,.35)';y.shadowBlur=8;y.shadowOffsetY=4;y.fillStyle='#f6eedb';y.beginPath();L.forEach(([a,b],i)=>i?y.lineTo(a,b):y.moveTo(a,b));y.closePath();y.fill();y.restore();
  y.save();y.clip();y.drawImage(PAPERG,0,0);y.restore();
- [[94,512,-.4],[692,512,.4]].forEach(([a,b,r])=>{y.save();y.translate(a,b);y.rotate(r);y.fillStyle='rgba(235,220,180,.7)';y.fillRect(-26,-9,52,18);y.restore()})}
+ [[94,512,-.4],[692,512,.4]].forEach(([a,b,r])=>{y.save();y.translate(a,b);y.rotate(r);y.fillStyle='rgba(235,220,180,.7)';y.fillRect(-26,-9,52,18);y.restore()});
+ // la même étiquette, plus basse, sous la carte d'une activité
+ {const z=LABEL2.getContext('2d');const L2=edge(52,568,716,710,2.5);z.save();z.shadowColor='rgba(0,0,0,.35)';z.shadowBlur=8;z.shadowOffsetY=4;z.fillStyle='#f6eedb';z.beginPath();L2.forEach(([a,b],i)=>i?z.lineTo(a,b):z.moveTo(a,b));z.closePath();z.fill();z.restore();z.save();z.clip();z.drawImage(PAPERG,0,0);z.restore()}}
 const easeBack=t=>{const c=1.7;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2)};
 // les pièces se dressent l'une après l'autre (pop !), puis respirent doucement, chacune à sa profondeur
 // la lumière des souvenirs : un calque translucide entre les plans du fond, des rayons doux, des poussières qui flottent
@@ -125,14 +127,14 @@ const sofa=(x,X,Y,W,H,col,col2)=>{fp(x,col2,c=>rrect(c,X,Y,W,H*.55,24));fp(x,col
  // Alice et Papa, assis sur la marche, de dos : ils regardent entre les barreaux
  const alice=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();chibi(x,{x:450,y:745,h:260,view:'back',armL:[-20,0],armR:[30,-40]});x.restore()});
  // Papa arrive quand il parle : assis tout près, au premier plan, penché vers elle, le bras autour de ses épaules
- const papa=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();parent(x,{kind:'man',view:'back',seated:true,x:250,y:830,h:440,tilt:40,hat:'#000',armL:[10,10],armR:[74,-44]});x.restore()});
- POP.escalier={P:[{...wall,depth:0},{...room,depth:.8},{...stairs,depth:1.8},{...alice,depth:2.6},{...papa,depth:2.7,when:()=>MEMX.papa?clamp((performance.now()-MEMX.papa)/800):0}],
+ const papa=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();parent(x,{kind:'man',view:'back',seated:true,x:300,y:830,h:420,tilt:30,hat:'#000',armL:[-6,6],armR:[58,-10]});x.restore()});
+ POP.escalier={P:[{...wall,depth:0},{...room,depth:.8},{...stairs,depth:1.8},{...papa,depth:2.45,when:()=>MEMX.papa?clamp((performance.now()-MEMX.papa)/800):0},{...alice,depth:2.6}],
   fx:(c,T)=>{tvGlow(c,475,285,T,230);motes(c,T,360,600,220,460)}}}
 /* 2. le canapé : le carton « ALICE », le carton « MAMAN » ; Papa crie « Kangourou ! » de la cuisine */
 {const wall=cut(x=>stripes(x,70,40,628,640,'#2f3a5c','#2a3454'),{crayon:.35,border:0,outline:0});
- const door=cut(x=>{fp(x,'#f2c46a',c=>c.rect(96,170,150,470));fp(x,'#e0a84a',c=>c.rect(96,560,150,80));parent(x,{kind:'man',x:170,y:636,h:300,view:'front',hat:'#000',scarf:'#000',armL:[-20,20],armR:[60,90]});fp(x,'#6a4a30',c=>c.rect(84,160,12,480));fp(x,'#6a4a30',c=>c.rect(246,160,12,480));fp(x,'#6a4a30',c=>c.rect(84,158,174,12))});
+ const door=cut(x=>{fp(x,'#f2c46a',c=>c.rect(96,170,150,470));fp(x,'#e0a84a',c=>c.rect(96,560,150,80));parent(x,{kind:'man',x:170,y:636,h:300,view:'front',hat:'#000',scarf:'#000',armL:[-7,5],armR:[7,-5]});fp(x,'#6a4a30',c=>c.rect(84,160,12,480));fp(x,'#6a4a30',c=>c.rect(246,160,12,480));fp(x,'#6a4a30',c=>c.rect(84,158,174,12))});
  const tv=cut(x=>tvSet(x,520,250,150,112,'board'));
- const couch=cut(x=>{sofa(x,300,470,370,190,'#d8904a','#c07a3a');parent(x,{kind:'woman',x:560,y:650,h:300,view:'front',seated:true,armL:[30,70],armR:[-30,-70]});cardboard(x,560,500,136,64,'MAMAN',.04,'#5a2a14')});
+ const couch=cut(x=>{sofa(x,300,470,370,190,'#d8904a','#c07a3a');parent(x,{kind:'woman',x:560,y:650,h:300,view:'front',seated:true,armL:[-6,6],armR:[6,-6]});cardboard(x,560,500,136,64,'MAMAN',.04,'#5a2a14')});
  const kid=cut(x=>{chibi(x,{x:400,y:700,h:190,view:'front',armL:[-165,20],armR:[165,-20]});cardboard(x,400,488,150,76,'ALICE',-.06,'#22306e',true)});
  const fg=cut(x=>{fp(x,'#7a4a2a',c=>rrect(c,500,676,200,26,8));fp(x,'#f6efe0',c=>c.ellipse(600,668,46,18,0,0,7));for(let i=0;i<14;i++)fp(x,'#fff6d0',c=>c.arc(570+rnd(0,60),660+rnd(-6,4),7,0,7));plant(x,120,700,1)});
  POP.canape={P:[{...wall,depth:0},{...door,depth:.7},{...tv,depth:1.1},{...couch,depth:1.9},{...kid,depth:2.9},{...fg,depth:4.1}],
@@ -140,7 +142,7 @@ const sofa=(x,X,Y,W,H,col,col2)=>{fp(x,col2,c=>rrect(c,X,Y,W,H*.55,24));fp(x,col
 /* 3. l'encre : le stylo-plume de Maman, un cercle sur la feuille, une tache sur la nappe */
 {const wall=cut(x=>{fp(x,'#3a4a5a',c=>rrect(c,70,40,628,640,20));fp(x,'#9aa8b0',c=>rrect(c,300,80,170,170,10));for(let i=0;i<10;i++)fp(x,'rgba(240,240,236,.45)',c=>c.arc(320+rnd(0,130),110+rnd(0,120),rnd(14,30),0,7));x.strokeStyle='#2a3036';x.lineWidth=10;x.strokeRect(300,80,170,170);x.beginPath();x.moveTo(385,80);x.lineTo(385,250);x.stroke()},{crayon:.35,border:0,outline:0});
  const lamp=cut(x=>{fp(x,'#2a2a30',c=>c.rect(381,40,6,120));fp(x,'#e8b84a',c=>{c.moveTo(330,200);c.quadraticCurveTo(384,140,438,200);c.closePath()})});
- const folks=cut(x=>{parent(x,{kind:'man',x:180,y:620,h:330,view:'front',hat:'#000',scarf:'#000',armL:[-15,10],armR:[70,80]});fp(x,'#f6efe0',c=>rrect(c,226,420,30,36,6));parent(x,{kind:'woman',x:560,y:610,h:330,view:'front',tilt:-14,armL:[-60,-50],armR:[20,30]});chibi(x,{x:384,y:520,h:150,view:'front',armL:[-40,40],armR:[40,-30]})});
+ const folks=cut(x=>{parent(x,{kind:'man',x:180,y:620,h:330,view:'front',hat:'#000',scarf:'#000',armL:[-7,5],armR:[7,-5]});parent(x,{kind:'woman',x:560,y:610,h:330,view:'front',tilt:-10,armL:[-7,5],armR:[7,-5]});chibi(x,{x:384,y:520,h:150,view:'front',armL:[-40,40],armR:[40,-30]})});
  const table=cut(x=>{fp(x,'#e8eef4',c=>{c.moveTo(110,520);c.lineTo(660,520);c.lineTo(700,700);c.lineTo(70,700);c.closePath()});x.save();x.beginPath();x.moveTo(110,520);x.lineTo(660,520);x.lineTo(700,700);x.lineTo(70,700);x.closePath();x.clip();x.strokeStyle='rgba(90,130,200,.35)';x.lineWidth=12;for(let u=0;u<16;u++){x.beginPath();x.moveTo(60+u*44,520);x.lineTo(40+u*48,700);x.stroke()}for(let v=530;v<700;v+=40){x.beginPath();x.moveTo(40,v);x.lineTo(720,v);x.stroke()}x.restore();
    x.save();x.translate(384,600);x.rotate(-.06);fp(x,'#fbf8f0',c=>c.rect(-90,-56,180,112));inkRing(x,0,0,38,{seed:9,w:6,f:[{a:.6,k:'tendril',s:1.4},{a:3.4,k:'splash',s:1}],drops:6});x.restore();
    inkRing(x,520,650,20,{seed:14,w:16,f:[{a:1,k:'splash',s:1.6},{a:4,k:'blob',s:1.4}],col:'#1a1f3a',drops:14,wash:false})});
@@ -150,7 +152,7 @@ const sofa=(x,X,Y,W,H,col,col2)=>{fp(x,col2,c=>rrect(c,X,Y,W,H*.55,24));fp(x,col
 /* 4. la fin du film : « Elle savait, et elle l'a fait quand même ? » — Papa passe un bras autour des deux */
 {const wall=cut(x=>stripes(x,70,40,628,640,'#2a3150','#262c49'),{crayon:.35,border:0,outline:0});
  const frames=cut(x=>{[[150,120,110,80],[300,100,90,120],[460,130,120,90]].forEach(([a,b,w,h])=>{fp(x,'#c9a06a',c=>c.rect(a-8,b-8,w+16,h+16));fp(x,'#5a6a7a',c=>c.rect(a,b,w,h))})});
- const couch=cut(x=>{sofa(x,150,360,470,260,'#d8904a','#c07a3a');parent(x,{kind:'man',x:250,y:600,h:330,view:'front',seated:true,hat:'#000',armL:[-20,30],armR:[-110,70]});parent(x,{kind:'woman',x:520,y:600,h:320,view:'front',seated:true,tilt:-8,armL:[-60,-40],armR:[20,40]});chibi(x,{x:390,y:560,h:150,view:'front',armL:[-30,30],armR:[30,-30]})});
+ const couch=cut(x=>{sofa(x,150,360,470,260,'#d8904a','#c07a3a');parent(x,{kind:'man',x:250,y:600,h:330,view:'front',seated:true,hat:'#000',armL:[-7,5],armR:[7,-5]});parent(x,{kind:'woman',x:520,y:600,h:320,view:'front',seated:true,tilt:-8,armL:[-7,5],armR:[7,-5]});chibi(x,{x:390,y:560,h:150,view:'front',armL:[-30,30],armR:[30,-30]})});
  const table=cut(x=>{fp(x,'#7a4a2a',c=>rrect(c,200,610,380,40,10));fp(x,'#5a3418',c=>c.rect(220,650,16,50));fp(x,'#5a3418',c=>c.rect(544,650,16,50));[[320,596],[440,598]].forEach(([a,b])=>{fp(x,'#f6efe0',c=>rrect(c,a-26,b-34,52,40,8));x.strokeStyle='#f6efe0';x.lineWidth=7;x.beginPath();x.arc(a+28,b-16,11,-1.4,1.4);x.stroke();fp(x,'#a8743a',c=>c.ellipse(a,b-32,22,6,0,0,7))})});
  const fg=cut(x=>{plant(x,640,700,1.05);fp(x,'#4a86e0',c=>rrect(c,90,660,90,24,4));fp(x,'#e0445a',c=>rrect(c,96,636,80,24,4))});
  POP.fin={P:[{...wall,depth:0},{...frames,depth:.6},{...couch,depth:1.7},{...table,depth:2.8},{...fg,depth:4}],
@@ -180,21 +182,22 @@ function handBox(c,x,y,w,h){c.beginPath();const seg=(x0,y0,x1,y1,o)=>{c.moveTo(x
 function drawJournal(c,T){c.save();c.textBaseline='alphabetic';
   if(JR.note){// Alice encadre l'essentiel au crayon, avec une petite étoile
     const k=clamp((performance.now()-JR.note.t0)/700);const fz=42;c.font=`600 ${fz}px Caveat, "Patrick Hand", cursive`;
-    const ls=jLines(c,JR.note.text,520),bh=ls.length*fz*1.15+30,by=624-bh/2;c.strokeStyle='#22306e';c.lineWidth=2.6;c.globalAlpha=k;handBox(c,110,by,560,bh);
+    const ls=jLines(c,JR.note.text,560),bh=ls.length*fz*1.12+28,by=607-bh/2;c.strokeStyle='#22306e';c.lineWidth=2.6;c.globalAlpha=k;handBox(c,94,by,592,bh);
     // de temps en temps, un petit dessin au stylo à côté du cadre, jamais au même endroit
     const dk=(JR.noteN||0)%3;if(dk){const px=dk===1?660:120,py=dk===1?by-10:by+bh+6;c.save();c.translate(px,py);c.rotate(dk===1?.15:-.1);c.beginPath();
       if(dk===1){for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2,rr=i%2?6:14;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}c.closePath()}else{c.moveTo(-14,4);c.quadraticCurveTo(-4,-12,6,0);c.quadraticCurveTo(14,10,22,-6);c.moveTo(-14,10);c.quadraticCurveTo(-4,-6,6,6);c.quadraticCurveTo(14,16,22,0)}c.stroke();c.restore()}
-    let y=by+fz*.95+12;ls.forEach(l=>{c.fillText(l,390-c.measureText(l).width/2,y);y+=fz*1.15});if(waitTap){c.fillStyle='#c8902a';c.globalAlpha=.5+.5*Math.sin(T*4);c.font='26px serif';c.fillText('▸',700,736)}c.restore();return}
-  let items=JR.items.slice(-2),fs=40,lines;const fit=()=>{for(fs=40;fs>=40;fs-=2){c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`;lines=0;items.forEach(it=>lines+=jLines(c,it.text,600).length);if(lines*(fs*1.15)<=(PAPER?150:190))return true}return false};
-  if(!fit()){items=JR.items.slice(-1);fs=40;c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`}
-  const lh=fs*1.15;let y=(PAPER?532:548)+lh*.85;items.forEach((it,i)=>{const old=i<items.length-1;c.fillStyle=INKC[it.who]||'#22306e';c.globalAlpha=old?.42:1;let n=jChars(it);for(const ln of jLines(c,it.text,600)){const s=ln.slice(0,Math.max(0,n));c.fillText(s,100,y);n-=ln.length+1;y+=lh}});
+    let y=by+fz*.95+10;ls.forEach(l=>{c.fillText(l,390-c.measureText(l).width/2,y);y+=fz*1.12});if(waitTap){c.fillStyle='#c8902a';c.globalAlpha=.5+.5*Math.sin(T*4);c.font='26px serif';c.fillText('▸',700,736)}c.restore();return}
+  let items=JR.items.slice(-2),fs=40,lines;const fit=()=>{for(fs=38;fs>=38;fs-=2){c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`;lines=0;items.forEach(it=>lines+=jLines(c,it.text,590).length);if(lines*(fs*1.15)<=(PAPER?140:190))return true}return false};
+  if(!fit()){items=JR.items.slice(-1);fs=38;c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`}
+  const lh=fs*1.15;let y=(PAPER?526:548)+lh*.85;items.forEach((it,i)=>{const old=i<items.length-1;c.fillStyle=INKC[it.who]||'#22306e';c.globalAlpha=old?.42:1;let n=jChars(it);for(const ln of jLines(c,it.text,590)){const s=ln.slice(0,Math.max(0,n));c.fillText(s,96,y);n-=ln.length+1;y+=lh}});
   c.globalAlpha=1;if(waitTap&&!jWriting()&&JR.items.length){c.fillStyle='#c8902a';c.globalAlpha=.5+.5*Math.sin(T*4);c.font='26px serif';c.fillText('▸',700,736)}c.restore()}
 
 /* ---------- les manipulations sont collées dans le journal comme des cartes ---------- */
 const CARD={x:115,y:18,k:.7,r:-.012};
 // sous la carte, ce qu'on se dit, écrit dans le carnet (jamais aussi dans une bulle) ; toujours la même taille
 const CAP={t:'',t0:0};function capWrite(t){t=String(t).replace(/ ([:;?!»])/g,'\u202f$1').replace(/« /g,'«\u202f');if(t===CAP.t)return;CAP.t=t;CAP.t0=performance.now()}
-function drawCap(c,T){if(!CAP.t)return;c.save();c.font='600 38px Caveat, "Patrick Hand", cursive';c.fillStyle='#22306e';let n=Math.floor((performance.now()-CAP.t0)/1000*48),y=600;for(const ln of jLines(c,CAP.t,610)){c.fillText(ln.slice(0,Math.max(0,n)),79,y);n-=ln.length+1;y+=42}c.restore()}
+const capWriting=()=>CAP.t&&(performance.now()-CAP.t0)/1000*48<CAP.t.length;function capFinish(){CAP.t0=-1e9}
+function drawCap(c,T){if(!CAP.t)return;if(PAPER)c.drawImage(LABEL2,0,0);c.save();c.font='600 38px Caveat, "Patrick Hand", cursive';c.fillStyle='#22306e';let n=Math.floor((performance.now()-CAP.t0)/1000*48),y=606;for(const ln of jLines(c,CAP.t,600)){c.fillText(ln.slice(0,Math.max(0,n)),84,y);n-=ln.length+1;y+=42}c.restore()}
 const toManip=(cx,cy)=>{const dx=cx-CARD.x,dy=cy-CARD.y,co=Math.cos(-CARD.r),si=Math.sin(-CARD.r);return[(dx*co-dy*si)/CARD.k,(dx*si+dy*co)/CARD.k]};
 const fromManip=(mx2,my2)=>{const co=Math.cos(CARD.r),si=Math.sin(CARD.r),x=mx2*CARD.k,y=my2*CARD.k;return[CARD.x+x*co-y*si,CARD.y+x*si+y*co]};
 const cardTmp=document.createElement('canvas');cardTmp.width=cardTmp.height=Math.round(MS*HD);const ctmp=cardTmp.getContext('2d');

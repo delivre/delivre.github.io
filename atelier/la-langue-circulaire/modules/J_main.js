@@ -18,7 +18,7 @@ const toNDC=e=>{const r=cv.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.
 const screenUV=e=>{toNDC(e);const h=ray.intersectObject(memMesh,false)[0];return h&&h.uv?[h.uv.x*MS,(1-h.uv.y)*MS]:null};
 const freeWalk=()=>phase==='play'&&!busy&&next<4||phase==='play'&&next>=4&&!busy;
 cv.addEventListener('pointerdown',e=>{PT.set(e.pointerId,{x:e.clientX,y:e.clientY});try{cv.setPointerCapture(e.pointerId)}catch(_){}
-  sndInit();if(curManip&&PT.size===1&&curManip.wantsTap&&curManip.wantsTap()&&!screenUV(e)){curManip.down(-999,-999);return}sndInit();if(TRACE.on&&!TRACE.done&&PT.size===1){const c=screenUV(e);if(c){manipPtr=true;traceDown(c[0],c[1]);return}}if(curManip&&PT.size===1){const c=screenUV(e);if(c){manipPtr=true;sndPaper(.25,.18);curManip.down(...toManip(c[0],c[1]));return}}
+  sndInit();if(curManip&&PT.size===1&&capWriting()){capFinish();return}if(curManip&&PT.size===1&&curManip.wantsTap&&curManip.wantsTap()){curManip.down(-999,-999);return}sndInit();if(TRACE.on&&!TRACE.done&&PT.size===1){const c=screenUV(e);if(c){manipPtr=true;traceDown(c[0],c[1]);return}}if(curManip&&PT.size===1){const c=screenUV(e);if(c){manipPtr=true;sndPaper(.25,.18);curManip.down(...toManip(c[0],c[1]));return}}
   if(PAPER&&SCR.kind==='mem'&&PT.size===1&&REVEAL[SCR.id]&&TAB.need&&!TAB.rev){const c=screenUV(e);if(c&&tabHit(c)){TAB.drag=true;TAB.x0=c[0]-TAB.p*TAB.L;TAB.used=1;sndPaper(.25,.2);return}}
   if(PT.size===1){gestureMulti=false;drag={x:e.clientX,y:e.clientY,yaw:yawT,moved:false,t0:performance.now(),cx:e.clientX,cy:e.clientY}}
   else if(PT.size===2){gestureMulti=true;drag=null;zoomDone();pinch={d0:Math.max(10,pdist()),z0:zt,l0:lidZ}}});
@@ -27,7 +27,7 @@ cv.addEventListener('pointermove',e=>{if(!PT.has(e.pointerId))return;PT.set(e.po
   if(manipPtr&&curManip){const c=screenUV(e);if(c)curManip.move(...toManip(c[0],c[1]));return}
   if(pinch&&PT.size>=2){if(camMode==='lid')lidZ=clamp(pinch.l0+Math.log(pdist()/pinch.d0)/Math.log(2.2));else if(phase==='play')zt=clamp(pinch.z0+Math.log(pdist()/pinch.d0)/Math.log(3.2));return}
   if(drag&&drag.held){drag.cx=e.clientX;drag.cy=e.clientY;return}
-  if(!drag)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>6||Math.abs(e.clientY-drag.y)>6)drag.moved=true;if(drag.moved&&freeWalk())yawT=drag.yaw-dx*.007});
+  if(!drag)return;const dx=e.clientX-drag.x;const th=camMode==='lid'?14:6;if(Math.abs(dx)>th||Math.abs(e.clientY-drag.y)>th)drag.moved=true;if(drag.moved&&freeWalk())yawT=drag.yaw-dx*.007});
 // rester appuyé : Alice continue de marcher vers le doigt (et on peut glisser pour la guider)
 function holdWalk(now){if(!drag||drag.moved||PT.size!==1||!freeWalk()||camMode==='lid'||phase!=='play')return;if(now-drag.t0<260)return;drag.held=true;if(now-(drag.lw||0)<160)return;drag.lw=now;
   toNDC({clientX:drag.cx,clientY:drag.cy});const pl=new THREE.Plane(new THREE.Vector3(0,1,0),-TOP),hit=new THREE.Vector3();if(ray.ray.intersectPlane(pl,hit)){const g=drag.goal;if(!g||Math.hypot(g[0]-hit.x,g[1]-hit.z)>.45||!figState.moving){drag.goal=[hit.x,hit.z];goTo(hit.x,hit.z)}if(say.className==='hint')hideSay()}}
