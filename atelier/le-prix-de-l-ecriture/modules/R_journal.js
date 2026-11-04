@@ -52,7 +52,7 @@ const TABFX={echo:{1:[0,-110]}};
 const tabX=()=>626+TAB.p*TAB.L,tabHit=([x,y])=>x>tabX()-40&&x<tabX()+70&&y>286&&y<366;
 // ce que la languette dévoile : ce qu'Alice a perdu, et qu'elle garde
 const REVEAL=PAPER?{
- echo:()=>cut(x=>{parent(x,{kind:'girl',x:565,y:572,h:228,view:'back'});},{border:5,outline:0}),
+ echo:()=>cut(x=>{parent(x,{kind:'girl',x:565,y:572,h:172,view:'back'});},{border:5,outline:0}),
  maman:()=>cut(x=>{fp(x,'#9a6a3a',c=>rrect(c,128,186,150,22,5));fp(x,'#7a4a26',c=>c.rect(128,204,150,4));[146,260].forEach(px=>fp(x,'#d8b878',c=>c.arc(px,197,4,0,7)));x.strokeStyle='#7a4a26';x.lineWidth=9;x.lineCap='round';x.beginPath();x.moveTo(200,204);x.lineTo(214,236);x.stroke();fp(x,'#9a6a3a',c=>c.arc(215,239,8,0,7));
    x.save();x.translate(220,282);x.rotate(-.18);
    fp(x,'#14102a',c=>c.ellipse(0,18,80,30,0,0,7));
