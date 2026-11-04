@@ -131,7 +131,7 @@ const SCRIPTS={
  1:[{cam:'box'},{say:'lieu',t:'La Grèce, bien plus tard. Un aède, un poète qui chante de mémoire, raconte une histoire immense, sans rien écrire.'},{cam:'lid'},{manip:mkTheatre},
   {mem:'maman'},{say:'maman',t:'Où en étions-nous ? Ah oui… le navire.'},
   {say:'alice',t:'Le livre restait ouvert. Elle ne le regardait jamais.'},
-  {note:'16 000 vers de mémoire, en 4 soirs.'},{fn:()=>{JR.note=null}},{say:'alice',t:'Quand Papa partait, il laissait son chapeau. Pour qu’on sache qu’il revenait.'},{memoff:1},{reward:1},{cam:'box'}],
+  {note:'16 000 vers de mémoire, en 4 soirs.'},{fn:()=>{JR.note=null}},{say:'alice',t:'Quand Papa partait, il laissait son chapeau. Pour que je sache qu’il revenait.'},{memoff:1},{reward:1},{cam:'box'}],
  2:[{cam:'box'},{say:'lieu',t:'Thèbes, en Égypte. Arrive l’écriture : Thot l’offre au roi Thamus. Le roi se méfie.'},{cam:'lid'},{manip:mkThot},
   {mem:'papa'},{say:'papa',t:'Écris tout. Mais ne le laisse pas se souvenir à ta place.'},
   {say:'alice',t:'Il remplissait des carnets entiers. Il n’en relisait jamais aucun.'},{say:'alice',t:'Il disait qu’écrire, c’était déjà retenir. Et que ses carnets, c’était pour plus tard.'},
