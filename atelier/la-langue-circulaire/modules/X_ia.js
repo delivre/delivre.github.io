@@ -32,7 +32,7 @@ const GPPAGE=(()=>{const o=document.createElement('canvas');o.width=440;o.height
  const R=seeded(1937);x.strokeStyle='#2a2a4a';x.lineWidth=2.2;x.lineCap='round';for(let y=36;y<320;y+=30){let px=20+R()*10;while(px<410){const w=20+R()*50;x.beginPath();x.moveTo(px,y);for(let u=0;u<w;u+=3){x.lineTo(px+u,y-4-Math.abs(Math.sin(u*.6+R()*3))*10*(R()<.3?1.6:1))}x.stroke();if(R()<.2){x.beginPath();x.moveTo(px+w+3,y-14);x.lineTo(px+w+7,y-2);x.stroke()}px+=w+12+R()*8}}
  x.fillStyle='rgba(255,226,120,.35)';x.fillRect(16,126,330,36);return lifted(bordered(o,5))})();
 function mkEvid(){const M={state:'tari',t0:performance.now(),pick:-1,tried:[],done:false,
- hint:'Dans la salle des enregistrements, une voix très vieille parle une langue d’Amazonie, le tariana. Maman m’en avait parlé.',
+ hint:'Aujourd’hui. Une voix très vieille parle tariana, une langue d’Amazonie. Maman m’en parlait déjà quand j’étais petite.',
  wantsTap:()=>['tari','me2','fin'].includes(M.state),
  draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now(),k=(now-M.t0)/1000;
   if(M.state==='tari'){paper(c,24,118);bigLine(c,'En tariana, « l’alien l’a mordu »',64,42);bigLine(c,'se dit de cinq façons :',108,38,'#3a2a20');
@@ -54,7 +54,7 @@ function mkEvid(){const M={state:'tari',t0:performance.now(),pick:-1,tried:[],do
   if(M.state==='me2'){M.state='carnet';showHint('Puis j’ai ouvert le carnet de Grand-père. Une ligne surlignée. Comment le savait-il ?');return}
   if(M.state==='fin'){M.done=true;return}
   if(M.state==='carnet'){[0,1,2].forEach(i=>{if(inR(cx,cy,[30+i*244,486,224,84])){M.tried=M.tried.filter(t=>t!==i);M.tried.push(i);sndPaper(.3,.2);
-     showHint(i===0?'La machine répond tout de suite, et sûre d’elle. Mais ce sont ses mots à lui, ses abréviations.':i===1?'Je reconnais des lettres. Pas ce qu’il voulait dire.':'Maman dit qu’une langue ne s’apprend qu’en face de quelqu’un.');
+     showHint(i===0?'La machine répond tout de suite, sûre d’elle. Mais ce sont ses mots à lui, ses abréviations.':i===1?'Je reconnais des lettres. Pas ce qu’il voulait dire.':'Maman dit qu’une langue ne s’apprend qu’en face de quelqu’un.');
      if(i===2)setTimeout(()=>{if(M.state==='carnet'){M.state='fin';sndTone(523,1.4,.07)}},2600)}})}},
  move(){},up(){},solve(){M.done=true}};return M}
 const mkIA=mkEvid;

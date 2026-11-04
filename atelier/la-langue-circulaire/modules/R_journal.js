@@ -79,18 +79,23 @@ const REVC={};function drawReveal(c,T,id){if(!REVEAL[id])return;const R=REVC[id]
  c.drawImage(R.c,0,0);c.restore()}
 function tabReveal(){if(TAB.rev)return;TAB.rev=true;TAB.p=1;TAB.used=1;const n=TAB.note;JR.noteN=(JR.noteN||0)+1;JR.note={text:n,t0:performance.now()};sndPaper(.4,.3);sndTone(523,1.2,.05);say.className='jr';sayWho.textContent='';sayTxt.textContent='À retenir : '+n;say.hidden=false;waitTap=true}
 function drawTab(c,T){if(!PAPER||!REVEAL[SCR.id]||!(TAB.need||TAB.rev))return;if(TAB.auto&&!TAB.rev)TAB.p=Math.min(1,(performance.now()-TAB.auto)/650);if(!TAB.drag&&!TAB.rev&&!TAB.auto)TAB.p*=.9;if(!TAB.rev&&TAB.p>.85)tabReveal();
-const x=tabX(),y=296;
+const x=tabX(),y=296,SX=532;
+ c.save();c.beginPath();c.rect(SX,0,MS,MS);c.clip();
  // la bande de papier qui sort de derrière l'image : on voit qu'on tire un mécanisme, pas une étiquette qu'on arrache
- c.save();c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.fillRect(470,308,x-30-470+2,36);c.fillStyle='rgba(60,35,10,.22)';c.fillRect(470,308,x-30-470+2,3);c.fillRect(470,341,x-30-470+2,3);c.strokeStyle='rgba(120,80,40,.5)';c.setLineDash([5,6]);c.lineWidth=1.5;c.beginPath();c.moveTo(480,326);c.lineTo(x-44,326);c.stroke();c.restore();
+ c.save();c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.fillRect(SX,308,x-30-SX+2,36);c.fillStyle='rgba(60,35,10,.22)';c.fillRect(SX,308,x-30-SX+2,3);c.fillRect(SX,341,x-30-SX+2,3);c.strokeStyle='rgba(120,80,40,.5)';c.setLineDash([5,6]);c.lineWidth=1.5;c.beginPath();c.moveTo(SX+4,326);c.lineTo(x-44,326);c.stroke();c.restore();
  c.save();c.translate(x-30,y+30);c.scale(1.32,1.32);c.translate(-(x-30),-(y+30));c.save();c.shadowColor='rgba(20,10,0,.45)';c.shadowBlur=8;c.shadowOffsetY=4;c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.beginPath();c.moveTo(x-30,y);c.lineTo(x+46,y);c.quadraticCurveTo(x+58,y+30,x+46,y+60);c.lineTo(x-30,y+60);c.closePath();c.fill();c.restore();
  c.strokeStyle='rgba(120,80,40,.8)';c.lineWidth=2;c.beginPath();c.moveTo(x-30,y);c.lineTo(x+46,y);c.quadraticCurveTo(x+58,y+30,x+46,y+60);c.lineTo(x-30,y+60);c.stroke();
  c.font='700 26px Caveat, cursive';c.fillStyle='#5a3418';c.fillText('tirer',x-22,y+38);c.strokeStyle='#5a3418';c.lineWidth=3;c.beginPath();c.moveTo(x+22,y+30);c.lineTo(x+40,y+30);c.moveTo(x+32,y+22);c.lineTo(x+40,y+30);c.lineTo(x+32,y+38);c.stroke();c.restore();
+ c.restore();
+ // l'encoche dans le carton : la languette en sort
+ c.save();c.fillStyle='rgba(30,18,8,.85)';c.beginPath();rrect(c,SX-6,y-14,12,88,5);c.fill();c.strokeStyle='rgba(255,236,200,.55)';c.lineWidth=2;c.beginPath();c.moveTo(SX+7,y-12);c.lineTo(SX+7,y+72);c.stroke();c.restore();
  if(!TAB.rev&&typeof drawHand==='function'){const k=(T*.6)%1,e=clamp((k-.2)/.5);drawHand(c,x+8+e*70,y+44,k>.15&&k<.75)}}
-function drawPieces(c,P,T,t){P.forEach((p,i)=>{const k=clamp((t-.15-i*.13)/.42),e=k<=0?0:easeBack(k);if(e<=0)return;const d=p.depth,dx=Math.sin(T*.55+d*1.3)*(1.5+d*1.6),dy=Math.cos(T*.4+d)*d*.6,piv=p.base||700;
+const MEMX={papa:0};
+function drawPieces(c,P,T,t){P.forEach((p,i)=>{const k=clamp((t-.15-i*.13)/.42),e=k<=0?0:easeBack(k);if(e<=0)return;const wa=p.when?p.when():1;if(wa<=0)return;c.save();c.globalAlpha*=wa;const d=p.depth,dx=Math.sin(T*.55+d*1.3)*(1.5+d*1.6),dy=Math.cos(T*.4+d)*d*.6,piv=p.base||700;
   if(PAPER&&!p.vivid){const v=mkC(),vx=v.getContext('2d');vx.filter='saturate(1.45) brightness(1.05) contrast(1.04)';vx.drawImage(p.c,0,0);p.c=v;p.vivid=1}
   if(PAPER&&i>0&&P[i-1].depth<1.5&&d>=1.5){const b=P[0];if(!b.haze){b.haze=mkC();const hx=b.haze.getContext('2d');hx.drawImage(b.c,0,0);hx.globalCompositeOperation='source-in';hx.fillStyle='#fbf3e2';hx.fillRect(0,0,MS,MS)}c.save();c.globalAlpha=.18*e;c.drawImage(b.haze,Math.sin(T*.55)*1.5,0);c.restore()}
   c.save();c.translate(0,piv);c.scale(1,Math.max(.001,e));c.translate(dx,dy-piv);const fx=PAPER&&TABFX[SCR.id]&&TABFX[SCR.id][i];if(fx)c.translate(fx[0]*TAB.p,fx[1]*TAB.p);
-  c.save();c.globalAlpha=.35+d*.05;c.filter=`blur(${3+d*1.5}px)`;c.drawImage(p.sh,5+d*3.5,7+d*4);c.restore();c.drawImage(p.c,0,0);c.restore()})}
+  c.save();c.globalAlpha=.35+d*.05;c.filter=`blur(${3+d*1.5}px)`;c.drawImage(p.sh,5+d*3.5,7+d*4);c.restore();c.drawImage(p.c,0,0);c.restore();c.restore()})}
 const POP={};
 const stripes=(x,X,Y,W,H,c1,c2,w=26)=>{fp(x,c1,c=>rrect(c,X,Y,W,H,20));x.save();x.beginPath();rrect(x,X,Y,W,H,20);x.clip();x.fillStyle=c2;for(let u=X;u<X+W;u+=w*2)x.fillRect(u,Y,w,H);x.restore()};
 const plant=(x,px,py,s=1)=>{fp(x,'#d8744a',c=>{c.moveTo(px-26*s,py-50*s);c.lineTo(px+26*s,py-50*s);c.lineTo(px+20*s,py);c.lineTo(px-20*s,py);c.closePath()});[[-30,-120,-.5],[0,-150,0],[28,-118,.5],[-14,-96,-.25],[16,-100,.3]].forEach(([dx,dy,r])=>fp(x,'#4fae5a',c=>{c.ellipse(px+dx*s,py+dy*s,12*s,40*s,r,0,7)}))};
@@ -118,8 +123,10 @@ const sofa=(x,X,Y,W,H,col,col2)=>{fp(x,col2,c=>rrect(c,X,Y,W,H*.55,24));fp(x,col
    for(let i=0;i<=9;i++){const t=i/9,[bx,by]=BS(t);fp(x,'#efe2c6',c=>rrect(c,bx-8,by-150,16,150,5));x.fillStyle='rgba(120,80,40,.3)';x.fillRect(bx+3,by-146,4,142)}
    const[a0,b0]=RL(0),[a1,b1]=RL(1);x.save();x.lineCap='round';x.strokeStyle='#8a5a34';x.lineWidth=22;x.beginPath();x.moveTo(a0,b0);x.lineTo(a1,b1);x.stroke();x.strokeStyle='#b07a45';x.lineWidth=8;x.beginPath();x.moveTo(a0,b0-7);x.lineTo(a1,b1-7);x.stroke();x.restore()});
  // Alice et Papa, assis sur la marche, de dos : ils regardent entre les barreaux
- const kids=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();parent(x,{kind:'man',view:'back',seated:true,x:210,y:730,h:340,hat:'#000',armL:[20,30],armR:[-10,-20]});chibi(x,{x:440,y:745,h:260,view:'back',armL:[-20,0],armR:[30,-40]});x.restore()});
- POP.escalier={P:[{...wall,depth:0},{...room,depth:.8},{...stairs,depth:1.8},{...kids,depth:2.6}],
+ const alice=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();chibi(x,{x:450,y:745,h:260,view:'back',armL:[-20,0],armR:[30,-40]});x.restore()});
+ // Papa arrive quand il parle : assis tout près, au premier plan, penché vers elle, le bras autour de ses épaules
+ const papa=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();parent(x,{kind:'man',view:'back',seated:true,x:250,y:830,h:440,tilt:40,hat:'#000',armL:[10,10],armR:[74,-44]});x.restore()});
+ POP.escalier={P:[{...wall,depth:0},{...room,depth:.8},{...stairs,depth:1.8},{...alice,depth:2.6},{...papa,depth:2.7,when:()=>MEMX.papa?clamp((performance.now()-MEMX.papa)/800):0}],
   fx:(c,T)=>{tvGlow(c,475,285,T,230);motes(c,T,360,600,220,460)}}}
 /* 2. le canapé : le carton « ALICE », le carton « MAMAN » ; Papa crie « Kangourou ! » de la cuisine */
 {const wall=cut(x=>stripes(x,70,40,628,640,'#2f3a5c','#2a3454'),{crayon:.35,border:0,outline:0});
@@ -172,19 +179,22 @@ function handBox(c,x,y,w,h){c.beginPath();const seg=(x0,y0,x1,y1,o)=>{c.moveTo(x
   seg(x-6,y,x+w+8,y+2,0);seg(x+w,y-6,x+w-2,y+h+7,9);seg(x+w+5,y+h,x-4,y+h-2,17);seg(x+2,y+h+6,x,y-7,27);c.stroke()}
 function drawJournal(c,T){c.save();c.textBaseline='alphabetic';
   if(JR.note){// Alice encadre l'essentiel au crayon, avec une petite étoile
-    const k=clamp((performance.now()-JR.note.t0)/700);let fz=46;for(;fz>=32;fz-=2){c.font=`600 ${fz}px Caveat, "Patrick Hand", cursive`;if(jLines(c,JR.note.text,520).length<=2)break}
+    const k=clamp((performance.now()-JR.note.t0)/700);const fz=42;c.font=`600 ${fz}px Caveat, "Patrick Hand", cursive`;
     const ls=jLines(c,JR.note.text,520),bh=ls.length*fz*1.15+30,by=624-bh/2;c.strokeStyle='#22306e';c.lineWidth=2.6;c.globalAlpha=k;handBox(c,110,by,560,bh);
     // de temps en temps, un petit dessin au stylo à côté du cadre, jamais au même endroit
     const dk=(JR.noteN||0)%3;if(dk){const px=dk===1?660:120,py=dk===1?by-10:by+bh+6;c.save();c.translate(px,py);c.rotate(dk===1?.15:-.1);c.beginPath();
       if(dk===1){for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2,rr=i%2?6:14;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}c.closePath()}else{c.moveTo(-14,4);c.quadraticCurveTo(-4,-12,6,0);c.quadraticCurveTo(14,10,22,-6);c.moveTo(-14,10);c.quadraticCurveTo(-4,-6,6,6);c.quadraticCurveTo(14,16,22,0)}c.stroke();c.restore()}
     let y=by+fz*.95+12;ls.forEach(l=>{c.fillText(l,390-c.measureText(l).width/2,y);y+=fz*1.15});if(waitTap){c.fillStyle='#c8902a';c.globalAlpha=.5+.5*Math.sin(T*4);c.font='26px serif';c.fillText('▸',700,736)}c.restore();return}
-  let items=JR.items.slice(-2),fs=40,lines;const fit=()=>{for(fs=44;fs>=38;fs-=2){c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`;lines=0;items.forEach(it=>lines+=jLines(c,it.text,600).length);if(lines*(fs*1.15)<=(PAPER?150:190))return true}return false};
-  if(!fit()){items=JR.items.slice(-1);if(!fit()){fs=38;c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`}}
+  let items=JR.items.slice(-2),fs=40,lines;const fit=()=>{for(fs=40;fs>=40;fs-=2){c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`;lines=0;items.forEach(it=>lines+=jLines(c,it.text,600).length);if(lines*(fs*1.15)<=(PAPER?150:190))return true}return false};
+  if(!fit()){items=JR.items.slice(-1);fs=40;c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`}
   const lh=fs*1.15;let y=(PAPER?532:548)+lh*.85;items.forEach((it,i)=>{const old=i<items.length-1;c.fillStyle=INKC[it.who]||'#22306e';c.globalAlpha=old?.42:1;let n=jChars(it);for(const ln of jLines(c,it.text,600)){const s=ln.slice(0,Math.max(0,n));c.fillText(s,100,y);n-=ln.length+1;y+=lh}});
   c.globalAlpha=1;if(waitTap&&!jWriting()&&JR.items.length){c.fillStyle='#c8902a';c.globalAlpha=.5+.5*Math.sin(T*4);c.font='26px serif';c.fillText('▸',700,736)}c.restore()}
 
 /* ---------- les manipulations sont collées dans le journal comme des cartes ---------- */
-const CARD={x:74,y:44,k:.82,r:-.012};
+const CARD={x:115,y:18,k:.7,r:-.012};
+// sous la carte, ce qu'on se dit, écrit dans le carnet (jamais aussi dans une bulle) ; toujours la même taille
+const CAP={t:'',t0:0};function capWrite(t){t=String(t).replace(/ ([:;?!»])/g,'\u202f$1').replace(/« /g,'«\u202f');if(t===CAP.t)return;CAP.t=t;CAP.t0=performance.now()}
+function drawCap(c,T){if(!CAP.t)return;c.save();c.font='600 38px Caveat, "Patrick Hand", cursive';c.fillStyle='#22306e';let n=Math.floor((performance.now()-CAP.t0)/1000*48),y=600;for(const ln of jLines(c,CAP.t,610)){c.fillText(ln.slice(0,Math.max(0,n)),79,y);n-=ln.length+1;y+=42}c.restore()}
 const toManip=(cx,cy)=>{const dx=cx-CARD.x,dy=cy-CARD.y,co=Math.cos(-CARD.r),si=Math.sin(-CARD.r);return[(dx*co-dy*si)/CARD.k,(dx*si+dy*co)/CARD.k]};
 const fromManip=(mx2,my2)=>{const co=Math.cos(CARD.r),si=Math.sin(CARD.r),x=mx2*CARD.k,y=my2*CARD.k;return[CARD.x+x*co-y*si,CARD.y+x*si+y*co]};
 const cardTmp=document.createElement('canvas');cardTmp.width=cardTmp.height=Math.round(MS*HD);const ctmp=cardTmp.getContext('2d');

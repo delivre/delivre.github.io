@@ -65,7 +65,7 @@ function drawScreen(T){mx.setTransform(HD,0,0,HD,0,0);mx.clearRect(0,0,MS,MS);
   SCR.a+=(SCR.ta-SCR.a)*(1-Math.pow(.03,DTG));if(SCR.ta===0&&SCR.a<.01){SCR.a=0;if(SCR.kind&&!SCR.keep)SCR.kind=null}
   if(SCR.a>0&&SCR.kind){mf.setTransform(HD,0,0,HD,0,0);mf.globalCompositeOperation='source-over';mf.clearRect(0,0,MS,MS);mf.drawImage(PAGE,0,0);
     if(SCR.kind==='mem'){if(PAPER)mf.drawImage(LABEL,0,0);const P=POP[SCR.id],t=(performance.now()-(SCR.t0||0))/1000;mf.save();mf.translate(384,30);mf.scale(.72,.72);mf.translate(-384,-40);drawPieces(mf,P.P,T,t);if(t>.8){mf.globalAlpha=clamp(t-.8);P.fx(mf,T);mf.globalAlpha=1}drawReveal(mf,T,SCR.id);memLight(mf,T,t,P.P);mf.restore();if(PAPER)drawTab(mf,T);drawJournal(mf,T)}
-    else if(SCR.obj)drawCard(mf,(c,TT)=>SCR.obj.draw(c,TT),T);
+    else if(SCR.obj){drawCard(mf,(c,TT)=>SCR.obj.draw(c,TT),T);drawCap(mf,T)}
     mx.globalAlpha=SCR.a;mx.drawImage(memF,0,0,MS,MS);mx.globalAlpha=1}
   memTex.needsUpdate=true}
 
@@ -95,7 +95,7 @@ const say=$('say'),sayWho=say.querySelector('.who'),sayTxt=say.querySelector('.t
 const WHO={alice:'Alice',maman:'Maman',papa:'Papa',lieu:'',src:''};
 const nb=t=>String(t).replace(/ ([:;?!»])/g,'\u202f$1').replace(/« /g,'«\u202f').replace(/(\d) (\d{3})/g,'$1\u202f$2');
 function showLine(who,t){t=nb(t);if(SCR.kind==='mem'&&SCR.ta===1&&INKC[who]){jWrite(who,t);say.className='jr';sayWho.textContent=WHO[who]||'';sayTxt.textContent=t;say.hidden=false;waitTap=true;return}say.className='line '+who;sayWho.textContent=WHO[who]||'';sayTxt.textContent=t;say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=true}
-function showHint(t){t=nb(t);say.className='hint';sayWho.textContent='';sayTxt.textContent=t;say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=false}
+function showHint(t){t=nb(t);if(SCR.kind==='manip'&&SCR.obj){capWrite(t);say.className='jr';sayWho.textContent='';sayTxt.textContent=t;say.hidden=false;waitTap=false;return}say.className='hint';sayWho.textContent='';sayTxt.textContent=t;say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=false}
 function showAsk([i,q,good,...bad]){q=nb(q);good=nb(good);bad=bad.map(nb);say.className='line ask';sayWho.textContent='';const opts=[[good,1],...bad.map(b=>[b,0])].sort(()=>Math.random()-.5);sayTxt.innerHTML='';const p=document.createElement('div');p.textContent=q;sayTxt.appendChild(p);
   opts.forEach(([t,ok])=>{const b=document.createElement('button');b.className='ch';b.textContent=t;b.addEventListener('click',ev=>{ev.stopPropagation();if(say.dataset.done)return;say.dataset.done='1';b.classList.add(ok?'ok':'no');if(!ok)[...sayTxt.querySelectorAll('.ch')].forEach(o=>{if(o.textContent===good)o.classList.add('ok')});sndPaper(.3,.2);setTimeout(()=>{delete say.dataset.done;waitTap=false;hideSay();step()},ok?900:1900)});sayTxt.appendChild(b)});
   say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=false}
@@ -124,7 +124,7 @@ const SCRIPTS={
  0:[{cam:'box'},{say:'lieu',t:'L’université. Dans le film, Louise y enseigne les langues. Toutes parlent du même monde, mais chacune le découpe à sa façon.'},{cam:'lid'},{manip:()=>mkMots()},
   {mem:'escalier'},{say:'alice',t:'C’était le film préféré de Maman. Papa disait qu’il était trop triste pour moi.'},
   {say:'alice',t:'Un soir, je suis descendue en cachette. Entre les barreaux, je voyais la brume sur l’écran, et Maman, toute seule sous son plaid.'},
-  {say:'papa',t:'Juste le début. Après, au lit.'},{say:'alice',t:'Il ne m’a pas renvoyée. Il s’est assis sur la marche, à côté de moi.'},
+  {fn:()=>{MEMX.papa=performance.now()}},{say:'papa',t:'Juste le début. Après, au lit.'},{say:'alice',t:'Il ne m’a pas renvoyée. Il s’est assis sur la marche, tout contre moi, et il a passé son bras autour de mes épaules.'},
   {note:'Chaque langue découpe le monde à sa façon, sans nous empêcher de le voir.'},
   {say:'alice',t:'Sur la table basse, son carnet était ouvert, plein de cercles et de mots. Elle ne regardait pas le film : elle l’étudiait.'},
   {say:'alice',t:'Mais alors, comment parler à quelqu’un dont on ne connaît pas un seul mot ?'},{memoff:1},{reward:0},{cam:'box'}],
@@ -171,7 +171,7 @@ let curName=null;function run(name){curName=name;Q=SCRIPTS[name];qi=0;busy=true;
 function step(){while(qi<Q.length){const s=Q[qi++];
   if(s.cam){camMode=s.cam;continue}
   if(s.fn){s.fn();continue}
-  if(s.mem){Object.assign(TAB,{need:false,rev:false,auto:0,p:0});SCR.kind='mem';SCR.id=s.mem;SCR.ta=1;SCR.t0=performance.now();JR.items=[];JR.note=null;sndPaper(.6,.5);continue}
+  if(s.mem){MEMX.papa=0;Object.assign(TAB,{need:false,rev:false,auto:0,p:0});SCR.kind='mem';SCR.id=s.mem;SCR.ta=1;SCR.t0=performance.now();JR.items=[];JR.note=null;sndPaper(.6,.5);continue}
   if(s.note&&PAPER&&SCR.kind==='mem'&&REVEAL[SCR.id]&&!TAB.rev){Object.assign(TAB,{need:true,note:s.note,auto:0,p:0});say.className='hint';sayWho.textContent='';sayTxt.textContent='Tirer la languette.';say.hidden=false;waitTap=true;return}
   if(s.note){JR.noteN=(JR.noteN||0)+1;JR.note={text:s.note,t0:performance.now()};sndPaper(.4,.3);say.className='jr';sayWho.textContent='';sayTxt.textContent='À retenir : '+s.note;say.hidden=false;waitTap=true;return}
   if(s.memoff){SCR.ta=0;continue}

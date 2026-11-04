@@ -891,20 +891,22 @@ const freeSpot=(x,z,m=.45)=>Math.hypot(x,z)<RB-.55&&!inSea(x,z,.35)&&routeD(x,z)
 const OBSTL=[[...PLACES[0],.95],[...PLACES[1],1.0],[PLACES[2][0],PLACES[2][1],.7],[...PLACES[3],.8],[...LIB,.62],[...BAPOS,.62]];
 const groundTex=canvasTex(GS,GS,(x,W)=>{
   // prairie pâle, plus sombre au pied des montagnes, avec des plaques d'herbe dorée (l'automne au Montana)
-  let g=x.createLinearGradient(0,0,0,W);g.addColorStop(0,'#7e8e72');g.addColorStop(.35,'#9aab84');g.addColorStop(1,'#adb894');x.fillStyle=g;x.fillRect(0,0,W,W);
-  for(let i=0;i<15000;i++){const cx=rnd(0,W),cy=rnd(0,W);dab(x,cx,cy,rnd(14,34),rnd(5,10),rnd(-.6,.6),rnd(70,105),rnd(12,26),rnd(46,66),rnd(.22,.42))}
-  for(let i=0;i<46;i++){const px=rnd(-5.5,5.5),pz=rnd(-4,5.5);if(Math.hypot(px,pz)>5.6)continue;for(let k=0;k<70;k++)dab(x,gx(px+rnd(-.5,.5)),gz(pz+rnd(-.35,.35)),rnd(18,34),rnd(6,10),rnd(-.5,.5),rnd(38,50),rnd(35,55),rnd(58,70),rnd(.25,.5))}
-  for(let i=0;i<60;i++)blob(x,rnd(0,W),rnd(0,W),rnd(90,240),Math.random()<.5?'rgba(214,206,170,.2)':'rgba(70,90,70,.2)');
+  let g=x.createLinearGradient(0,0,0,W);g.addColorStop(0,'#6e8a4e');g.addColorStop(.35,'#8fae5a');g.addColorStop(1,'#a9c26a');x.fillStyle=g;x.fillRect(0,0,W,W);
+  for(let i=0;i<15000;i++){const cx=rnd(0,W),cy=rnd(0,W);dab(x,cx,cy,rnd(14,34),rnd(5,10),rnd(-.6,.6),rnd(68,108),rnd(28,48),rnd(40,60),rnd(.22,.42))}
+  for(let i=0;i<46;i++){const px=rnd(-5.5,5.5),pz=rnd(-4,5.5);if(Math.hypot(px,pz)>5.6)continue;for(let k=0;k<70;k++)dab(x,gx(px+rnd(-.5,.5)),gz(pz+rnd(-.35,.35)),rnd(18,34),rnd(6,10),rnd(-.5,.5),rnd(30,46),rnd(60,78),rnd(52,64),rnd(.25,.5))}
+  for(let i=0;i<60;i++)blob(x,rnd(0,W),rnd(0,W),rnd(90,240),Math.random()<.5?'rgba(240,190,90,.16)':'rgba(60,110,60,.18)');
   for(let i=0;i<6000;i++){const cx=rnd(0,W),cy=rnd(0,W);x.strokeStyle=hsl(rnd(45,75),rnd(14,32),rnd(60,80),rnd(.25,.5));x.lineWidth=rnd(1,2);x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+rnd(6,14),cy-rnd(2,8));x.stroke()}
   // un anneau d'herbe plus claire entre le chemin et le lac : la prairie fauchée, en rond
-  for(let i=0;i<2600;i++){const a=rnd(0,6.283),r=rnd(LR+.25,RING-.25);dab(x,gx(SEA.x+Math.cos(a)*r),gz(SEA.z+Math.sin(a)*r),rnd(16,30),rnd(6,9),a+Math.PI/2+rnd(-.3,.3),rnd(68,88),rnd(18,30),rnd(60,72),rnd(.25,.45))}
+  for(let i=0;i<2600;i++){const a=rnd(0,6.283),r=rnd(LR+.25,RING-.25);dab(x,gx(SEA.x+Math.cos(a)*r),gz(SEA.z+Math.sin(a)*r),rnd(16,30),rnd(6,9),a+Math.PI/2+rnd(-.3,.3),rnd(72,100),rnd(36,52),rnd(46,60),rnd(.25,.45))}
+  // et plein de fleurs d'automne : asters mauves, verges d'or, coquelicots tardifs
+  for(let i=0;i<5200;i++){const a=rnd(0,6.283),r=rnd(LR+.2,RING-.2),px=SEA.x+Math.cos(a)*r,pz=SEA.z+Math.sin(a)*r;if(routeD(px,pz)<.25)continue;const q=Math.random();x.fillStyle=q<.35?hsl(rnd(265,290),55,rnd(62,74),.9):q<.7?hsl(rnd(42,50),85,rnd(52,62),.9):q<.85?hsl(rnd(2,12),75,rnd(50,58),.9):hsl(0,0,97,.9);x.beginPath();x.arc(gx(px)+rnd(-3,3),gz(pz)+rnd(-3,3),rnd(2.2,4.2),0,7);x.fill()}
   // le lac : ardoise, plus clair au bord, des reflets de ciel, et le reflet sombre de la coquille
   const coastPath=()=>{x.beginPath();COAST.forEach(([u,v],i)=>i?x.lineTo(gx(u),gz(v)):x.moveTo(gx(u),gz(v)));x.closePath()};
-  x.save();coastPath();x.clip();const lg=x.createRadialGradient(gx(SEA.x),gz(SEA.z),0,gx(SEA.x),gz(SEA.z),gx(LR)-gx(0));lg.addColorStop(0,'#dfe4df');lg.addColorStop(.7,'#cfd7d3');lg.addColorStop(1,'#9fadad');x.fillStyle=lg;x.fillRect(0,0,W,W);
-  for(let i=0;i<1400;i++)dab(x,rnd(0,W),rnd(0,W),rnd(30,80),rnd(3,7),rnd(-.05,.05),rnd(170,210),rnd(6,14),rnd(74,90),rnd(.14,.3));
-  for(let k=0;k<40;k++){const t=k/40;dab(x,gx(SEA.x+rnd(-.12,.12)),gz(SEA.z-LR+.1+t*1.5),rnd(40,70),rnd(10,16),Math.PI/2+rnd(-.1,.1),210,8,30,.3*(1-t))}
-  for(let i=0;i<90;i++){x.strokeStyle=`rgba(255,255,255,${rnd(.2,.5)})`;x.lineWidth=rnd(1.5,3);const a=rnd(0,W),b=rnd(0,W),l=rnd(20,80);x.beginPath();x.moveTo(a,b);x.lineTo(a+l,b);x.stroke()}
-  [[70,'rgba(140,156,162,.5)'],[34,'rgba(176,188,190,.6)'],[12,'rgba(214,220,216,.85)']].forEach(([lw,col])=>{x.strokeStyle=col;x.lineWidth=lw;x.lineJoin='round';coastPath();x.stroke()});x.restore();
+  x.save();coastPath();x.clip();const lg=x.createRadialGradient(gx(SEA.x),gz(SEA.z),0,gx(SEA.x),gz(SEA.z),gx(LR)-gx(0));lg.addColorStop(0,'#fbf6ee');lg.addColorStop(.6,'#ece6ec');lg.addColorStop(.88,'#c9c2d4');lg.addColorStop(1,'#8f88a6');x.fillStyle=lg;x.fillRect(0,0,W,W);
+  for(let i=0;i<260;i++){const a=rnd(0,6.283),r=rnd(0,LR*.95),cx=gx(SEA.x+Math.cos(a)*r),cy=gz(SEA.z+Math.sin(a)*r),rr=rnd(20,60);blob(x,cx+rr*.25,cy+rr*.3,rr,'rgba(150,140,180,.16)');blob(x,cx,cy,rr,`rgba(255,${rnd(244,252)|0},${rnd(236,248)|0},.55)`)}
+  
+  
+  [[70,'rgba(120,110,150,.45)'],[34,'rgba(170,160,190,.5)'],[12,'rgba(240,236,244,.9)']].forEach(([lw,col])=>{x.strokeStyle=col;x.lineWidth=lw;x.lineJoin='round';coastPath();x.stroke()});x.restore();
   // une grève de galets clairs tout autour
   for(let k=0;k<COAST.length;k++){const[ax,az]=COAST[k],[bx,bz]=COAST[(k+1)%COAST.length],L=Math.hypot(bx-ax,bz-az),n=Math.ceil(L*80);for(let s=0;s<n;s++){const t=Math.random(),ox=rnd(-7,7),oy=rnd(-7,7);x.fillStyle=hsl(rnd(30,60),rnd(4,12),rnd(66,86),.85);x.beginPath();x.ellipse(gx(ax+(bx-ax)*t)+ox,gz(az+(bz-az)*t)+oy,rnd(2,5),rnd(1.5,3.5),rnd(0,3),0,7);x.fill()}}
   // le ruisseau
@@ -935,7 +937,7 @@ const WATER={};
  const land=mesh(g,[M.ground,M.edge],true,true);land.position.y=TOP-SEAD;box.add(land);
  // quelques rides découpées, posées sur le lac
  const crest=cutMat((x,W,H)=>{x.fillStyle='#aebbbb';x.beginPath();x.moveTo(8,H-8);x.quadraticCurveTo(W*.3,H*.35,W*.55,H*.45);x.quadraticCurveTo(W*.75,H*.45,W-8,H-8);x.closePath();x.fill();x.fillStyle='rgba(250,252,250,.95)';x.beginPath();x.moveTo(W*.2,H*.7);x.quadraticCurveTo(W*.35,H*.42,W*.55,H*.45);x.quadraticCurveTo(W*.38,H*.5,W*.3,H*.72);x.closePath();x.fill()},256,128);
- WATER.waves=[];let tries=0;while(WATER.waves.length<7&&tries<600){tries++;const x0=rnd(SEA.x-1.7,SEA.x+1.7),z0=rnd(SEA.z-1,SEA.z+1);if(!pip(x0,z0,COAST)||segD(x0,z0,COASTC)<.4||WATER.waves.some(m=>Math.hypot(m.userData.x-x0,m.position.z-z0)<.9))continue;
+ WATER.waves=[];let tries=0;while(WATER.waves.length<0&&tries<600){tries++;const x0=rnd(SEA.x-1.7,SEA.x+1.7),z0=rnd(SEA.z-1,SEA.z+1);if(!pip(x0,z0,COAST)||segD(x0,z0,COASTC)<.4||WATER.waves.some(m=>Math.hypot(m.userData.x-x0,m.position.z-z0)<.9))continue;
   const m=new THREE.Mesh(new THREE.PlaneGeometry(.36,.16),crest);m.customDepthMaterial=crest.userData.depth;m.castShadow=true;m.position.set(x0,TOP-SEAD+.08,z0);m.rotation.y=rnd(-.35,.35);m.userData={x:x0,row:WATER.waves.length};box.add(m);WATER.waves.push(m)}}
 
 const shellCount=box.children.length;
@@ -1001,7 +1003,7 @@ const heli=()=>{const g=new THREE.Group(),m=plastic('#4a5048'),d=plastic('#2a2e2
 const SHELL={};
 {const g=new THREE.Group();const H=3.9,N=56,lift=.75;
  for(let i=0;i<N;i++){const t=(i+.5)/N,prof=Math.sin(Math.PI*Math.pow(t,.92)),r=.62*Math.pow(prof,.8)+.02;const s=mesh(new THREE.CylinderGeometry(r*.72,r*.72,H/N*.97,48),i%6===0?M.slate2:M.slate);s.scale.z=.5;s.position.y=lift+t*H;g.add(s)}
- SHELL.g=g;const[px,pz]=PLACES[2];g.rotation.y=.25;put(g,px,pz);SHELL.y0=TOP;
+ SHELL.g=g;g.scale.setScalar(.88);g.rotation.y=.25;put(g,SEA.x,SEA.z);SHELL.y0=TOP;
  // la plate-forme élévatrice, sous son ventre, côté lac
  const pl=new THREE.Group();pl.add(box3(.42,.04,.42,M.white,0,.18,0));[-1,1].forEach(k=>{const b=mesh(new THREE.BoxGeometry(.5,.02,.03),M.slateL);b.rotation.z=k*.35;b.position.set(0,.09,k*.17);pl.add(b)});pl.add(box3(.46,.04,.46,M.slateL,0,0,0));
  put(pl,...pol(180,3.72))}
@@ -1059,10 +1061,27 @@ const CLOUDS=[],CRANES=[];
  scatter(26,.4,(x,z)=>rocks.push([x,TOP+.04,z,rnd(.08,.16),rnd(0,6),rnd(.06,.11)]));
  [[CUT.pine,pines],[CUT.pine2,pines2],[CUT.grass,grass],[CUT.birch,birch],[CUT.reed,reeds]].forEach(([m,l])=>{if(!l.length)return;const im=inst(CROSS,m,l);im.customDepthMaterial=m.userData.depth});
  inst((()=>{const g=new THREE.IcosahedronGeometry(1,1),p=g.attributes.position,map={};for(let i=0;i<p.count;i++){const k=[p.getX(i),p.getY(i),p.getZ(i)].map(v=>v.toFixed(3)).join();const f=map[k]||(map[k]=rnd(.78,1.12));p.setXYZ(i,p.getX(i)*f,p.getY(i)*f,p.getZ(i)*f)}g.computeVertexNormals();return g})(),plastic('#b9bab4'),rocks)}
-// une barque de papier sur le lac, et deux oiseaux de papier qui tournent au-dessus de la vallée
+
+// l'automne d'Alice : des érables rouges et orangés, des buissons, des meules de foin dans le pré fleuri
+{const mapleA=cutMat((x)=>{x.fillStyle='#5a3a26';x.fillRect(122,140,12,116);blobs(x,[[128,92,58],[80,116,40],[176,112,42],[104,60,40],[154,62,40],[128,140,34]],'#d8562e');blobs(x,[[150,82,30],[98,120,22],[170,128,20]],'#b83a22');blobs(x,[[110,70,20],[140,50,14],[84,104,14]],'#f2a04a')}),
+  mapleB=cutMat((x)=>{x.fillStyle='#5a3a26';x.fillRect(122,140,12,116);blobs(x,[[128,92,56],[82,118,38],[174,114,40],[104,62,38],[152,60,38]],'#eaa23a');blobs(x,[[150,84,28],[96,122,22]],'#d07a26');blobs(x,[[112,72,18],[140,48,14]],'#ffd36a')}),
+  bush=cutMat((x)=>{blobs(x,[[128,200,54],[80,214,36],[176,214,38],[128,170,40]],'#7a8a3a');blobs(x,[[150,196,26],[96,214,20]],'#a85a2a');for(let i=0;i<14;i++){x.fillStyle=['#c8463a','#e8b84a','#b07ad0'][i%3];x.beginPath();x.arc(rnd(86,170),rnd(166,230),5,0,7);x.fill()}});
+ const A1=[],A2=[],BU=[];
+ for(let i=0;i<120;i++){const a=rnd(0,Math.PI*2),r=rnd(LR+.45,RING-.45),x=SEA.x+Math.cos(a)*r,z=SEA.z+Math.sin(a)*r;const deg=(Math.atan2(x-SEA.x,z-SEA.z)*180/Math.PI+360)%360;
+  if(routeD(x,z)<.45||PLACES.some(([p,q])=>Math.hypot(x-p,z-q)<1.2)||[...A1,...A2].some(t=>Math.hypot(t[0]-x,t[2]-z)<.55))continue;if(A1.length+A2.length>=22)break;
+  const sc=rnd(.85,1.2);(i%2?A1:A2).push([x,TOP+.3*sc,z,.22*sc,0,.3*sc]);OBSTL.push([x,z,.18])}
+ for(let i=0;i<260;i++){const x=rnd(-5,5),z=rnd(-5,5);if(BU.length>=46)break;const rr=Math.hypot(x-SEA.x,z-SEA.z);if(rr<LR+.3||Math.hypot(x,z)>RB-.6||routeD(x,z)<.35||PLACES.some(([p,q])=>Math.hypot(x-p,z-q)<1.0))continue;BU.push([x,TOP+.1,z,.14,0,.11])}
+ [[mapleA,A1],[mapleB,A2],[bush,BU]].forEach(([m,l])=>{if(!l.length)return;const im=inst(CROSS,m,l);im.customDepthMaterial=m.userData.depth});
+ const hay=plastic('#e2b858'),hb=[];for(let i=0;i<40&&hb.length<7;i++){const a=rnd(0,Math.PI*2),r=rnd(RING+.45,4.2),x=SEA.x+Math.cos(a)*r,z=SEA.z+Math.sin(a)*r;if(Math.hypot(x,z)>RB-.6||routeD(x,z)<.4||PLACES.some(([p,q])=>Math.hypot(x-p,z-q)<1.2)||segD(x,z,NILEP)<.4)continue;
+  const m=mesh(new THREE.CylinderGeometry(.12,.12,.16,20),hay,true,true);m.rotation.z=Math.PI/2;m.rotation.y=rnd(0,3);m.position.set(x,TOP+.12,z);box.add(m);hb.push(m);OBSTL.push([x,z,.18])}}
+// autour de la coquille, des nuages qui roulent dans le gouffre ; le cercle d'encre est posé dessous
+{const t=canvasTex(256,256,(x,W)=>{for(let i=0;i<9;i++){const cx=rnd(60,196),cy=rnd(80,180),r=rnd(40,70);const g=x.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,'rgba(255,252,246,.95)');g.addColorStop(.6,'rgba(244,238,246,.6)');g.addColorStop(1,'rgba(230,224,240,0)');x.fillStyle=g;x.beginPath();x.arc(cx,cy,r,0,7);x.fill()}});
+ const mat=new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,opacity:.9,toneMapped:false});
+ MAPFX.puffs=[...Array(16)].map((_,i)=>{const sp=new THREE.Sprite(mat);const a=i/16*Math.PI*2+rnd(-.15,.15),r=i%2?rnd(1.32,1.65):rnd(.28,.5),k=rnd(.55,.95);sp.scale.set(k*1.4,k*.8,1);sp.userData={a,r,y:rnd(-.02,.22),ph:rnd(0,6)};sp.renderOrder=2;box.add(sp);return sp})}
+// deux oiseaux de papier qui tournent au-dessus de la vallée
 const BOATG=(()=>{const g=new THREE.BufferGeometry();const v=[-.12,0,0, .12,0,0, .27,.13,.07, -.27,.13,.07,  .12,0,0, -.12,0,0, -.27,.13,-.07, .27,.13,-.07,  -.13,.12,0, .13,.12,0, 0,.34,0,  -.27,.13,.07, -.12,0,0, -.27,.13,-.07,  .12,0,0, .27,.13,.07, .27,.13,-.07];
  g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex([0,1,2,0,2,3,4,5,6,4,6,7,8,9,10,11,12,13,14,15,16]);g.computeVertexNormals();return g})();
-const boats=[(()=>{const g=new THREE.Group();const m=mesh(BOATG,new THREE.MeshStandardMaterial({color:new THREE.Color('#e8e4d8').convertSRGBToLinear(),side:THREE.DoubleSide,flatShading:true,roughness:.95,bumpMap:FIB,bumpScale:.006}));m.scale.setScalar(1.5);m.castShadow=true;g.add(m);g.rotation.y=.8;put(g,.75,1.15,TOP-.04);return g})()];
+const boats=[];const _noBoat=[(()=>{const g=new THREE.Group();const m=mesh(BOATG,new THREE.MeshStandardMaterial({color:new THREE.Color('#e8e4d8').convertSRGBToLinear(),side:THREE.DoubleSide,flatShading:true,roughness:.95,bumpMap:FIB,bumpScale:.006}));m.scale.setScalar(1.5);m.castShadow=true;g.add(m);g.rotation.y=.8;return g})];
 const sheep=[];
 {const cg=new THREE.BufferGeometry();const v=[0,0,-.16, 0,.02,.12, -.03,-.02,0, 0,0,-.16, 0,.02,.12, .03,-.02,0, 0,.02,.12, 0,.12,.2, .02,0,.05, 0,0,-.16, 0,.1,-.22, -.02,0,-.08];cg.setAttribute('position',new THREE.Float32BufferAttribute(v,3));cg.computeVertexNormals();
  const wg=new THREE.BufferGeometry();wg.setAttribute('position',new THREE.Float32BufferAttribute([0,0,-.06, 0,0,.08, .22,.03,0],3));wg.computeVertexNormals();
@@ -1093,10 +1112,10 @@ const BRIDGE={};const bridgeH=(x,z)=>{if(BRIDGE.L==null)return 0;const dx=x-BRID
 /* ---------- ce qui bouge : la coquille respire, l'hélicoptère tourne, les projecteurs balaient la brume, le cercle d'encre tourne sur le lac ---------- */
 {// le cercle d'encre, pâle comme de la brume, posé sur l'eau
  const t=canvasTex(1024,1024,(x,W)=>{x.clearRect(0,0,W,W);inkRing(x,W/2,W/2,330,{seed:1918,col:'#141414',w:30,drops:30,wash:false,f:[{a:-.3,k:'splash',s:1.4},{a:.9,k:'tendril',s:1.5,c:.06},{a:1.6,k:'blob',s:1.2},{a:2.4,k:'spike',s:1.3,d:-1},{a:3.3,k:'splash',s:1.1},{a:4.1,k:'hook',s:1.3},{a:4.9,k:'tendril',s:1.2,d:-1,c:-.05},{a:5.6,k:'blob',s:.9}]})});
- const m=new THREE.Mesh(new THREE.PlaneGeometry(2.9,2.9),new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:.55,depthWrite:false,toneMapped:false}));m.rotation.x=-Math.PI/2;m.position.set(SEA.x,TOP-.035,SEA.z);m.renderOrder=1;box.add(m);MAPFX.ink=m}
+ const m=new THREE.Mesh(new THREE.PlaneGeometry(2.9,2.9),new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:.55,depthWrite:false,toneMapped:false}));m.rotation.x=-Math.PI/2;m.position.set(SEA.x,TOP+.09,SEA.z);m.renderOrder=3;box.add(m);MAPFX.ink=m}
 {// la lueur sous la coquille, sur l'herbe et sur l'eau
  const t=canvasTex(256,256,(x,W)=>{const g=x.createRadialGradient(W/2,W/2,0,W/2,W/2,W/2);g.addColorStop(0,'rgba(230,236,240,.9)');g.addColorStop(.5,'rgba(200,214,224,.35)');g.addColorStop(1,'rgba(200,214,224,0)');x.fillStyle=g;x.fillRect(0,0,W,W)});
- const m=new THREE.Mesh(new THREE.CircleGeometry(1.3,32),new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:.5,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));m.rotation.x=-Math.PI/2;m.position.set(PLACES[2][0],TOP+.03,PLACES[2][1]+.3);box.add(m);MAPFX.pool=m}
+ const m=new THREE.Mesh(new THREE.CircleGeometry(1.3,32),new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:.5,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));m.rotation.x=-Math.PI/2;m.position.set(SEA.x,TOP-.02,SEA.z);box.add(m);MAPFX.pool=m}
 {// les projecteurs du camp, des cônes de lumière très doux, sans bord, qui cherchent la coquille
  const am=canvasTex(64,256,(x,W,H)=>{const gr=x.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#fff');gr.addColorStop(.3,'#666');gr.addColorStop(.7,'#1a1a1a');gr.addColorStop(1,'#000');x.fillStyle=gr;x.fillRect(0,0,W,H)});am.encoding=THREE.LinearEncoding;
  [[-.9,1.0],[.8,1.0]].forEach(([lx,ly],i)=>{const L=4.6,geo=new THREE.ConeGeometry(.55,L,24,1,true);geo.translate(0,-L/2,0);geo.rotateX(-Math.PI/2);
@@ -1113,18 +1132,19 @@ MAPFX.heli=heli();MAPFX.heli.scale.setScalar(1.15);box.add(MAPFX.heli);
  const t=canvasTex(32,32,(x,W)=>{const gr=x.createRadialGradient(W/2,W/2,0,W/2,W/2,W/2);gr.addColorStop(0,'rgba(240,244,248,1)');gr.addColorStop(1,'rgba(240,244,248,0)');x.fillStyle=gr;x.fillRect(0,0,W,W)});
  const pts=new THREE.Points(g,new THREE.PointsMaterial({map:t,size:.09,transparent:true,opacity:.75,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));box.add(pts);MAPFX.pts=pts}
 function mapTick(T){if(!MAPFX.heli)return;const on=phase!=='closed'&&phase!=='opening';
+ if(MAPFX.puffs)MAPFX.puffs.forEach(p=>{const u=p.userData,a=u.a+T*.025;p.position.set(SEA.x+Math.cos(a)*u.r,TOP+u.y+.04*Math.sin(T*.4+u.ph),SEA.z+Math.sin(a)*u.r*.85)});
  // la coquille respire à peine
- SHELL.g.position.y=TOP+.06*Math.sin(T*.45);SHELL.g.rotation.y=.25+.04*Math.sin(T*.13);MAPFX.pool.material.opacity=.38+.12*Math.sin(T*.45);
+ SHELL.g.position.y=TOP+.18+.06*Math.sin(T*.45);SHELL.g.rotation.y=.25+.04*Math.sin(T*.13);MAPFX.pool.material.opacity=.38+.12*Math.sin(T*.45);
  // le cercle d'encre tourne lentement sur le lac
  MAPFX.ink.rotation.z=T*.035;MAPFX.ink.material.opacity=.86+.08*Math.sin(T*.3);
  // l'hélicoptère fait le tour de la vallée
  const h=MAPFX.heli,a=T*.16;h.visible=on;h.position.set(SEA.x+Math.cos(a)*4.1,TOP+2.5+.12*Math.sin(T*.9),SEA.z+Math.sin(a)*3.6-.3);h.rotation.set(.12*Math.sin(T*.5),-a-Math.PI,.1);h.userData.rot.rotation.y=T*28;MAPFX.heli0.userData.rot.rotation.y=0;
  // les projecteurs balaient la brume vers la coquille
- MAPFX.beams.forEach(({b,ph})=>{b.visible=on;const tx=PLACES[2][0]+Math.sin(T*.23+ph)*1.6,ty=TOP+1.6+Math.sin(T*.31+ph)*.9,tz=PLACES[2][1]+Math.cos(T*.19+ph)*.6;const w=new THREE.Vector3(tx,ty,tz);box.localToWorld(w);b.lookAt(w)});
+ MAPFX.beams.forEach(({b,ph})=>{b.visible=on;const tx=SEA.x+Math.sin(T*.23+ph)*1.2,ty=TOP+1.6+Math.sin(T*.31+ph)*.9,tz=SEA.z+Math.cos(T*.19+ph)*.6;const w=new THREE.Vector3(tx,ty,tz);box.localToWorld(w);b.lookAt(w)});
  // les lampes, avec leur halo qui frémit
  MAPFX.halos.forEach(s=>{const k=s.userData.k*(1+.08*Math.sin(T*3+s.userData.ph)+.05*Math.sin(T*7.3+s.userData.ph));s.scale.set(k,k,1);s.visible=on});
  // les poussières de lumière
- const P=MAPFX.pts.geometry.attributes.position;MAPFX.motes.forEach((m,i)=>{m.y+=m.s*.016;if(m.y>4.4)m.y=0;const aa=m.a+T*.05;P.setXYZ(i,PLACES[2][0]+Math.cos(aa)*m.r,TOP+m.y,PLACES[2][1]+Math.sin(aa)*m.r*.6)});P.needsUpdate=true;MAPFX.pts.visible=on}
+ const P=MAPFX.pts.geometry.attributes.position;MAPFX.motes.forEach((m,i)=>{m.y+=m.s*.016;if(m.y>4.4)m.y=0;const aa=m.a+T*.05;P.setXYZ(i,SEA.x+Math.cos(aa)*m.r,TOP+m.y,SEA.z+Math.sin(aa)*m.r*.6)});P.needsUpdate=true;MAPFX.pts.visible=on}
 
 /* ---------- le couvercle : un disque de kraft, et dessus, peint à l'encre, un grand cercle ---------- */
 const hinge=new THREE.Group();hinge.position.set(0,TOP+.06,-RB);box.add(hinge);
@@ -1487,18 +1507,23 @@ const REVC={};function drawReveal(c,T,id){if(!REVEAL[id])return;const R=REVC[id]
  c.drawImage(R.c,0,0);c.restore()}
 function tabReveal(){if(TAB.rev)return;TAB.rev=true;TAB.p=1;TAB.used=1;const n=TAB.note;JR.noteN=(JR.noteN||0)+1;JR.note={text:n,t0:performance.now()};sndPaper(.4,.3);sndTone(523,1.2,.05);say.className='jr';sayWho.textContent='';sayTxt.textContent='À retenir : '+n;say.hidden=false;waitTap=true}
 function drawTab(c,T){if(!PAPER||!REVEAL[SCR.id]||!(TAB.need||TAB.rev))return;if(TAB.auto&&!TAB.rev)TAB.p=Math.min(1,(performance.now()-TAB.auto)/650);if(!TAB.drag&&!TAB.rev&&!TAB.auto)TAB.p*=.9;if(!TAB.rev&&TAB.p>.85)tabReveal();
-const x=tabX(),y=296;
+const x=tabX(),y=296,SX=532;
+ c.save();c.beginPath();c.rect(SX,0,MS,MS);c.clip();
  // la bande de papier qui sort de derrière l'image : on voit qu'on tire un mécanisme, pas une étiquette qu'on arrache
- c.save();c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.fillRect(470,308,x-30-470+2,36);c.fillStyle='rgba(60,35,10,.22)';c.fillRect(470,308,x-30-470+2,3);c.fillRect(470,341,x-30-470+2,3);c.strokeStyle='rgba(120,80,40,.5)';c.setLineDash([5,6]);c.lineWidth=1.5;c.beginPath();c.moveTo(480,326);c.lineTo(x-44,326);c.stroke();c.restore();
+ c.save();c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.fillRect(SX,308,x-30-SX+2,36);c.fillStyle='rgba(60,35,10,.22)';c.fillRect(SX,308,x-30-SX+2,3);c.fillRect(SX,341,x-30-SX+2,3);c.strokeStyle='rgba(120,80,40,.5)';c.setLineDash([5,6]);c.lineWidth=1.5;c.beginPath();c.moveTo(SX+4,326);c.lineTo(x-44,326);c.stroke();c.restore();
  c.save();c.translate(x-30,y+30);c.scale(1.32,1.32);c.translate(-(x-30),-(y+30));c.save();c.shadowColor='rgba(20,10,0,.45)';c.shadowBlur=8;c.shadowOffsetY=4;c.fillStyle=c.createPattern(KRAFTP||PAPERG,'repeat');c.beginPath();c.moveTo(x-30,y);c.lineTo(x+46,y);c.quadraticCurveTo(x+58,y+30,x+46,y+60);c.lineTo(x-30,y+60);c.closePath();c.fill();c.restore();
  c.strokeStyle='rgba(120,80,40,.8)';c.lineWidth=2;c.beginPath();c.moveTo(x-30,y);c.lineTo(x+46,y);c.quadraticCurveTo(x+58,y+30,x+46,y+60);c.lineTo(x-30,y+60);c.stroke();
  c.font='700 26px Caveat, cursive';c.fillStyle='#5a3418';c.fillText('tirer',x-22,y+38);c.strokeStyle='#5a3418';c.lineWidth=3;c.beginPath();c.moveTo(x+22,y+30);c.lineTo(x+40,y+30);c.moveTo(x+32,y+22);c.lineTo(x+40,y+30);c.lineTo(x+32,y+38);c.stroke();c.restore();
+ c.restore();
+ // l'encoche dans le carton : la languette en sort
+ c.save();c.fillStyle='rgba(30,18,8,.85)';c.beginPath();rrect(c,SX-6,y-14,12,88,5);c.fill();c.strokeStyle='rgba(255,236,200,.55)';c.lineWidth=2;c.beginPath();c.moveTo(SX+7,y-12);c.lineTo(SX+7,y+72);c.stroke();c.restore();
  if(!TAB.rev&&typeof drawHand==='function'){const k=(T*.6)%1,e=clamp((k-.2)/.5);drawHand(c,x+8+e*70,y+44,k>.15&&k<.75)}}
-function drawPieces(c,P,T,t){P.forEach((p,i)=>{const k=clamp((t-.15-i*.13)/.42),e=k<=0?0:easeBack(k);if(e<=0)return;const d=p.depth,dx=Math.sin(T*.55+d*1.3)*(1.5+d*1.6),dy=Math.cos(T*.4+d)*d*.6,piv=p.base||700;
+const MEMX={papa:0};
+function drawPieces(c,P,T,t){P.forEach((p,i)=>{const k=clamp((t-.15-i*.13)/.42),e=k<=0?0:easeBack(k);if(e<=0)return;const wa=p.when?p.when():1;if(wa<=0)return;c.save();c.globalAlpha*=wa;const d=p.depth,dx=Math.sin(T*.55+d*1.3)*(1.5+d*1.6),dy=Math.cos(T*.4+d)*d*.6,piv=p.base||700;
   if(PAPER&&!p.vivid){const v=mkC(),vx=v.getContext('2d');vx.filter='saturate(1.45) brightness(1.05) contrast(1.04)';vx.drawImage(p.c,0,0);p.c=v;p.vivid=1}
   if(PAPER&&i>0&&P[i-1].depth<1.5&&d>=1.5){const b=P[0];if(!b.haze){b.haze=mkC();const hx=b.haze.getContext('2d');hx.drawImage(b.c,0,0);hx.globalCompositeOperation='source-in';hx.fillStyle='#fbf3e2';hx.fillRect(0,0,MS,MS)}c.save();c.globalAlpha=.18*e;c.drawImage(b.haze,Math.sin(T*.55)*1.5,0);c.restore()}
   c.save();c.translate(0,piv);c.scale(1,Math.max(.001,e));c.translate(dx,dy-piv);const fx=PAPER&&TABFX[SCR.id]&&TABFX[SCR.id][i];if(fx)c.translate(fx[0]*TAB.p,fx[1]*TAB.p);
-  c.save();c.globalAlpha=.35+d*.05;c.filter=`blur(${3+d*1.5}px)`;c.drawImage(p.sh,5+d*3.5,7+d*4);c.restore();c.drawImage(p.c,0,0);c.restore()})}
+  c.save();c.globalAlpha=.35+d*.05;c.filter=`blur(${3+d*1.5}px)`;c.drawImage(p.sh,5+d*3.5,7+d*4);c.restore();c.drawImage(p.c,0,0);c.restore();c.restore()})}
 const POP={};
 const stripes=(x,X,Y,W,H,c1,c2,w=26)=>{fp(x,c1,c=>rrect(c,X,Y,W,H,20));x.save();x.beginPath();rrect(x,X,Y,W,H,20);x.clip();x.fillStyle=c2;for(let u=X;u<X+W;u+=w*2)x.fillRect(u,Y,w,H);x.restore()};
 const plant=(x,px,py,s=1)=>{fp(x,'#d8744a',c=>{c.moveTo(px-26*s,py-50*s);c.lineTo(px+26*s,py-50*s);c.lineTo(px+20*s,py);c.lineTo(px-20*s,py);c.closePath()});[[-30,-120,-.5],[0,-150,0],[28,-118,.5],[-14,-96,-.25],[16,-100,.3]].forEach(([dx,dy,r])=>fp(x,'#4fae5a',c=>{c.ellipse(px+dx*s,py+dy*s,12*s,40*s,r,0,7)}))};
@@ -1526,8 +1551,10 @@ const sofa=(x,X,Y,W,H,col,col2)=>{fp(x,col2,c=>rrect(c,X,Y,W,H*.55,24));fp(x,col
    for(let i=0;i<=9;i++){const t=i/9,[bx,by]=BS(t);fp(x,'#efe2c6',c=>rrect(c,bx-8,by-150,16,150,5));x.fillStyle='rgba(120,80,40,.3)';x.fillRect(bx+3,by-146,4,142)}
    const[a0,b0]=RL(0),[a1,b1]=RL(1);x.save();x.lineCap='round';x.strokeStyle='#8a5a34';x.lineWidth=22;x.beginPath();x.moveTo(a0,b0);x.lineTo(a1,b1);x.stroke();x.strokeStyle='#b07a45';x.lineWidth=8;x.beginPath();x.moveTo(a0,b0-7);x.lineTo(a1,b1-7);x.stroke();x.restore()});
  // Alice et Papa, assis sur la marche, de dos : ils regardent entre les barreaux
- const kids=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();parent(x,{kind:'man',view:'back',seated:true,x:210,y:730,h:340,hat:'#000',armL:[20,30],armR:[-10,-20]});chibi(x,{x:440,y:745,h:260,view:'back',armL:[-20,0],armR:[30,-40]});x.restore()});
- POP.escalier={P:[{...wall,depth:0},{...room,depth:.8},{...stairs,depth:1.8},{...kids,depth:2.6}],
+ const alice=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();chibi(x,{x:450,y:745,h:260,view:'back',armL:[-20,0],armR:[30,-40]});x.restore()});
+ // Papa arrive quand il parle : assis tout près, au premier plan, penché vers elle, le bras autour de ses épaules
+ const papa=cut(x=>{x.save();x.beginPath();x.rect(70,40,628,640);x.clip();parent(x,{kind:'man',view:'back',seated:true,x:250,y:830,h:440,tilt:40,hat:'#000',armL:[10,10],armR:[74,-44]});x.restore()});
+ POP.escalier={P:[{...wall,depth:0},{...room,depth:.8},{...stairs,depth:1.8},{...alice,depth:2.6},{...papa,depth:2.7,when:()=>MEMX.papa?clamp((performance.now()-MEMX.papa)/800):0}],
   fx:(c,T)=>{tvGlow(c,475,285,T,230);motes(c,T,360,600,220,460)}}}
 /* 2. le canapé : le carton « ALICE », le carton « MAMAN » ; Papa crie « Kangourou ! » de la cuisine */
 {const wall=cut(x=>stripes(x,70,40,628,640,'#2f3a5c','#2a3454'),{crayon:.35,border:0,outline:0});
@@ -1580,19 +1607,22 @@ function handBox(c,x,y,w,h){c.beginPath();const seg=(x0,y0,x1,y1,o)=>{c.moveTo(x
   seg(x-6,y,x+w+8,y+2,0);seg(x+w,y-6,x+w-2,y+h+7,9);seg(x+w+5,y+h,x-4,y+h-2,17);seg(x+2,y+h+6,x,y-7,27);c.stroke()}
 function drawJournal(c,T){c.save();c.textBaseline='alphabetic';
   if(JR.note){// Alice encadre l'essentiel au crayon, avec une petite étoile
-    const k=clamp((performance.now()-JR.note.t0)/700);let fz=46;for(;fz>=32;fz-=2){c.font=`600 ${fz}px Caveat, "Patrick Hand", cursive`;if(jLines(c,JR.note.text,520).length<=2)break}
+    const k=clamp((performance.now()-JR.note.t0)/700);const fz=42;c.font=`600 ${fz}px Caveat, "Patrick Hand", cursive`;
     const ls=jLines(c,JR.note.text,520),bh=ls.length*fz*1.15+30,by=624-bh/2;c.strokeStyle='#22306e';c.lineWidth=2.6;c.globalAlpha=k;handBox(c,110,by,560,bh);
     // de temps en temps, un petit dessin au stylo à côté du cadre, jamais au même endroit
     const dk=(JR.noteN||0)%3;if(dk){const px=dk===1?660:120,py=dk===1?by-10:by+bh+6;c.save();c.translate(px,py);c.rotate(dk===1?.15:-.1);c.beginPath();
       if(dk===1){for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2,rr=i%2?6:14;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}c.closePath()}else{c.moveTo(-14,4);c.quadraticCurveTo(-4,-12,6,0);c.quadraticCurveTo(14,10,22,-6);c.moveTo(-14,10);c.quadraticCurveTo(-4,-6,6,6);c.quadraticCurveTo(14,16,22,0)}c.stroke();c.restore()}
     let y=by+fz*.95+12;ls.forEach(l=>{c.fillText(l,390-c.measureText(l).width/2,y);y+=fz*1.15});if(waitTap){c.fillStyle='#c8902a';c.globalAlpha=.5+.5*Math.sin(T*4);c.font='26px serif';c.fillText('▸',700,736)}c.restore();return}
-  let items=JR.items.slice(-2),fs=40,lines;const fit=()=>{for(fs=44;fs>=38;fs-=2){c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`;lines=0;items.forEach(it=>lines+=jLines(c,it.text,600).length);if(lines*(fs*1.15)<=(PAPER?150:190))return true}return false};
-  if(!fit()){items=JR.items.slice(-1);if(!fit()){fs=38;c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`}}
+  let items=JR.items.slice(-2),fs=40,lines;const fit=()=>{for(fs=40;fs>=40;fs-=2){c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`;lines=0;items.forEach(it=>lines+=jLines(c,it.text,600).length);if(lines*(fs*1.15)<=(PAPER?150:190))return true}return false};
+  if(!fit()){items=JR.items.slice(-1);fs=40;c.font=`600 ${fs}px Caveat, "Patrick Hand", cursive`}
   const lh=fs*1.15;let y=(PAPER?532:548)+lh*.85;items.forEach((it,i)=>{const old=i<items.length-1;c.fillStyle=INKC[it.who]||'#22306e';c.globalAlpha=old?.42:1;let n=jChars(it);for(const ln of jLines(c,it.text,600)){const s=ln.slice(0,Math.max(0,n));c.fillText(s,100,y);n-=ln.length+1;y+=lh}});
   c.globalAlpha=1;if(waitTap&&!jWriting()&&JR.items.length){c.fillStyle='#c8902a';c.globalAlpha=.5+.5*Math.sin(T*4);c.font='26px serif';c.fillText('▸',700,736)}c.restore()}
 
 /* ---------- les manipulations sont collées dans le journal comme des cartes ---------- */
-const CARD={x:74,y:44,k:.82,r:-.012};
+const CARD={x:115,y:18,k:.7,r:-.012};
+// sous la carte, ce qu'on se dit, écrit dans le carnet (jamais aussi dans une bulle) ; toujours la même taille
+const CAP={t:'',t0:0};function capWrite(t){t=String(t).replace(/ ([:;?!»])/g,'\u202f$1').replace(/« /g,'«\u202f');if(t===CAP.t)return;CAP.t=t;CAP.t0=performance.now()}
+function drawCap(c,T){if(!CAP.t)return;c.save();c.font='600 38px Caveat, "Patrick Hand", cursive';c.fillStyle='#22306e';let n=Math.floor((performance.now()-CAP.t0)/1000*48),y=600;for(const ln of jLines(c,CAP.t,610)){c.fillText(ln.slice(0,Math.max(0,n)),79,y);n-=ln.length+1;y+=42}c.restore()}
 const toManip=(cx,cy)=>{const dx=cx-CARD.x,dy=cy-CARD.y,co=Math.cos(-CARD.r),si=Math.sin(-CARD.r);return[(dx*co-dy*si)/CARD.k,(dx*si+dy*co)/CARD.k]};
 const fromManip=(mx2,my2)=>{const co=Math.cos(CARD.r),si=Math.sin(CARD.r),x=mx2*CARD.k,y=my2*CARD.k;return[CARD.x+x*co-y*si,CARD.y+x*si+y*co]};
 const cardTmp=document.createElement('canvas');cardTmp.width=cardTmp.height=Math.round(MS*HD);const ctmp=cardTmp.getContext('2d');
@@ -1779,25 +1809,25 @@ const paper=(c,y,h)=>tagBox(c,34,y,700,h,14);
 const THERMO=(c,T)=>{const x0=94,x1=674,y=350;const g=c.createLinearGradient(x0,0,x1,0);g.addColorStop(0,'#3b6fd6');g.addColorStop(.5,'#e9e2c8');g.addColorStop(1,'#c8463a');c.save();c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=10;c.shadowOffsetY=5;c.fillStyle=g;c.beginPath();rrect(c,x0,y-30,x1-x0,60,30);c.fill();c.restore();
  txt(c,'glacée',x0+40,y+64,30,'#cfe0f0');txt(c,'brûlante',x1-50,y+64,30,'#f6c4b0');return[x0,x1,y]};
 function mkMots(){const M={state:'drag',v:.35,drag:false,t0:0,pick:-1,done:false,
- hint:'Maman, à ses étudiants : « Une question toute simple. L’eau du bain : où commence le mot tiède ? »',
+ hint:'Maman, la main sous le robinet : « Une question pour toi, ma puce. L’eau du bain : à partir d’où est-elle “tiède” ? »',
  wantsTap:()=>['marks','snow2','end'].includes(M.state),
  draw(c,T){c.drawImage(OFFICEBG,0,0);const now=performance.now();
   if(M.state==='drag'||M.state==='marks'){paper(c,28,96);bigLine(c,'Où commence « tiède » ?',76,46);const[x0,x1,y]=THERMO(c,T);
    const mark=(v,lab,col,up)=>{const px=x0+(x1-x0)*v;c.save();c.fillStyle=col;c.beginPath();c.moveTo(px,y-36);c.lineTo(px-14,y-62);c.lineTo(px+14,y-62);c.closePath();c.fill();c.restore();txt(c,lab,px,y-86-(up?44:0),34,col)};
    mark(M.v,'moi','#ffd27a');
    if(M.state==='drag'){txt(c,'Glisser la flèche dorée',384,520,40,'#f3ead6');txt(c,'là où l’eau devient « tiède ».',384,566,40,'#f3ead6');const k=(tutT()*.6)%1;drawHand(c,x0+(x1-x0)*(M.v+.12*Math.sin(k*Math.PI)),y-50,k<.6);if(M.moved)nextBtn(c,'c’est là')}
-   else{const k=clamp((now-M.t0)/900);if(k>.2)mark(.52,'Maman','#e8b4c8',true);if(k>.6)mark(.22,'Papa','#9ec6f0',true);
-    if(k>=1){paper(c,470,190);bigLine(c,'Trois personnes, trois « tiède ».',516,40);bigLine(c,'Le même mot ne coupe pas le monde',566,36,'#3a2a20');bigLine(c,'au même endroit pour chacun.',606,36,'#3a2a20');tapLine(c,700)}}return}
+   else{const k=clamp((now-M.t0)/900);if(k>.2)mark(.45,'Maman','#e8b4c8',true);if(k>.6)mark(.6,'Papa','#9ec6f0',true);
+    if(k>=1){paper(c,470,190);bigLine(c,'Trois personnes, trois « tiède ».',516,42);bigLine(c,'Le monde, lui, n’a pas de frontière :',566,38,'#3a2a20');bigLine(c,'c’est le mot qui en trace une.',612,38,'#3a2a20');tapLine(c,700)}}return}
   if(M.state==='snow'||M.state==='snow2'){paper(c,28,96);bigLine(c,'Les Inuits ont-ils des dizaines de mots',62,40);bigLine(c,'pour dire la neige ?',104,40);
    [['2',0],['50',1],['100',2]].forEach(([l,i])=>btn(c,94+i*200,170,180,110,l,M.pick===i,58));
    if(M.state==='snow2'){paper(c,320,330);bigLine(c,'Deux racines seulement :',372,42,'#7a2a08');bigLine(c,'la neige au sol, la neige qui tombe.',420,38);bigLine(c,'Les « cent mots », c’est un mythe.',476,38);
     bigLine(c,'Et nous ? neige, givre, verglas,',536,36,'#3a2a20');bigLine(c,'poudreuse, grésil, flocon…',576,36,'#3a2a20');tapLine(c,700)}return}
-  if(M.state==='end'){paper(c,150,420);bigLine(c,'Une langue découpe le monde',230,44);bigLine(c,'à sa façon.',284,44);bigLine(c,'Mais elle ne nous empêche pas de le voir :',370,36,'#3a2a20');bigLine(c,'quand un mot manque, on dit',420,36,'#3a2a20');bigLine(c,'« rouge foncé », « neige qui colle ».',470,38,'#7a2a08');tapLine(c,640)}},
+  if(M.state==='end'){paper(c,150,420);bigLine(c,'Chacun coupe ailleurs,',224,44);bigLine(c,'chaque langue aussi.',278,44);bigLine(c,'Mais couper n’est pas enfermer :',366,40,'#3a2a20');bigLine(c,'quand un mot manque, on dit',416,38,'#3a2a20');bigLine(c,'« rouge foncé », « neige qui colle ».',470,40,'#7a2a08');tapLine(c,640)}},
  down(cx,cy){const now=performance.now();
-  if(M.state==='drag'){if(M.moved&&hitNext(cx,cy)){M.state='marks';M.t0=now;sndTone(523,.8,.08);showHint('« Moi, je mets “tiède” plus haut. Papa, bien plus bas. Personne n’a tort : chacun découpe à sa façon. »');return}if(Math.abs(cy-350)<90){M.drag=true;M.move(cx,cy)}return}
-  if(M.state==='marks'){if(now-M.t0<900)return;M.state='snow';showHint('« Alors, une langue changerait ce qu’on voit ? Voyons un exemple célèbre. »');return}
-  if(M.state==='snow'){[0,1,2].forEach(i=>{if(inR(cx,cy,[94+i*200,170,180,110])){M.pick=i;M.state='snow2';sndTone(i===0?659:440,.6,.08);showHint(i===0?'« Bravo, presque personne ne le sait. »':'« C’est ce que tout le monde croit. Landragin le dit : c’est un mythe. »')}});return}
-  if(M.state==='snow2'){M.state='end';showHint('C’est la vieille question de Sapir et Whorf : la langue façonne-t-elle la pensée ? Maman disait : « On verra ça au bord du lac. »');return}
+  if(M.state==='drag'){if(M.moved&&hitNext(cx,cy)){M.state='marks';M.t0=now;sndTone(523,.8,.08);showHint('« Moi, je le mets ici. Papa, un peu plus loin : il aime l’eau chaude. Aucun de nous n’a tort. »');return}if(Math.abs(cy-350)<90){M.drag=true;M.move(cx,cy)}return}
+  if(M.state==='marks'){if(now-M.t0<900)return;M.state='snow';showHint('« Et d’une langue à l’autre, les frontières bougent aussi. On raconte même que les Inuits voient la neige autrement… »');return}
+  if(M.state==='snow'){[0,1,2].forEach(i=>{if(inR(cx,cy,[94+i*200,170,180,110])){M.pick=i;M.state='snow2';sndTone(i===0?659:440,.6,.08);showHint(i===0?'« Bravo ! Presque personne ne le sait. Le reste, ils le fabriquent, comme nous disons “neige fondue”. »':'« Tout le monde le croit ! Landragin le démonte : deux racines, et des mots qu’on fabrique avec. »')}});return}
+  if(M.state==='snow2'){M.state='end';showHint('« Alors les mots découpent… mais ils ne nous enferment pas ? » Maman m’a embrassée : « C’est toute la question de Sapir et Whorf. »');return}
   if(M.state==='end'){M.done=true}},
  move(cx){if(M.drag&&M.state==='drag'){M.v=clamp((cx-94)/580,.04,.96);M.moved=true}},up(){M.drag=false},solve(){M.done=true}};return M}
 
@@ -1813,7 +1843,7 @@ const PICS={
 const GUESS=['un lapin','un animal','blanc','« regarde ! »'];
 const GSCN=[['chien','Un chien qui détale.',1],['feuille','Une feuille emportée par le vent.',1],['dort','Un lapin qui dort.',0]];
 function mkGavagai(){const M={state:'rabbit',t0:performance.now(),pick:-1,i:-1,done:false,
- hint:'Au camp. Un lapin traverse le champ ; le visiteur trace un cercle. Louise note : « gavagai ».',
+ hint:'Un lapin traverse le champ. Le visiteur trace un cercle. Papa, de la cuisine : « Gavagai ! Ça veut dire lapin, non ? »',
  wantsTap:()=>['rabbit','scene','fin'].includes(M.state),
  draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now(),k=(now-M.t0)/1000;
   if(M.state==='rabbit'){const lx=lerp(60,640,clamp(k/1.8));if(k<2.2){c.save();c.globalAlpha=1-clamp((k-1.8)/.4);c.drawImage(PICS.lapin,lx-75,560);c.restore()}drawGlyph(c,G_GAV,384,330,170,clamp((k-.4)/1.8));if(k>2.3){bigLine(c,'« Gavagai ! »',640,54);tapLine(c,712)}return}
@@ -1823,9 +1853,9 @@ function mkGavagai(){const M={state:'rabbit',t0:performance.now(),pick:-1,i:-1,d
    if(kk>=1){bigLine(c,yes?'« Gavagai ! »':'Silence. Pas de gavagai.',560,44,yes?'#22306e':'#6a5a5a');const note=M.i===0?(M.pick===0?'Un chien ? Alors ce n’est pas « lapin ».':'Un chien aussi ?'):M.i===1?'Une feuille ? Ni lapin, ni animal…':'Un lapin… mais immobile.';bigLine(c,note,620,36,'#7a2a08');tapLine(c,712)}return}
   if(M.state==='fin'){paper(c,120,500);drawGlyph(c,G_GAV,384,260,100);bigLine(c,'Gavagai voulait dire :',420,40,'#3a2a20');bigLine(c,'« ce qui s’enfuit ».',476,52,'#7a2a08');bigLine(c,'Un seul exemple ne suffit jamais.',548,38);bigLine(c,'Un mot ne se devine pas : il se demande.',596,38);tapLine(c,690)}},
  down(cx,cy){const now=performance.now();
-  if(M.state==='rabbit'){if(now-M.t0<2300)return;M.state='guess';showHint('« À ton avis ? Choisis. Il n’y a pas de mauvaise réponse… pour l’instant. »');return}
-  if(M.state==='guess'){GUESS.forEach((g,i)=>{if(inR(cx,cy,[40+(i%2)*352,560+(i/2|0)*96,336,82])){M.pick=i;sndPaper(.3,.2);M.state='scene';M.i=0;M.t0=now;showHint('« '+(i===3?'Regarde':g[0].toUpperCase()+g.slice(1))+' ? Vérifions. »')}});return}
-  if(M.state==='scene'){if(now-M.t0<1600)return;M.i++;M.t0=now;sndPaper(.25,.2);if(M.i>=GSCN.length){M.state='fin';sndTone(784,1.2,.1);showHint('C’est l’énigme « gavagai » du philosophe Quine. Et dans le film, Louise s’avance vers la vitre pour ça : on n’apprend une langue qu’en face à face.')}return}
+  if(M.state==='rabbit'){if(now-M.t0<2300)return;M.state='guess';showHint('Maman souriait : elle connaissait le piège. « À ton avis, ma puce ? »');return}
+  if(M.state==='guess'){GUESS.forEach((g,i)=>{if(inR(cx,cy,[40+(i%2)*352,560+(i/2|0)*96,336,82])){M.pick=i;sndPaper(.3,.2);M.state='scene';M.i=0;M.t0=now;showHint('« '+(i===3?'Regarde':g[0].toUpperCase()+g.slice(1))+' ? Un seul exemple, c’est trop peu. Louise montre autre chose, et elle demande. »')}});return}
+  if(M.state==='scene'){if(now-M.t0<1600)return;M.i++;M.t0=now;sndPaper(.25,.2);if(M.i>=GSCN.length){M.state='fin';sndTone(784,1.2,.1);showHint('« C’est l’énigme du philosophe Quine. Voilà pourquoi Louise enlève sa combinaison : une langue s’apprend en face à face. »')}return}
   if(M.state==='fin'){M.done=true}},
  move(){},up(){},solve(){M.done=true}};return M}
 
@@ -1835,7 +1865,7 @@ const EMBS=[{l:'Le malt était dans la maison.',ring:['le malt','était dans la 
  {l:'Le malt que le rat que le chat a mordu a mangé était dans la maison.',ring:['le chat','a mordu le rat']}];
 const RINGS3=[GLYPH(41,4),GLYPH(52,3),GLYPH(63,3)];
 function mkEmboite(){const M={state:'build',n:1,t0:performance.now(),pick:-1,done:false,
- hint:'Maman me montrait une phrase célèbre du linguiste Chomsky. « On va y glisser une autre phrase. Puis encore une. »',
+ hint:'Maman a pris un crayon : « Une phrase peut en cacher une autre, comme des poupées russes. Regarde. »',
  wantsTap:()=>['res','end'].includes(M.state),
  draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now(),k=clamp((now-M.t0)/1200);
   // en haut : la phrase en ligne
@@ -1848,8 +1878,8 @@ function mkEmboite(){const M={state:'build',n:1,t0:performance.now(),pick:-1,don
   if(M.state==='res'){paper(c,660,96);bigLine(c,M.pick===2?'Le chat ! On le voit d’un regard.':'Le chat : regarde le petit cercle.',708,40,'#7a2a08')}
   if(M.state==='end'){c.save();c.globalAlpha=.94;paper(c,200,420);c.restore();bigLine(c,'En ligne, deux phrases glissées',270,42);bigLine(c,'au milieu suffisent à nous perdre :',318,42);bigLine(c,'la mémoire ne tient pas les morceaux.',366,38,'#3a2a20');bigLine(c,'Dessinée, la phrase se lit d’un regard.',440,42,'#7a2a08');bigLine(c,'Les visiteurs écrivent comme ça :',500,36,'#3a2a20');bigLine(c,'toute la phrase, d’un seul geste.',540,36,'#3a2a20');tapLine(c,600)}},
  down(cx,cy){const now=performance.now();
-  if(M.state==='build'){if(now-M.t0<1200||!inR(cx,cy,[214,672,340,72]))return;if(M.n<3){M.n++;M.t0=now;sndPaper(.35,.25);showHint(M.n===2?'« Le rat a mangé le malt. Ça va encore. »':'« Et le chat a mordu le rat. Relis la ligne du haut… Et maintenant, regarde les cercles. »')}else{M.state='ask';showHint('« Sans relire : qui a mordu ? »')}return}
-  if(M.state==='ask'){[0,1,2].forEach(i=>{if(inR(cx,cy,[64+i*220,672,200,72])){M.pick=i;M.state='res';sndTone(i===2?659:440,.7,.08);showHint('« Dans la ligne, on cherche, on revient en arrière. Dans les cercles, le chat est là, au cœur, avec ce qu’il a fait. »')}});return}
+  if(M.state==='build'){if(now-M.t0<1200||!inR(cx,cy,[214,672,340,72]))return;if(M.n<3){M.n++;M.t0=now;sndPaper(.35,.25);showHint(M.n===2?'« Le rat a mangé le malt. Ça se suit encore. »':'« Et le chat a mordu le rat. Lis la ligne du haut… Tu t’y retrouves ? Moi non plus. »')}else{M.state='ask';showHint('« Sans relire : qui a mordu ? »')}return}
+  if(M.state==='ask'){[0,1,2].forEach(i=>{if(inR(cx,cy,[64+i*220,672,200,72])){M.pick=i;M.state='res';sndTone(i===2?659:440,.7,.08);showHint('« Dans la ligne, on revient en arrière. Dans les cercles, le chat est au cœur, avec ce qu’il a fait. »')}});return}
   if(M.state==='res'){M.state='end';return}
   if(M.state==='end'){M.done=true}},
  move(){},up(){},solve(){M.done=true}};return M}
@@ -1869,7 +1899,7 @@ const VIGS=[0,1,2,3].map(VIGN);
 const ASPS=[['elle commence','va commencer'],['elle est en train','est en train de'],['c’est fini','vient de finir']];
 const VERB=GLYPH(88,3);
 function mkAspect(){const M={state:'s',i:0,t0:performance.now(),done:false,
- hint:'J’essayais de dessiner un cercle, comme eux. Maman : « Regarde le tien. Dans cette langue, le verbe ne dit pas quand : il dit où en est l’action. »',
+ hint:'Je dessinais un cercle, comme eux. Maman s’est penchée : « Dans leur langue, le verbe ne dit pas quand. Il dit où en est l’action. »',
  wantsTap:()=>true,
  draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now(),k=clamp((now-M.t0)/1000);
   if(M.state==='s'){paper(c,24,82);bigLine(c,'« Alice dessine un cercle. »',66,46);const v=VIGS[M.i];c.drawImage(v,40,140,340,262);
@@ -1882,7 +1912,7 @@ function mkAspect(){const M={state:'s',i:0,t0:performance.now(),done:false,
    bigLine(c,'Mais nous savons le dire aussi :',414,40,'#22306e');bigLine(c,'« va commencer », « est en train de »,',466,38,'#7a2a08');bigLine(c,'« vient de finir ».',514,38,'#7a2a08');
    bigLine(c,'Une langue n’enferme pas la pensée.',590,40);bigLine(c,'Elle oblige à regarder certaines choses.',636,40);tapLine(c,720)}},
  down(){const now=performance.now();if(now-M.t0<1000)return;
-  if(M.state==='s'){if(M.i<2){M.i++;M.t0=now;sndPaper(.3,.2);showHint(M.i===1?'« Le trait avance, le cercle du verbe aussi. »':'« Fini : le cercle se referme. Il n’a dit ni hier, ni demain. »')}else{M.state='fr';M.t0=now;showHint('« Et Louise, qui voit l’avenir ? C’est le cinéma. Même Ted Chiang l’écrit : “ma vision du monde restera un amalgame”. »')}return}
+  if(M.state==='s'){if(M.i<2){M.i++;M.t0=now;sndPaper(.3,.2);showHint(M.i===1?'« Ton trait avance : le cercle du verbe aussi. »':'« Fini. Il n’a dit ni hier, ni demain. Juste : c’est fait. »')}else{M.state='fr';M.t0=now;showHint('« Et Louise, qui voit l’avenir ? » « Ça, c’est le cinéma, ma puce. Chiang l’écrit : “ma vision du monde restera un amalgame”. »')}return}
   if(M.state==='fr'){M.done=true}},
  move(){},up(){},solve(){M.done=true}};return M}
 
@@ -2027,7 +2057,7 @@ function drawScreen(T){mx.setTransform(HD,0,0,HD,0,0);mx.clearRect(0,0,MS,MS);
   SCR.a+=(SCR.ta-SCR.a)*(1-Math.pow(.03,DTG));if(SCR.ta===0&&SCR.a<.01){SCR.a=0;if(SCR.kind&&!SCR.keep)SCR.kind=null}
   if(SCR.a>0&&SCR.kind){mf.setTransform(HD,0,0,HD,0,0);mf.globalCompositeOperation='source-over';mf.clearRect(0,0,MS,MS);mf.drawImage(PAGE,0,0);
     if(SCR.kind==='mem'){if(PAPER)mf.drawImage(LABEL,0,0);const P=POP[SCR.id],t=(performance.now()-(SCR.t0||0))/1000;mf.save();mf.translate(384,30);mf.scale(.72,.72);mf.translate(-384,-40);drawPieces(mf,P.P,T,t);if(t>.8){mf.globalAlpha=clamp(t-.8);P.fx(mf,T);mf.globalAlpha=1}drawReveal(mf,T,SCR.id);memLight(mf,T,t,P.P);mf.restore();if(PAPER)drawTab(mf,T);drawJournal(mf,T)}
-    else if(SCR.obj)drawCard(mf,(c,TT)=>SCR.obj.draw(c,TT),T);
+    else if(SCR.obj){drawCard(mf,(c,TT)=>SCR.obj.draw(c,TT),T);drawCap(mf,T)}
     mx.globalAlpha=SCR.a;mx.drawImage(memF,0,0,MS,MS);mx.globalAlpha=1}
   memTex.needsUpdate=true}
 
@@ -2057,7 +2087,7 @@ const say=$('say'),sayWho=say.querySelector('.who'),sayTxt=say.querySelector('.t
 const WHO={alice:'Alice',maman:'Maman',papa:'Papa',lieu:'',src:''};
 const nb=t=>String(t).replace(/ ([:;?!»])/g,'\u202f$1').replace(/« /g,'«\u202f').replace(/(\d) (\d{3})/g,'$1\u202f$2');
 function showLine(who,t){t=nb(t);if(SCR.kind==='mem'&&SCR.ta===1&&INKC[who]){jWrite(who,t);say.className='jr';sayWho.textContent=WHO[who]||'';sayTxt.textContent=t;say.hidden=false;waitTap=true;return}say.className='line '+who;sayWho.textContent=WHO[who]||'';sayTxt.textContent=t;say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=true}
-function showHint(t){t=nb(t);say.className='hint';sayWho.textContent='';sayTxt.textContent=t;say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=false}
+function showHint(t){t=nb(t);if(SCR.kind==='manip'&&SCR.obj){capWrite(t);say.className='jr';sayWho.textContent='';sayTxt.textContent=t;say.hidden=false;waitTap=false;return}say.className='hint';sayWho.textContent='';sayTxt.textContent=t;say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=false}
 function showAsk([i,q,good,...bad]){q=nb(q);good=nb(good);bad=bad.map(nb);say.className='line ask';sayWho.textContent='';const opts=[[good,1],...bad.map(b=>[b,0])].sort(()=>Math.random()-.5);sayTxt.innerHTML='';const p=document.createElement('div');p.textContent=q;sayTxt.appendChild(p);
   opts.forEach(([t,ok])=>{const b=document.createElement('button');b.className='ch';b.textContent=t;b.addEventListener('click',ev=>{ev.stopPropagation();if(say.dataset.done)return;say.dataset.done='1';b.classList.add(ok?'ok':'no');if(!ok)[...sayTxt.querySelectorAll('.ch')].forEach(o=>{if(o.textContent===good)o.classList.add('ok')});sndPaper(.3,.2);setTimeout(()=>{delete say.dataset.done;waitTap=false;hideSay();step()},ok?900:1900)});sayTxt.appendChild(b)});
   say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=false}
@@ -2086,7 +2116,7 @@ const SCRIPTS={
  0:[{cam:'box'},{say:'lieu',t:'L’université. Dans le film, Louise y enseigne les langues. Toutes parlent du même monde, mais chacune le découpe à sa façon.'},{cam:'lid'},{manip:()=>mkMots()},
   {mem:'escalier'},{say:'alice',t:'C’était le film préféré de Maman. Papa disait qu’il était trop triste pour moi.'},
   {say:'alice',t:'Un soir, je suis descendue en cachette. Entre les barreaux, je voyais la brume sur l’écran, et Maman, toute seule sous son plaid.'},
-  {say:'papa',t:'Juste le début. Après, au lit.'},{say:'alice',t:'Il ne m’a pas renvoyée. Il s’est assis sur la marche, à côté de moi.'},
+  {fn:()=>{MEMX.papa=performance.now()}},{say:'papa',t:'Juste le début. Après, au lit.'},{say:'alice',t:'Il ne m’a pas renvoyée. Il s’est assis sur la marche, tout contre moi, et il a passé son bras autour de mes épaules.'},
   {note:'Chaque langue découpe le monde à sa façon, sans nous empêcher de le voir.'},
   {say:'alice',t:'Sur la table basse, son carnet était ouvert, plein de cercles et de mots. Elle ne regardait pas le film : elle l’étudiait.'},
   {say:'alice',t:'Mais alors, comment parler à quelqu’un dont on ne connaît pas un seul mot ?'},{memoff:1},{reward:0},{cam:'box'}],
@@ -2133,7 +2163,7 @@ let curName=null;function run(name){curName=name;Q=SCRIPTS[name];qi=0;busy=true;
 function step(){while(qi<Q.length){const s=Q[qi++];
   if(s.cam){camMode=s.cam;continue}
   if(s.fn){s.fn();continue}
-  if(s.mem){Object.assign(TAB,{need:false,rev:false,auto:0,p:0});SCR.kind='mem';SCR.id=s.mem;SCR.ta=1;SCR.t0=performance.now();JR.items=[];JR.note=null;sndPaper(.6,.5);continue}
+  if(s.mem){MEMX.papa=0;Object.assign(TAB,{need:false,rev:false,auto:0,p:0});SCR.kind='mem';SCR.id=s.mem;SCR.ta=1;SCR.t0=performance.now();JR.items=[];JR.note=null;sndPaper(.6,.5);continue}
   if(s.note&&PAPER&&SCR.kind==='mem'&&REVEAL[SCR.id]&&!TAB.rev){Object.assign(TAB,{need:true,note:s.note,auto:0,p:0});say.className='hint';sayWho.textContent='';sayTxt.textContent='Tirer la languette.';say.hidden=false;waitTap=true;return}
   if(s.note){JR.noteN=(JR.noteN||0)+1;JR.note={text:s.note,t0:performance.now()};sndPaper(.4,.3);say.className='jr';sayWho.textContent='';sayTxt.textContent='À retenir : '+s.note;say.hidden=false;waitTap=true;return}
   if(s.memoff){SCR.ta=0;continue}
@@ -2344,7 +2374,7 @@ const GPPAGE=(()=>{const o=document.createElement('canvas');o.width=440;o.height
  const R=seeded(1937);x.strokeStyle='#2a2a4a';x.lineWidth=2.2;x.lineCap='round';for(let y=36;y<320;y+=30){let px=20+R()*10;while(px<410){const w=20+R()*50;x.beginPath();x.moveTo(px,y);for(let u=0;u<w;u+=3){x.lineTo(px+u,y-4-Math.abs(Math.sin(u*.6+R()*3))*10*(R()<.3?1.6:1))}x.stroke();if(R()<.2){x.beginPath();x.moveTo(px+w+3,y-14);x.lineTo(px+w+7,y-2);x.stroke()}px+=w+12+R()*8}}
  x.fillStyle='rgba(255,226,120,.35)';x.fillRect(16,126,330,36);return lifted(bordered(o,5))})();
 function mkEvid(){const M={state:'tari',t0:performance.now(),pick:-1,tried:[],done:false,
- hint:'Dans la salle des enregistrements, une voix très vieille parle une langue d’Amazonie, le tariana. Maman m’en avait parlé.',
+ hint:'Aujourd’hui. Une voix très vieille parle tariana, une langue d’Amazonie. Maman m’en parlait déjà quand j’étais petite.',
  wantsTap:()=>['tari','me2','fin'].includes(M.state),
  draw(c,T){c.drawImage(FOGBG,0,0);const now=performance.now(),k=(now-M.t0)/1000;
   if(M.state==='tari'){paper(c,24,118);bigLine(c,'En tariana, « l’alien l’a mordu »',64,42);bigLine(c,'se dit de cinq façons :',108,38,'#3a2a20');
@@ -2366,7 +2396,7 @@ function mkEvid(){const M={state:'tari',t0:performance.now(),pick:-1,tried:[],do
   if(M.state==='me2'){M.state='carnet';showHint('Puis j’ai ouvert le carnet de Grand-père. Une ligne surlignée. Comment le savait-il ?');return}
   if(M.state==='fin'){M.done=true;return}
   if(M.state==='carnet'){[0,1,2].forEach(i=>{if(inR(cx,cy,[30+i*244,486,224,84])){M.tried=M.tried.filter(t=>t!==i);M.tried.push(i);sndPaper(.3,.2);
-     showHint(i===0?'La machine répond tout de suite, et sûre d’elle. Mais ce sont ses mots à lui, ses abréviations.':i===1?'Je reconnais des lettres. Pas ce qu’il voulait dire.':'Maman dit qu’une langue ne s’apprend qu’en face de quelqu’un.');
+     showHint(i===0?'La machine répond tout de suite, sûre d’elle. Mais ce sont ses mots à lui, ses abréviations.':i===1?'Je reconnais des lettres. Pas ce qu’il voulait dire.':'Maman dit qu’une langue ne s’apprend qu’en face de quelqu’un.');
      if(i===2)setTimeout(()=>{if(M.state==='carnet'){M.state='fin';sndTone(523,1.4,.07)}},2600)}})}},
  move(){},up(){},solve(){M.done=true}};return M}
 const mkIA=mkEvid;
@@ -2587,7 +2617,7 @@ function frame(now){const rawDt=Math.min(1,(now-last)/1000),dt=Math.min(.05,rawD
   const fp=(camMode==='lid'&&phase==='play'?lid.localToWorld(apexL.clone()).lerp(look,.4):zs>.45&&phase==='play'&&camMode==='box'?fig.position.clone().add(new THREE.Vector3(0,.6,0)):look.clone()).project(camera);
   lidSharp+=((camMode==='lid'&&phase==='play'?1:0)-lidSharp)*.06;const tsA=lerp(2.8,3,zs)*(1-lidSharp);hPass.uniforms.h.value=tsA/SW;vPass.uniforms.v.value=tsA/SH;hPass.uniforms.r.value=vPass.uniforms.r.value=clamp(fp.y*.5+.5,.25,.75);
   composer.render();if(window.__frame)window.__frame();if(!SPL.ready){SPL.ready=1;const b=document.getElementById('splgo');if(b){b.disabled=false;b.textContent='J’ouvre la boîte';b.onclick=()=>{const sp=document.getElementById('splash');sp.classList.add('out');setTimeout(()=>sp.remove(),800);openBox()}}}if(ABUB.s&&ABUB.s.visible){const ac=renderer.autoClear;renderer.autoClear=false;renderer.setRenderTarget(null);renderer.clearDepth();renderer.render(BSC,camera);renderer.autoClear=ac}requestAnimationFrame(frame)}
-if(location.hash.includes('test'))window.__T={tab:(r)=>Object.assign(TAB,{need:true,rev:!!r,p:r?1:0}),note:(t)=>{JR.note={text:t,t0:performance.now()}},manip:(n)=>{camMode='lid';curManip=({m:mkMots,v:mkGavagai,e:mkEmboite,a:mkAspect,i:mkEvid,g:mkArg})[n||'m']();SCR.kind='manip';SCR.obj=curManip;SCR.ta=1},lidcam:(k,w,t)=>{Object.assign(TAB,{need:false,rev:false,auto:0,p:0,note:''});JR.note=null;JR.items=[];camMode='lid';SCR.kind='mem';SCR.id=k;SCR.ta=1;SCR.t0=performance.now();jWrite(w||'alice',t||'Il avait de la poussière plein les mains. Il revenait d’un endroit dont il ne parlait jamais.')},gt:()=>lidTop.image.toDataURL('image/jpeg',.7),dbg:()=>{const M=mkSoleil(),o=mkC();M.p=.2;M.draw(o.getContext('2d'),0);return o.toDataURL()},advance,solve:()=>curManip&&curManip.solve(),toScreen:(cx,cy)=>{const v=canvasToWorld(...fromManip(cx,cy)).project(camera);return[(v.x*.5+.5)*SW,(-v.y*.5+.5)*SH]},st:()=>({phase,next,busy,waitTap,manip:!!curManip,camMode,lidZ,dist:+dist.toFixed(2),OV:+ovDist().toFixed(2)}),spot:i=>{const v=SPOTS[i].clone().project(camera);return[(v.x*.5+.5)*SW,(-v.y*.5+.5)*SH]},dbgp:(X,Z)=>{const[i,j]=toCell(X,Z);let s='';for(let b=j-6;b<=j+6;b++){for(let a=i-12;a<=i+12;a++)s+=(a===i&&b===j)?'@':BLK[b*NX+a]?'#':'.';s+='\n'}return s+JSON.stringify(findPath(X,Z,2.25,3.75))},fp:()=>({x:fig.position.x,z:fig.position.z,tx:figState.tx,tz:figState.tz,path:figState.path,v:figState.v}),ask:()=>{camMode='lid';constelT=1;lit=4;Q=SCRIPTS[3].filter(s=>s.ask);qi=0;step()},vega:()=>{vegaT=1},trace:()=>{camMode='lid';lit=4;Q=[{trace:1},{fn:()=>{constelT=1}},{wait:1600},{fn:()=>{vegaT=1}}];qi=0;step()},stars:()=>STARS,jw:(w,t)=>jWrite(w,t),lidScreen:(x,y)=>{const v=canvasToWorld(x,y).project(camera);return[(v.x*.5+.5)*SW,(-v.y*.5+.5)*SH]},mus:()=>({paused:MUS.el?MUS.el.paused:null,g:MUS.g?+MUS.g.gain.value.toFixed(3):null,st:SND.ctx&&SND.ctx.state,on:SND.on,t:MUS.el?+MUS.el.currentTime.toFixed(1):0}),grid:()=>{let s='';for(let j=0;j<NZ;j+=2){for(let i=0;i<NX;i++)s+=BLK[j*NX+i]?'#':'.';s+='\n'}return s},recall:()=>RECALL,thot:()=>curManip&&curManip.list?curManip.list.map(k=>{const s=curManip.slots.find(o=>o.k===k);return[s.x,s.y]}):null,card:()=>{Q=[{card:RCARD[1]}];qi=0;busy=true;step()},ask0:()=>{Q=SCRIPTS[3].filter(s=>s.ask);qi=0;busy=true;step()},mdown:(x,y)=>curManip&&curManip.down(x,y),tab:(p)=>{TAB.need=true;TAB.note=TAB.note||'Avant l’écriture, chaque savoir avait sa place.';TAB.p=p;TAB.drag=p>0},arg:()=>{camMode='lid';startArg()},mmove:(x,y)=>curManip&&curManip.move(x,y),mup:()=>curManip&&curManip.up(),seq:()=>curManip&&curManip.seq,mst:()=>curManip&&(curManip.state||curManip.st),cmb:()=>curManip&&[curManip.big,curManip.bt,performance.now()],unlock:()=>{unlock5()},memf:()=>memF.toDataURL('image/png'),tr:()=>({on:TRACE.on,done:TRACE.done,n:TRACE.edges.size}),tn:()=>[TRACE.done,TRACE.cur??0,traceNext()],mstate:()=>curManip?{state:curManip.state,score:curManip.score}:null};
+if(location.hash.includes('test'))window.__T={hint:(t)=>showHint(t),tab:(r)=>Object.assign(TAB,{need:true,rev:!!r,p:r?1:0}),note:(t)=>{JR.note={text:t,t0:performance.now()}},manip:(n)=>{camMode='lid';curManip=({m:mkMots,v:mkGavagai,e:mkEmboite,a:mkAspect,i:mkEvid,g:mkArg})[n||'m']();SCR.kind='manip';SCR.obj=curManip;SCR.ta=1},lidcam:(k,w,t)=>{MEMX.papa=1;Object.assign(TAB,{need:false,rev:false,auto:0,p:0,note:''});JR.note=null;JR.items=[];camMode='lid';SCR.kind='mem';SCR.id=k;SCR.ta=1;SCR.t0=performance.now();jWrite(w||'alice',t||'Il avait de la poussière plein les mains. Il revenait d’un endroit dont il ne parlait jamais.')},gt:()=>lidTop.image.toDataURL('image/jpeg',.7),dbg:()=>{const M=mkSoleil(),o=mkC();M.p=.2;M.draw(o.getContext('2d'),0);return o.toDataURL()},advance,solve:()=>curManip&&curManip.solve(),toScreen:(cx,cy)=>{const v=canvasToWorld(...fromManip(cx,cy)).project(camera);return[(v.x*.5+.5)*SW,(-v.y*.5+.5)*SH]},st:()=>({phase,next,busy,waitTap,manip:!!curManip,camMode,lidZ,dist:+dist.toFixed(2),OV:+ovDist().toFixed(2)}),spot:i=>{const v=SPOTS[i].clone().project(camera);return[(v.x*.5+.5)*SW,(-v.y*.5+.5)*SH]},dbgp:(X,Z)=>{const[i,j]=toCell(X,Z);let s='';for(let b=j-6;b<=j+6;b++){for(let a=i-12;a<=i+12;a++)s+=(a===i&&b===j)?'@':BLK[b*NX+a]?'#':'.';s+='\n'}return s+JSON.stringify(findPath(X,Z,2.25,3.75))},fp:()=>({x:fig.position.x,z:fig.position.z,tx:figState.tx,tz:figState.tz,path:figState.path,v:figState.v}),ask:()=>{camMode='lid';constelT=1;lit=4;Q=SCRIPTS[3].filter(s=>s.ask);qi=0;step()},vega:()=>{vegaT=1},trace:()=>{camMode='lid';lit=4;Q=[{trace:1},{fn:()=>{constelT=1}},{wait:1600},{fn:()=>{vegaT=1}}];qi=0;step()},stars:()=>STARS,jw:(w,t)=>jWrite(w,t),lidScreen:(x,y)=>{const v=canvasToWorld(x,y).project(camera);return[(v.x*.5+.5)*SW,(-v.y*.5+.5)*SH]},mus:()=>({paused:MUS.el?MUS.el.paused:null,g:MUS.g?+MUS.g.gain.value.toFixed(3):null,st:SND.ctx&&SND.ctx.state,on:SND.on,t:MUS.el?+MUS.el.currentTime.toFixed(1):0}),grid:()=>{let s='';for(let j=0;j<NZ;j+=2){for(let i=0;i<NX;i++)s+=BLK[j*NX+i]?'#':'.';s+='\n'}return s},recall:()=>RECALL,thot:()=>curManip&&curManip.list?curManip.list.map(k=>{const s=curManip.slots.find(o=>o.k===k);return[s.x,s.y]}):null,card:()=>{Q=[{card:RCARD[1]}];qi=0;busy=true;step()},ask0:()=>{Q=SCRIPTS[3].filter(s=>s.ask);qi=0;busy=true;step()},mdown:(x,y)=>curManip&&curManip.down(x,y),tab:(p)=>{TAB.need=true;TAB.note=TAB.note||'Avant l’écriture, chaque savoir avait sa place.';TAB.p=p;TAB.drag=p>0},arg:()=>{camMode='lid';startArg()},mmove:(x,y)=>curManip&&curManip.move(x,y),mup:()=>curManip&&curManip.up(),seq:()=>curManip&&curManip.seq,mst:()=>curManip&&(curManip.state||curManip.st),cmb:()=>curManip&&[curManip.big,curManip.bt,performance.now()],unlock:()=>{unlock5()},memf:()=>memF.toDataURL('image/png'),tr:()=>({on:TRACE.on,done:TRACE.done,n:TRACE.edges.size}),tn:()=>[TRACE.done,TRACE.cur??0,traceNext()],mstate:()=>curManip?{state:curManip.state,score:curManip.score}:null};
 requestAnimationFrame(frame);
 {const b=$('snd'),pn=$('sndpanel'),m=$('volm'),e=$('vole'),mute=$('mute');m.value=Math.round(SND.vm*100);e.value=Math.round(SND.ve*100);
  const sync=()=>{b.setAttribute('aria-pressed',String(SND.on));mute.textContent=SND.on?'Tout couper':'Remettre le son';b.classList.toggle('off',!SND.on)};sync();
