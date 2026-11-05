@@ -2072,7 +2072,12 @@ const fpRay=new THREE.Raycaster();
 function fpRayAt(e){const r=cv.getBoundingClientRect(),v=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);fpRay.setFromCamera(v,camera)}
 function fpPick(e){fpRayAt(e);const hh=fpRay.intersectObjects(FPT.hand.filter(o=>!o.used).map(o=>o.m),false)[0];if(hh)return{hand:FPT.hand.find(o=>o.m===hh.object)};
   const S=(FPT.P.sites||[]),ph=fpRay.intersectObjects(S.filter(d=>d.visible).map(d=>d.userData.hit),false)[0];if(ph)return{site:S.findIndex(d=>d.userData.hit===ph.object)};
-  const O=FPT.P.objs?FPT.P.objs():[],po=fpRay.intersectObjects(O,true)[0];if(po){let o=po.object;while(o&&o.userData.obj==null)o=o.parent;if(o)return{obj:o.userData.obj}}return{}}
+  const O=FPT.P.objs?FPT.P.objs():[];
+  if(FPT.P.screen&&O.length){const r=cv.getBoundingClientRect(),mx=(e.clientX-r.left)/r.width*2-1,my=-(e.clientY-r.top)/r.height*2+1;let best=null,bd=.3;
+   O.forEach(o=>{const b=new THREE.Box3().setFromObject(o),c=b.getCenter(new THREE.Vector3()),lo=new THREE.Vector3(c.x,b.min.y,c.z).project(camera),hi=new THREE.Vector3(c.x,b.max.y,c.z).project(camera);
+    const y=clamp(my,Math.min(lo.y,hi.y),Math.max(lo.y,hi.y)),d=Math.hypot((mx-lo.x)*camera.aspect,my-y);if(d<bd){bd=d;best=o}});
+   return best?{obj:best.userData.obj}:{}}
+  const po=fpRay.intersectObjects(O,true)[0];if(po){let o=po.object;while(o&&o.userData.obj==null)o=o.parent;if(o)return{obj:o.userData.obj}}return{}}
 const fpFloor=new THREE.Plane(new THREE.Vector3(0,1,0),0);
 function fpFloorPt(e){fpRayAt(e);fpFloor.constant=-FPT.P.g.localToWorld(new THREE.Vector3(0,FPT.P.floorY||0,0)).y;const p=new THREE.Vector3();return fpRay.ray.intersectPlane(fpFloor,p)?FPT.P.g.worldToLocal(p):null}
 const fpNear=(p)=>{let b=-1,bd=FPT.P.nearR||.17;(FPT.P.sites||[]).forEach((d,i)=>{if(!d.visible)return;const q=d.position;const dd=Math.hypot(p.x-q.x,p.z-q.z);if(dd<bd){bd=dd;b=i}});return b};
@@ -2165,17 +2170,20 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
 /* ===== 0. Göbekli Tepe : assis sur le talus de l'enceinte, face aux piliers gravés =====
    Les quatre piliers du bord le plus proche regardent vers nous (leurs animaux gravés sont sur la face extérieure).
    Vu d'ici (on regarde vers +x), la gauche de l'écran est le -z de la maquette. */
-{const P={first:'intro',face:-Math.PI/2,floorY:.21,eye:new THREE.Vector3(-2.05,.82,0),look:new THREE.Vector3(.2,.36,0),hf:58,memUp:.25};FP_PLACES[0]=P;
+// on s'assied de l'autre côté de l'enceinte (vers le coin de la boîte) : on regarde à travers les piliers, vers toute la carte
+{const EYE=new THREE.Vector3(.99,1.3,-1.54),P={first:'intro',face:Math.atan2(EYE.x,EYE.z),floorY:.21,eye:EYE,look:new THREE.Vector3(-.49,.1,.76),hf:72,memUp:.3,screen:true};FP_PLACES[0]=P;
  const B4=[1,2,0,3];let pil=[],glows=[],deco,T0=[0,0,0,0];
  P.init=()=>{P.g=GOBE;deco=new THREE.Group();deco.visible=false;GOBE.add(deco);
-  const tps=GOBE.userData.tps;pil=[5,4,3,2].map((i,j)=>{const p=tps[i];p.userData.obj=j;return p});
-  glows=pil.map(p=>{const d=new THREE.Vector3(-1,0,0);return fpGlow(deco,p.position.clone().add(new THREE.Vector3(0,.22,0)).addScaledVector(d,.09),.5)});
+  // les quatre piliers du bord le plus proche de nous, rangés de gauche à droite tels qu'on les voit
+  const tps=GOBE.userData.tps.slice(0,8),ed=new THREE.Vector3(EYE.x,0,EYE.z).normalize(),rt=new THREE.Vector3(-ed.z,0,ed.x).negate();
+  pil=tps.sort((a,b)=>b.position.dot(ed)-a.position.dot(ed)).slice(0,4).sort((a,b)=>a.position.dot(rt)-b.position.dot(rt));pil.forEach((p,j)=>p.userData.obj=j);
+  glows=pil.map(p=>{const d=EYE.clone().sub(p.position).setY(0).normalize();return fpGlow(deco,p.position.clone().add(new THREE.Vector3(0,.22,0)).addScaledVector(d,.09),.5)});
   P.sites=pil.map(p=>fpSite(deco,new THREE.Vector3(p.position.x,.228,p.position.z),'',.075,.18))};
  P.objs=()=>FPT.st==='intro'||FPT.st==='input'?pil:[];
  P.enter=()=>{deco.visible=true;pil.forEach(p=>{p.visible=true;if(p.userData.ry0==null)p.userData.ry0=p.rotation.y;p.rotation.y=Math.atan2(P.eye.x-p.position.x,P.eye.z-p.position.z)});P.sites.forEach(d=>d.visible=false);P.seq=[0,1,2,3].sort(()=>Math.random()-.5);P.len=3;P.inp=0};
  P.leave=()=>{deco.visible=false;pil.forEach(p=>{p.visible=true;if(p.userData.ry0!=null)p.rotation.y=p.userData.ry0})};
  P.toMem=()=>{pil.forEach(p=>p.visible=true)};
- const top=(j)=>pil[j].position.clone().add(new THREE.Vector3(-.05,.52,0));
+ const top=(j)=>pil[j].position.clone().add(new THREE.Vector3(0,.52,0));
  P.light=(j,dur=1)=>{T0[j]=performance.now();sndTone(PIL_NOTES[j],1.1*dur,.15);const b=BEASTS[B4[pil[j].userData.k%4]][1];const c=fpPut(b,.15,top(j));fpAfter(1000,()=>fpUnput(c))};
  P.show=()=>{FPT.st='show';P.inp=0;P.seq.slice(0,P.len).forEach((j,k)=>fpAfter(600+k*900,()=>P.light(j)));
   fpAfter(600+P.len*900,()=>{FPT.st='input';fpHint(P.len===3?'« À toi de rechanter l’histoire : touche les pierres dans le même ordre. »':'« L’histoire s’allonge. Rechante-la. »')})};
@@ -2189,7 +2197,7 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
    else{FPT.st='wait';fpHint('« Presque. Écoute encore. »');fpAfter(1200,()=>P.show())}return}
   if(st==='ask'&&h.site!=null){const s=h.site;if(P.got.some(o=>o.s===s))return;const ok=s===P.seq[P.inp];P.got.push({s,ok});sndTone(PIL_NOTES[s],.9,.13);
    fpPut(fpTag(String(P.inp+1),{w:120,h:120,fs:64,col:ok?'#2a6a2a':'#a8582a'}),.09,P.sites[s].position.clone().add(new THREE.Vector3(0,.01,0)));P.sites[s].visible=false;P.inp++;
-   if(P.inp>=4){FPT.st='end';const n=P.got.filter(o=>o.ok).length;fpAfter(700,()=>{pil.forEach(p=>p.visible=true);fpPut(fpTag(`${n} sur 4, de mémoire`,{w:520,h:140,fs:52,col:'#22306e'}),.12,new THREE.Vector3(-.95,.228,0));
+   if(P.inp>=4){FPT.st='end';const n=P.got.filter(o=>o.ok).length;fpAfter(700,()=>{pil.forEach(p=>p.visible=true);fpPut(fpTag(`${n} sur 4, de mémoire`,{w:520,h:140,fs:52,col:'#22306e'}),.12,new THREE.Vector3(.24,.228,-.37));
      fpHint((n>=3?'« Tu as revu les pierres dans ta tête, n’est-ce pas ? Le chant était là où on l’avait laissé. C’est ça, un palais de mémoire. »':'« Les places t’ont déjà aidée. Avec un peu d’habitude, on retrouve tout un chant comme ça : c’est un palais de mémoire. »')+' Toucher pour continuer.');fpWait(()=>fpFinish())})}return}};
  P.tick=(now,T)=>{glows.forEach((g,j)=>{const idle=FPT.st==='intro'?.18+.12*Math.sin(T*3+j):0;g.material.opacity=Math.max(idle,Math.max(0,1-(now-T0[j])/900)*.95);g.visible=pil[j].visible})};
  P.auto=(st)=>{if(st==='intro')fpTap({obj:0});else if(st==='input')fpTap({obj:P.seq[P.inp]});else if(st==='ask')fpTap({site:P.seq[P.inp]})}}

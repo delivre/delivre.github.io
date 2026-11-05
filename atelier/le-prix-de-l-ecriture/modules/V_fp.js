@@ -63,7 +63,12 @@ const fpRay=new THREE.Raycaster();
 function fpRayAt(e){const r=cv.getBoundingClientRect(),v=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);fpRay.setFromCamera(v,camera)}
 function fpPick(e){fpRayAt(e);const hh=fpRay.intersectObjects(FPT.hand.filter(o=>!o.used).map(o=>o.m),false)[0];if(hh)return{hand:FPT.hand.find(o=>o.m===hh.object)};
   const S=(FPT.P.sites||[]),ph=fpRay.intersectObjects(S.filter(d=>d.visible).map(d=>d.userData.hit),false)[0];if(ph)return{site:S.findIndex(d=>d.userData.hit===ph.object)};
-  const O=FPT.P.objs?FPT.P.objs():[],po=fpRay.intersectObjects(O,true)[0];if(po){let o=po.object;while(o&&o.userData.obj==null)o=o.parent;if(o)return{obj:o.userData.obj}}return{}}
+  const O=FPT.P.objs?FPT.P.objs():[];
+  if(FPT.P.screen&&O.length){const r=cv.getBoundingClientRect(),mx=(e.clientX-r.left)/r.width*2-1,my=-(e.clientY-r.top)/r.height*2+1;let best=null,bd=.3;
+   O.forEach(o=>{const b=new THREE.Box3().setFromObject(o),c=b.getCenter(new THREE.Vector3()),lo=new THREE.Vector3(c.x,b.min.y,c.z).project(camera),hi=new THREE.Vector3(c.x,b.max.y,c.z).project(camera);
+    const y=clamp(my,Math.min(lo.y,hi.y),Math.max(lo.y,hi.y)),d=Math.hypot((mx-lo.x)*camera.aspect,my-y);if(d<bd){bd=d;best=o}});
+   return best?{obj:best.userData.obj}:{}}
+  const po=fpRay.intersectObjects(O,true)[0];if(po){let o=po.object;while(o&&o.userData.obj==null)o=o.parent;if(o)return{obj:o.userData.obj}}return{}}
 const fpFloor=new THREE.Plane(new THREE.Vector3(0,1,0),0);
 function fpFloorPt(e){fpRayAt(e);fpFloor.constant=-FPT.P.g.localToWorld(new THREE.Vector3(0,FPT.P.floorY||0,0)).y;const p=new THREE.Vector3();return fpRay.ray.intersectPlane(fpFloor,p)?FPT.P.g.worldToLocal(p):null}
 const fpNear=(p)=>{let b=-1,bd=FPT.P.nearR||.17;(FPT.P.sites||[]).forEach((d,i)=>{if(!d.visible)return;const q=d.position;const dd=Math.hypot(p.x-q.x,p.z-q.z);if(dd<bd){bd=dd;b=i}});return b};
