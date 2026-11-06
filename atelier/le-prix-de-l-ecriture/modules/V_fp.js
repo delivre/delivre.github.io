@@ -24,13 +24,14 @@ const fpNight=document.createElement('div');fpNight.style.cssText='position:abso
 let fpCurtKT=0;
 // le ciel : à hauteur du lieu, un vrai ciel de fin de journée (le soleil est du côté de la lumière de la maquette)
 const fpSky=(()=>{const sd=new THREE.Vector3(sun.position.x,0,sun.position.z).normalize();sd.y=.16;sd.normalize();
-  const m=new THREE.ShaderMaterial({side:THREE.BackSide,transparent:true,depthWrite:false,uniforms:{op:{value:0},sd:{value:sd}},
+  const m=new THREE.ShaderMaterial({side:THREE.BackSide,transparent:true,depthWrite:false,uniforms:{op:{value:0},sd:{value:sd},nt:{value:0}},
    vertexShader:'varying vec3 vD;void main(){vD=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-   fragmentShader:'varying vec3 vD;uniform float op;uniform vec3 sd;float hs(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}'+
+   fragmentShader:'varying vec3 vD;uniform float op;uniform float nt;uniform vec3 sd;float hs(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}'+
    'void main(){vec3 d=normalize(vD);float h=d.y;float s=max(dot(d,sd),0.);'+
    'vec3 hor=vec3(.98,.66,.42),mid=vec3(.62,.42,.58),zen=vec3(.13,.13,.32);vec3 c=mix(hor,mid,smoothstep(-.02,.22,h));c=mix(c,zen,smoothstep(.18,.75,h));'+
    'c+=vec3(1.,.72,.4)*pow(s,6.)*.55+vec3(1.,.9,.7)*pow(s,300.)*1.2;'+
-   'vec3 q=floor(d*180.);float st=step(.996,hs(q))*smoothstep(.35,.8,h);c+=vec3(st*.9);gl_FragColor=vec4(c,op);}'});
+   'vec3 q=floor(d*180.);float st=step(.996,hs(q))*smoothstep(.35,.8,h);c+=vec3(st*.9);'+
+   'vec3 nc=mix(vec3(.10,.10,.24),vec3(.03,.04,.12),smoothstep(-.02,.5,h))+vec3(step(.993,hs(q))*smoothstep(.02,.3,h));c=mix(c,nc,nt);gl_FragColor=vec4(c,op);}'});
   const o=new THREE.Mesh(new THREE.SphereGeometry(60,32,16),m);o.renderOrder=-10;o.frustumCulled=false;o.visible=false;scene.add(o);return o})();
 // les objets posés dans le lieu (cartes, étiquettes)
 const fpStage=[];function fpClearStage(){fpStage.forEach(o=>fpG.remove(o));fpStage.length=0}
@@ -66,7 +67,7 @@ FPT.start=(n,cb)=>{const P=FP_PLACES[n];if(!P){cb&&cb();return}FPT.P=P;P.init&&!
   hideSay();P.enter&&P.enter();fpAfter(1900,()=>fpGo(P.first))};
 const fpRay=new THREE.Raycaster();
 function fpRayAt(e){const r=cv.getBoundingClientRect(),v=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);fpRay.setFromCamera(v,camera)}
-function fpPick(e){fpRayAt(e);const hh=fpRay.intersectObjects(FPT.hand.filter(o=>!o.used).map(o=>o.m),false)[0];if(hh)return{hand:FPT.hand.find(o=>o.m===hh.object)};
+function fpPick(e){fpRayAt(e);if(FPT.P.pick)return FPT.P.pick(e);const hh=fpRay.intersectObjects(FPT.hand.filter(o=>!o.used).map(o=>o.m),false)[0];if(hh)return{hand:FPT.hand.find(o=>o.m===hh.object)};
   const S=(FPT.P.sites||[]),ph=fpRay.intersectObjects(S.filter(d=>d.visible).map(d=>d.userData.hit),false)[0];if(ph)return{site:S.findIndex(d=>d.userData.hit===ph.object)};
   const O=FPT.P.objs?FPT.P.objs():[];
   if(FPT.P.screen&&O.length){const r=cv.getBoundingClientRect(),mx=(e.clientX-r.left)/r.width*2-1,my=-(e.clientY-r.top)/r.height*2+1;let best=null,bd=.3;
@@ -91,7 +92,7 @@ FPT.host={attach(fr){fpAnchor.add(dioG);dioG.rotation.set(0,0,0);dioG.position.s
  detach(){lid.add(dioG);dioG.rotation.set(Math.PI/2,0,0);dioG.position.set(0,-.2,0);dioG.scale.setScalar(DK);FPT.exit()}};
 function fpAnchorTick(){if(dioG.parent!==fpAnchor||!FPT.anc)return;const a=FPT.anc,fw=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion),rt=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
   fpAnchor.quaternion.copy(camera.quaternion);fpAnchor.position.copy(camera.position).addScaledVector(fw,FPT.anchorD).addScaledVector(rt,-a.fx*a.sc).addScaledVector(up,-a.fy*a.sc+a.vh*.06)}
-FPT.exit=()=>{FPT.st='out';camMode='lid';FPT.kT=0;DIO.host=null;const P=FPT.P;fpAfter(1900,()=>{FPT.on=false;fpG.visible=false;fpClearStage();(P.sites||[]).forEach(d=>d.visible=false);P.leave&&P.leave()})};
+FPT.exit=()=>{FPT.st='out';FPT.nightT=0;camMode='lid';FPT.kT=0;DIO.host=null;const P=FPT.P;fpAfter(1900,()=>{FPT.on=false;fpG.visible=false;fpClearStage();(P.sites||[]).forEach(d=>d.visible=false);P.leave&&P.leave()})};
 // la caméra : on plonge de la vue de la carte jusque dans le lieu (en arc, sans raser la maquette), et on en ressort
 const fpPos=new THREE.Vector3(),fpLk=new THREE.Vector3(),fpQa=new THREE.Quaternion(),fpQb=new THREE.Quaternion(),fpM=new THREE.Matrix4();
 function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-FPT.kT)<.002)FPT.k=FPT.kT;const k=FPT.k;
@@ -105,6 +106,8 @@ function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-
   const hf=(P.hf||48)*Math.PI/180,vf=2*Math.atan(Math.tan(hf/2)/camera.aspect)*180/Math.PI,fpf=clamp(vf,52,84);camera.fov=lerp(f0,fpf,e);camera.near=lerp(.1,.01,e);camera.updateProjectionMatrix();
   fig.visible=k<.4;fpSky.visible=k>.01;fpSky.material.uniforms.op.value=e;fpSky.position.copy(camera.position);
   fpNight.style.opacity=fpCurtKT;
+  {const nT=FPT.nightT||0;FPT.night=(FPT.night||0)+(nT-(FPT.night||0))*(1-Math.pow(.25,dt));const n=FPT.night;if(sun.userData.i0==null){sun.userData.i0=sun.intensity;HEMI.userData.i0=HEMI.intensity}
+   sun.intensity=sun.userData.i0*(1-.88*n);HEMI.intensity=HEMI.userData.i0*(1-.55*n);fpSky.material.uniforms.nt.value=n}
   const now=performance.now(),T=now/1000;fpFlyTick(now);
   fpStage.forEach(p=>{const u=clamp((now-p.userData.pop)/450);if(!FPT.fly.some(f=>f.p===p))p.scale.setScalar(Math.max(.001,u<1?u+Math.sin(u*Math.PI)*.25:1))});
   if(FPT.on&&FPT.st&&P.tick)P.tick(now,T,dt);
@@ -157,4 +160,4 @@ function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-
   P.sites.forEach((d,i)=>{if(FPT.st==='place'){d.visible=i>=P.pi;d.material.emissiveIntensity=i===P.pi?.5+.4*Math.sin(T*5):0}else if(FPT.st==='recall'&&!(FPT.drag&&FPT.drag.moved))d.material.emissiveIntensity=FPT.sel&&d.visible?.35+.3*Math.sin(T*5):.05});
   FPT.hand.forEach(o=>o.hot=FPT.st==='place'&&o.i===P.pi)};
  P.auto=(st)=>{if(st==='predict')fpTap({hand:FPT.hand[2]});else if(st==='recallA'){const f=P.lineA.length;fpTap({hand:FPT.hand.find(o=>o.f===f)})}else if(st==='place')fpTap({site:P.pi});else if(st==='recall'){const o=FPT.hand.find(h=>!h.used);if(o)fpTap({site:o.i,card:o,dragged:true})}}}
-if(/test/.test(location.hash))window.__FP=FPT;
+if(/test/.test(location.hash)){window.__FP=FPT;FPT.run=(n)=>run(n);window.__FPP=FP_PLACES}

@@ -115,6 +115,7 @@ function mkIA(){const ids=[0,1,2,3,4,5].sort(()=>Math.random()-.5),mode={};ids.f
    setTimeout(()=>{M.lock=0;M.i++;if(M.i<6)O=opts(test[M.i]);else{M.st='end';showHint(M.score.cherche>M.score.machine?'« Tu vois ? Ce que tu as cherché toi-même est resté. »':M.score.cherche===M.score.machine?'« Égalité, ce soir. Mais on refera le test dans une semaine… »':'« Ce soir, la machine gagne. Mais on refera le test dans une semaine… »')}},1000);return}
   if(M.st==='end'&&hit([{...cont,y:640}],cx,cy))M.done=true};
  function nextL(){M.i++;if(M.i<6){M.sub='ask';O=opts(ids[M.i])}else startShelf()}
+ M.surf=()=>M.st==='shelf'||M.st==='test'||(M.st==='learn'&&mode[ids[M.i]]==='cherche')?'paper':'screen';
  M.move=()=>{};M.up=()=>{};M.solve=()=>{M.score={machine:1,cherche:3};M.done=true};return M}
 
 // ---- l'écho d'Alice : la cuisine, la tablette, la main de papa sur l'écran
@@ -140,3 +141,5 @@ SCRIPTS.ai=[{say:'lieu',t:'Alexandrie, aujourd’hui. Une nouvelle bibliothèque
   {say:'alice',t:'Plus tard, c’était pour moi. Ses notes sont là, dans le livre, en haut à gauche : l’écrit garde pour ceux qui viennent après. Le chemin, lui, reste dans ma tête.'},
  {fn:()=>{hideSay();FIFTH='done';REPLAY.last=4;markDone();setTimeout(()=>showHint('Les souvenirs restent dans la boîte. Revenir '+dayFr(3)+', et toucher « Rappel » : c’est le meilleur moment pour tout rallumer de mémoire.'),500)}}];
 {const S=SCRIPTS.ai,a=S.findIndex(s=>s.mem),b=S.findIndex(s=>s.memoff);SCRIPTS.m4=[{cam:'lid'},...S.slice(a,b+1),{cam:'box'}]}
+// à la première personne : le jeu de Papa se joue au bureau, devant le terminal
+if(FPM&&FP_PLACES[4]){const a=SCRIPTS.ai,i=a.findIndex(s=>s.manip);a.splice(a[i-1]&&a[i-1].cam==='lid'?i-1:i,a[i-1]&&a[i-1].cam==='lid'?2:1,{fp:4})}
