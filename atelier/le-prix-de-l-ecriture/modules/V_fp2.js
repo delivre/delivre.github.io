@@ -28,7 +28,7 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
   if(st==='input'&&h.obj!=null){const j=h.obj;P.light(j,.8);
    if(j===P.seq[P.inp]){P.inp++;if(P.inp>=P.len){if(P.len===3){P.len=4;FPT.st='wait';fpHint('« Bien ! Écoute la suite… »');fpAfter(1300,()=>P.show())}
      else{FPT.st='wait';fpHint('« Tu connais l’histoire des pierres. »');fpAfter(1700,()=>{fpCurtKT=1;fpHint('Puis Papa éteignait la lumière…');fpAfter(1200,()=>{pil.forEach(p=>p.visible=false);P.sites.forEach(d=>{d.visible=true;d.material.emissiveIntensity=.25});P.inp=0;P.got=[];fpCurtKT=0;
-       fpAfter(500,()=>{FPT.st='ask';fpHint('« Les pierres ont disparu. Touche leurs places, dans l’ordre de l’histoire. »')})})})}}}
+       fpAfter(500,()=>{FPT.st='ask';fpHint('« Les pierres ont disparu. » Toucher les cercles où elles étaient, dans l’ordre de l’histoire.')})})})}}}
    else{FPT.st='wait';fpHint('« Presque. Écoute encore. »');fpAfter(1200,()=>P.show())}return}
   if(st==='ask'&&h.site!=null){const s=h.site;if(P.got.some(o=>o.s===s))return;const ok=s===P.seq[P.inp];P.got.push({s,ok});sndTone(PIL_NOTES[s],.9,.13);
    fpPut(fpTag(String(P.inp+1),{w:120,h:120,fs:70,col:ok?'#2a6a2a':'#a8582a'}),.14,P.sites[s].position.clone().add(new THREE.Vector3(0,.01,0)));P.sites[s].visible=false;P.inp++;

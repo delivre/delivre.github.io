@@ -36,6 +36,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 @keyframes blink{50%{opacity:.25}}
 #say.alice .txt{font-style:italic}#say.maman .who{color:#ffb8d0}#say.papa .who{color:#a8d8ff}
 #say.lieu .txt{color:#fff6e4}#say.src .txt{font-size:14px;color:var(--dim);font-style:italic}
+#say .txt .act{display:block;margin-top:7px;font-style:normal;color:#9ff3e6;font-size:15px;letter-spacing:.01em}#say .txt .rec+.act{padding-top:7px;border-top:1px solid rgba(159,243,230,.18)}#say .txt .act::before{content:'☞ '}
 #say.hint{background:rgba(10,8,24,.78);border-color:rgba(159,243,230,.18);cursor:default}#say.hint .txt{font-style:italic;color:#e6def0;font-size:16px;text-align:center;margin:0 auto}
 #err{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;font-size:17px}
 [hidden]{display:none!important}
@@ -2193,7 +2194,7 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
   if(st==='input'&&h.obj!=null){const j=h.obj;P.light(j,.8);
    if(j===P.seq[P.inp]){P.inp++;if(P.inp>=P.len){if(P.len===3){P.len=4;FPT.st='wait';fpHint('« Bien ! Écoute la suite… »');fpAfter(1300,()=>P.show())}
      else{FPT.st='wait';fpHint('« Tu connais l’histoire des pierres. »');fpAfter(1700,()=>{fpCurtKT=1;fpHint('Puis Papa éteignait la lumière…');fpAfter(1200,()=>{pil.forEach(p=>p.visible=false);P.sites.forEach(d=>{d.visible=true;d.material.emissiveIntensity=.25});P.inp=0;P.got=[];fpCurtKT=0;
-       fpAfter(500,()=>{FPT.st='ask';fpHint('« Les pierres ont disparu. Touche leurs places, dans l’ordre de l’histoire. »')})})})}}}
+       fpAfter(500,()=>{FPT.st='ask';fpHint('« Les pierres ont disparu. » Toucher les cercles où elles étaient, dans l’ordre de l’histoire.')})})})}}}
    else{FPT.st='wait';fpHint('« Presque. Écoute encore. »');fpAfter(1200,()=>P.show())}return}
   if(st==='ask'&&h.site!=null){const s=h.site;if(P.got.some(o=>o.s===s))return;const ok=s===P.seq[P.inp];P.got.push({s,ok});sndTone(PIL_NOTES[s],.9,.13);
    fpPut(fpTag(String(P.inp+1),{w:120,h:120,fs:70,col:ok?'#2a6a2a':'#a8582a'}),.14,P.sites[s].position.clone().add(new THREE.Vector3(0,.01,0)));P.sites[s].visible=false;P.inp++;
@@ -2439,7 +2440,11 @@ const say=$('say'),sayWho=say.querySelector('.who'),sayTxt=say.querySelector('.t
 const WHO={alice:'Alice',maman:'Maman',papa:'Papa',lieu:'',src:''};
 const nb=t=>String(t).replace(/ ([:;?!»])/g,'\u202f$1').replace(/« /g,'«\u202f').replace(/(\d) (\d{3})/g,'$1\u202f$2');
 function showLine(who,t){t=nb(t);if(SCR.kind==='mem'&&SCR.ta===1&&INKC[who]&&!SCR.dio){jWrite(who,t);say.className='jr';sayWho.textContent=WHO[who]||'';sayTxt.textContent=t;say.hidden=false;waitTap=true;return}say.className='line '+who;sayWho.textContent=WHO[who]||'';sayTxt.textContent=t;say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=true}
-function showHint(t){t=nb(t);say.className='hint';sayWho.textContent='';sayTxt.textContent=t;say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=false}
+// le récit (pensées d'Alice, souvenirs) et la consigne (ce qu'il faut faire) : la consigne va à la ligne, dans un autre style
+const ACT_RE=/^([\s\S]*?)(?:^|\s)((?:Toucher|Faire glisser|Glisser|Tourner|Crayonner|Tracer|Chercher de mémoire|Choisir|Relier|Appuyer|Écouter)\b[\s\S]*)$/;
+function setHintText(t){sayTxt.innerHTML='';const m=t.match(ACT_RE);if(!m){sayTxt.textContent=t;return}
+  if(m[1].trim()){const a=document.createElement('span');a.className='rec';a.textContent=m[1].trim();sayTxt.append(a)}const b=document.createElement('span');b.className='act';b.textContent=m[2];sayTxt.append(b)}
+function showHint(t){t=nb(t);say.className='hint';sayWho.textContent='';setHintText(t);say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=false}
 function showAsk([i,q,good,...bad]){q=nb(q);good=nb(good);bad=bad.map(nb);say.className='line ask';sayWho.textContent='';const opts=[[good,1],...bad.map(b=>[b,0])].sort(()=>Math.random()-.5);sayTxt.innerHTML='';const p=document.createElement('div');p.textContent=q;sayTxt.appendChild(p);
   opts.forEach(([t,ok])=>{const b=document.createElement('button');b.className='ch';b.textContent=t;b.addEventListener('click',ev=>{ev.stopPropagation();if(say.dataset.done)return;say.dataset.done='1';b.classList.add(ok?'ok':'no');if(!ok)[...sayTxt.querySelectorAll('.ch')].forEach(o=>{if(o.textContent===good)o.classList.add('ok')});sndPaper(.3,.2);setTimeout(()=>{delete say.dataset.done;waitTap=false;hideSay();step()},ok?900:1900)});sayTxt.appendChild(b)});
   say.hidden=false;say.classList.remove('in');void say.offsetWidth;say.classList.add('in');waitTap=false}
