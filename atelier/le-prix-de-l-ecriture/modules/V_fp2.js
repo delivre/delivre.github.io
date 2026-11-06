@@ -6,7 +6,7 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
    Les quatre piliers du bord le plus proche regardent vers nous (leurs animaux gravés sont sur la face extérieure).
    Vu d'ici (on regarde vers +x), la gauche de l'écran est le -z de la maquette. */
 // on s'assied de l'autre côté de l'enceinte (vers le coin de la boîte) : on regarde à travers les piliers, vers toute la carte
-{const EYE=new THREE.Vector3(.99,1.3,-1.54),P={first:'intro',face:Math.atan2(EYE.x,EYE.z),floorY:.21,eye:EYE,look:new THREE.Vector3(-.49,.1,.76),hf:72,memUp:.3,screen:true};FP_PLACES[0]=P;
+{const EYE=new THREE.Vector3(.99,1.3,-1.54),P={first:'intro',face:Math.atan2(EYE.x,EYE.z),floorY:.21,eye:EYE,look:new THREE.Vector3(-.49,.1,.76),hf:72,memUp:.3,screen:true,down:.35,downIn:['ask','end']};FP_PLACES[0]=P;
  const B4=[1,2,0,3];let pil=[],glows=[],deco,T0=[0,0,0,0];
  P.init=()=>{P.g=GOBE;deco=new THREE.Group();deco.visible=false;GOBE.add(deco);
   // les quatre piliers du bord le plus proche de nous, rangés de gauche à droite tels qu'on les voit
@@ -31,7 +31,7 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
        fpAfter(500,()=>{FPT.st='ask';fpHint('« Les pierres ont disparu. Touche leurs places, dans l’ordre de l’histoire. »')})})})}}}
    else{FPT.st='wait';fpHint('« Presque. Écoute encore. »');fpAfter(1200,()=>P.show())}return}
   if(st==='ask'&&h.site!=null){const s=h.site;if(P.got.some(o=>o.s===s))return;const ok=s===P.seq[P.inp];P.got.push({s,ok});sndTone(PIL_NOTES[s],.9,.13);
-   fpPut(fpTag(String(P.inp+1),{w:120,h:120,fs:64,col:ok?'#2a6a2a':'#a8582a'}),.09,P.sites[s].position.clone().add(new THREE.Vector3(0,.01,0)));P.sites[s].visible=false;P.inp++;
+   fpPut(fpTag(String(P.inp+1),{w:120,h:120,fs:70,col:ok?'#2a6a2a':'#a8582a'}),.14,P.sites[s].position.clone().add(new THREE.Vector3(0,.01,0)));P.sites[s].visible=false;P.inp++;
    if(P.inp>=4){FPT.st='end';const n=P.got.filter(o=>o.ok).length;fpAfter(700,()=>{pil.forEach(p=>p.visible=true);fpPut(fpTag(`${n} sur 4, de mémoire`,{w:520,h:140,fs:52,col:'#22306e'}),.12,new THREE.Vector3(.24,.228,-.37));
      fpHint((n>=3?'« Tu as revu les pierres dans ta tête, n’est-ce pas ? Le chant était là où on l’avait laissé. C’est ça, un palais de mémoire. »':'« Les places t’ont déjà aidée. Avec un peu d’habitude, on retrouve tout un chant comme ça : c’est un palais de mémoire. »')+' Toucher pour continuer.');fpWait(()=>fpFinish())})}return}};
  P.tick=(now,T)=>{glows.forEach((g,j)=>{const idle=FPT.st==='intro'?.18+.12*Math.sin(T*3+j):0;g.material.opacity=Math.max(idle,Math.max(0,1-(now-T0[j])/900)*.95);g.visible=pil[j].visible})};

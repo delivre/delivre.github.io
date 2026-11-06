@@ -92,8 +92,8 @@ const fpPos=new THREE.Vector3(),fpLk=new THREE.Vector3(),fpQa=new THREE.Quaterni
 function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-FPT.kT)<.002)FPT.k=FPT.kT;const k=FPT.k;
   if(k<.001){if(camera.userData.fpFov){camera.fov=camera.userData.fpFov;camera.near=.1;camera.updateProjectionMatrix();camera.userData.fpFov=0;fpSky.visible=false;fig.visible=true}return}
   const P=FPT.P;if(!camera.userData.fpFov)camera.userData.fpFov=camera.fov;const f0=camera.userData.fpFov;
-  if(DIO.ph)FPT.yawT=0;FPT.yaw+=(FPT.yawT-FPT.yaw)*.12;FPT.up2=(FPT.up2||0)+(((FPT.st==='mem'&&DIO.ph)?1:0)-(FPT.up2||0))*.05;const e=k*k*(3-2*k);
-  fpPos.copy(P.eye);P.g.localToWorld(fpPos);const lk=P.look.clone().add(new THREE.Vector3(0,(P.memUp||.3)*FPT.up2,0)).sub(P.eye).applyAxisAngle(new THREE.Vector3(0,1,0),FPT.yaw).add(P.eye);fpLk.copy(lk);P.g.localToWorld(fpLk);
+  if(DIO.ph)FPT.yawT=0;FPT.yaw+=(FPT.yawT-FPT.yaw)*.12;FPT.up2=(FPT.up2||0)+(((FPT.st==='mem'&&DIO.ph)?1:0)-(FPT.up2||0))*.05;FPT.dn=(FPT.dn||0)+(((P.downIn||[]).includes(FPT.st)?1:0)-(FPT.dn||0))*.05;const e=k*k*(3-2*k);
+  fpPos.copy(P.eye);P.g.localToWorld(fpPos);const lk=P.look.clone().add(new THREE.Vector3(0,(P.memUp||.3)*FPT.up2-(P.down||0)*FPT.dn,0)).sub(P.eye).applyAxisAngle(new THREE.Vector3(0,1,0),FPT.yaw).add(P.eye);fpLk.copy(lk);P.g.localToWorld(fpLk);
   fpM.lookAt(fpPos,fpLk,new THREE.Vector3(0,1,0));fpQb.setFromRotationMatrix(fpM);fpQa.copy(camera.quaternion);
   const p0=camera.position.clone(),pe=Math.pow(e,.7);camera.position.lerpVectors(p0,fpPos,pe);camera.position.y+=Math.sin(pe*Math.PI)*2.6;
   camera.quaternion.copy(fpQa).slerp(fpQb,e);
