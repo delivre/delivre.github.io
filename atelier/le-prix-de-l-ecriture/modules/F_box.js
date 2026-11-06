@@ -236,10 +236,10 @@ let pharosFire,pharosLight;const BEAM={};
  g.add(at(mesh(new THREE.CylinderGeometry(.14,.17,.3,16),M.marbleP),0,1.72,0));
  // détails du phare (vus de près, à la première personne) : assises de pierre, fenêtres éclairées, tritons aux angles, statue au sommet
  {const gr=new THREE.MeshStandardMaterial({color:new THREE.Color('#cbbfa6').convertSRGBToLinear(),roughness:.95}),win=new THREE.MeshStandardMaterial({color:new THREE.Color('#3a2a30').convertSRGBToLinear(),emissive:new THREE.Color('#ffb060'),emissiveIntensity:.45,roughness:.9});
-  [.17,.29,.41,.53,.65,.77].forEach(y=>g.add(at(mesh(new THREE.BoxGeometry(.606,.008,.606),gr,false,false),0,y+.075,0)));
-  for(let f=0;f<4;f++){const a=f*Math.PI/2;for(let r=0;r<3;r++)for(let c=-1;c<=1;c+=2){const w=mesh(new THREE.BoxGeometry(.045,.075,.012),win,false,false);w.position.set(Math.sin(a)*.302+Math.cos(a)*c*.12,.34+r*.2,Math.cos(a)*.302-Math.sin(a)*c*.12);w.rotation.y=a;g.add(w)}}
-  {const d=mesh(new THREE.BoxGeometry(.12,.16,.012),win,false,false);d.position.set(0,.16,.302);g.add(d)}
-  for(let k=0;k<8;k++){const a=k*Math.PI/4+Math.PI/8,w=mesh(new THREE.BoxGeometry(.04,.07,.012),win,false,false);w.position.set(Math.sin(a)*.235,1.3,Math.cos(a)*.235);w.rotation.y=a;g.add(w)}
+  [.17,.29,.41,.53,.65,.77].forEach(y=>g.add(at(mesh(new THREE.BoxGeometry(.624,.012,.624),gr,false,false),0,y+.075,0)));
+  for(let f=0;f<4;f++){const a=f*Math.PI/2;for(let r=0;r<3;r++)for(let c=-1;c<=1;c+=2){const w=mesh(new THREE.BoxGeometry(.045,.075,.012),win,false,false);w.position.set(Math.sin(a)*.312+Math.cos(a)*c*.12,.34+r*.2,Math.cos(a)*.312-Math.sin(a)*c*.12);w.rotation.y=a;g.add(w)}}
+  {const d=mesh(new THREE.BoxGeometry(.12,.16,.012),win,false,false);d.position.set(0,.16,.312);g.add(d)}
+  for(let k=0;k<8;k++){const a=k*Math.PI/4+Math.PI/8,w=mesh(new THREE.BoxGeometry(.04,.07,.012),win,false,false);w.position.set(Math.sin(a)*.25,1.3,Math.cos(a)*.25);w.rotation.y=a;g.add(w)}
   [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([x,z])=>{const t=mesh(new THREE.ConeGeometry(.035,.12,8),M.gold);t.position.set(x*.29,1.04,z*.29);g.add(t)});
   {const st=new THREE.Group();st.add(at(mesh(new THREE.CylinderGeometry(.02,.03,.1,8),M.gold),0,0,0));st.add(at(mesh(new THREE.SphereGeometry(.025,10,8),M.gold),0,.07,0));st.position.y=2.29;g.add(st)}}
  pharosFire=mesh(new THREE.ConeGeometry(.1,.22,12),new THREE.MeshBasicMaterial({color:'#ffb347'}),false,false);pharosFire.position.y=1.98;g.add(pharosFire);if(PAPER){// un faisceau qui s'efface en douceur : fort près de la lanterne, rien au bout, sans bord net

@@ -115,7 +115,7 @@ function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-
   if(AUTO&&FPT.on&&FPT.k>.95&&!FPT.fly.length&&FPT.st!=='mem'&&FPT.st!=='out'){FPT.auto+=dt;if(FPT.auto>1.2){FPT.auto=0;if(FPT.wait)fpTap();else P.auto&&P.auto(FPT.st)}}}
 
 /* ===== 1. le théâtre : assis en haut des gradins ===== */
-{const P={first:'predict',face:Math.PI,floorY:.045,eye:new THREE.Vector3(0,.5,-.8),look:new THREE.Vector3(0,.19,.42)};FP_PLACES[1]=P;
+{const P={first:'predict',face:Math.PI,floorY:.045,eye:new THREE.Vector3(0,.56,-.95),look:new THREE.Vector3(0,.17,.36),hf:54,noLook:true};FP_PLACES[1]=P;
  let deco,props=[],LOCI=[];
  P.init=()=>{P.g=THEA;deco=new THREE.Group();deco.visible=false;THEA.add(deco);
   // les lieux : un arc devant nous, sur le cercle de l'orchestre, de gauche à droite VU DES GRADINS (assis face à la scène, la gauche de l'écran est le +x de la maquette)

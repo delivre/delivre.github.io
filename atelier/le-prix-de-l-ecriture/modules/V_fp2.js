@@ -71,52 +71,51 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
  P.auto=(st)=>{if(st==='task'){const o=offs.find(o=>!o.userData.sel&&P.list.includes(o.userData.k));if(o)fpTap({obj:o.userData.obj})}}}
 
 /* ===== 3. Alexandrie : rentrer au port de nuit =====
-   Sur le bateau de papier, au couchant, Alice retient les repères du port (la jarre sur le quai, la statue, le rocher, la colonne).
-   Puis la nuit tombe : seule reste la lumière du phare. Pour rentrer, on touche dans le noir l'endroit de chaque repère, de mémoire.
-   La carte écrite est restée à la bibliothèque : ce qui ramène, c'est ce qu'on a gardé en tête. */
-{const ROUTE=[[0,.5,-2.75],[0,.48,-2.45],[0,.46,-2.15],[0,.45,-1.85],[0,.44,-1.55]].map(a=>new THREE.Vector3(...a));
- const EYE=ROUTE[0].clone(),P={first:'look',face:Math.PI,floorY:-.05,eye:EYE,look:new THREE.Vector3(0,.55,0),hf:52,memUp:.15,screen:true};FP_PLACES[3]=P;
- // vu du bateau (on regarde vers +z), la gauche de l'écran est le +x de la maquette
- const LM=[{n:'la jarre du quai',p:[.27,-1.78]},{n:'la statue',p:[-.29,-1.46]},{n:'le rocher',p:[.3,-1.12]},{n:'la colonne',p:[-.28,-.8]}];
- let deco,marks=[],wins=[],seaY=-.06,miss=0;
+   L'étape au-dessus du théâtre. L'aède suivait son chemin dans l'ordre ; un marin, lui, doit retrouver CHAQUE repère, dans n'importe quel ordre.
+   Au couchant, depuis le bateau, Papa raconte l'entrée du port : cinq repères sur l'eau, de gauche à droite, chacun avec son petit morceau d'histoire.
+   La nuit tombe : on ne voit plus que la lumière du phare. Papa demande les repères dans le désordre ; on touche l'endroit où chacun était. */
+{const EYE=new THREE.Vector3(0,.5,-2.75),PORT=new THREE.Vector3(0,.44,-1.85),P={first:'look',face:Math.PI,floorY:-.05,eye:EYE,look:new THREE.Vector3(0,.42,0),hf:58,memUp:.15,screen:true,noLook:true};FP_PLACES[3]=P;
+ // vu du bateau (on regarde vers +z), la gauche de l'écran est le +x de la maquette : de gauche à droite = x décroissant
+ const LM=[{n:'le rocher',t:'D’abord le rocher, où les mouettes dorment.',p:[.44,-1.44]},{n:'la statue',t:'Puis la statue dorée, qui montre le chemin du doigt.',p:[.22,-1.33]},
+  {n:'la jarre',t:'Au milieu, la grande jarre, pleine de l’huile du phare.',p:[0,-1.29]},{n:'la colonne',t:'Puis la colonne brisée, tombée d’un vieux temple.',p:[-.22,-1.33]},{n:'l’obélisque',t:'Et l’obélisque, tout au bout : après lui, c’est le port.',p:[-.44,-1.44]}];
+ let deco,marks=[],wins=[],seaY=-.06;
  P.init=()=>{P.g=PHAR;deco=new THREE.Group();deco.visible=false;PHAR.add(deco);
-  const terra=M.terra,marb=M.marbleP,dark=M.marbleD,stone=new THREE.MeshStandardMaterial({color:new THREE.Color('#8c8478').convertSRGBToLinear(),roughness:1,flatShading:true});
+  const terra=M.terra,marb=M.marbleP,stone=new THREE.MeshStandardMaterial({color:new THREE.Color('#8c8478').convertSRGBToLinear(),roughness:1,flatShading:true});
   marks=LM.map((L,i)=>{const g=new THREE.Group();g.position.set(L.p[0],seaY,L.p[1]);
-   g.add(at(mesh(new THREE.CylinderGeometry(.11,.13,.08,10),stone),0,.02,0)); // un îlot de pierre
-   if(i===0){g.add(at(mesh(new THREE.BoxGeometry(.2,.06,.14),marb),0,.09,0));const pts=[[0,0],[.03,.006],[.046,.04],[.044,.08],[.022,.105],[.02,.12],[.028,.126]].map(([a,b])=>new THREE.Vector2(a,b));g.add(at(mesh(new THREE.LatheGeometry(pts,18),terra),0,.12,0))}
+   g.add(at(mesh(new THREE.CylinderGeometry(.1,.12,.08,10),stone),0,.02,0));
+   if(i===0){const r=mesh(new THREE.DodecahedronGeometry(.1,0),stone);r.position.y=.1;r.scale.set(1.1,1.2,.9);r.rotation.set(.3,.5,.2);g.add(r);[[-.03,.2],[.04,.18]].forEach(([x,y])=>{const b=mesh(new THREE.SphereGeometry(.018,8,6),M.white||marb);b.position.set(x,y,0);g.add(b)})}
    if(i===1){g.add(at(mesh(new THREE.BoxGeometry(.08,.1,.08),marb),0,.11,0));g.add(at(mesh(new THREE.CylinderGeometry(.018,.03,.13,10),M.gold),0,.225,0));g.add(at(mesh(new THREE.SphereGeometry(.024,10,8),M.gold),0,.31,0));
     const arm=at(mesh(new THREE.CylinderGeometry(.007,.007,.09,6),M.gold),.035,.29,0);arm.rotation.z=-.6;g.add(arm)}
-   if(i===2){const r=mesh(new THREE.DodecahedronGeometry(.11,0),stone);r.position.y=.1;r.scale.set(1,1.3,.9);r.rotation.set(.3,.5,.2);g.add(r)}
-   if(i===3){g.add(at(mesh(new THREE.CylinderGeometry(.035,.04,.26,12),marb),0,.18,0));g.add(at(mesh(new THREE.BoxGeometry(.1,.025,.1),marb),0,.32,0))}
-   g.userData.obj=i;g.userData.lab=fpTag(L.n,{w:360,h:110,fs:44});deco.add(g);return g});
-  // les fenêtres du phare qui s'allument, une par repère retrouvé (face au bateau : -z)
-  wins=[[.12,.34],[-.12,.54],[.12,.74],[0,1.3]].map(([x,y])=>fpGlow(deco,new THREE.Vector3(x,y,y>1?-.25:-.32),.22))};
+   if(i===2){const pts=[[0,0],[.04,.008],[.062,.05],[.06,.11],[.03,.145],[.027,.165],[.038,.172]].map(([a,b])=>new THREE.Vector2(a,b));g.add(at(mesh(new THREE.LatheGeometry(pts,18),terra),0,.06,0))}
+   if(i===3){g.add(at(mesh(new THREE.CylinderGeometry(.035,.04,.2,12),marb),0,.15,0));const t=at(mesh(new THREE.CylinderGeometry(.035,.035,.1,12),marb),.06,.07,0);t.rotation.z=1.3;g.add(t)}
+   if(i===4){const ob=mesh(new THREE.CylinderGeometry(.018,.04,.3,4),M.marbleD);ob.rotation.y=Math.PI/4;ob.position.y=.2;g.add(ob);const py=mesh(new THREE.ConeGeometry(.028,.05,4),M.gold);py.rotation.y=Math.PI/4;py.position.y=.375;g.add(py)}
+   g.userData.obj=i;g.userData.lab=fpTag(L.n,{w:340,h:110,fs:46});deco.add(g);return g});
+  wins=[[.12,.34],[-.12,.54],[.12,.74],[-.12,.34],[0,1.3]].map(([x,y])=>fpGlow(deco,new THREE.Vector3(x,y,y>1?-.27:-.34),.22))};
  P.objs=()=>FPT.st==='night'?marks:[];
- P.enter=()=>{deco.visible=true;marks.forEach(g=>{g.visible=true;g.scale.setScalar(1)});P.k=0;P.ok=[];miss=0;EYE.copy(ROUTE[0]);P.seen=-1;FPT.nightT=0};
- P.leave=()=>{deco.visible=false;FPT.nightT=0;EYE.copy(ROUTE[0]);if(BEAM.m&&P.beamO)BEAM.m.children.forEach((m,i)=>m.material.opacity=P.beamO[i])};
+ P.enter=()=>{deco.visible=true;{const w=PHAR.localToWorld(new THREE.Vector3(0,0,-2));P.waves=(WATER.waves||[]).filter(m=>m.visible&&Math.hypot(m.position.x-w.x,m.position.z-w.z)<1.6);P.waves.forEach(m=>m.visible=false)}marks.forEach(g=>{g.visible=true;g.scale.setScalar(1)});P.got=[];P.tries=0;P.miss=0;EYE.set(0,.5,-2.75);P.seen=-1;FPT.nightT=0;P.order=[0,1,2,3,4].sort(()=>Math.random()-.5);P.q=0};
+ P.leave=()=>{deco.visible=false;(P.waves||[]).forEach(m=>m.visible=true);FPT.nightT=0;EYE.set(0,.5,-2.75);if(BEAM.m&&P.beamO)BEAM.m.children.forEach((m,i)=>m.material.opacity=P.beamO[i])};
  P.toMem=()=>{FPT.nightT=.45};
- P.go=(st)=>{if(st==='look'){fpHint('Papa disait : « La nuit, la carte reste à la bibliothèque. Ce qui te ramène au port, c’est ce que tu as gardé en tête. » Il me faisait retenir les repères, avant le soir. Toucher pour regarder.');fpWait(()=>{FPT.st='show';P.t0=performance.now();P.seen=-1})}};
- P.tap=(st,h)=>{if(st!=='night')return;const k=P.k;
-  if(h.obj===k){P.ok[k]=miss===0;miss=0;const g=marks[k];g.visible=true;g.scale.setScalar(.01);g.userData.pop=performance.now();sndTone([523,587,659,784][k],1.2,.12);
-   fpPut(g.userData.lab,.12,new THREE.Vector3(g.position.x,seaY+.42,g.position.z));P.k++;
-   fpHint(P.k<4?'« '+LM[k].n.replace(/^./,c=>c.toUpperCase())+'. » Le bateau avance. Toucher l’endroit du repère suivant.':'« La colonne. » Le port est là.');
-   if(P.k===4){FPT.st='end';fpAfter(1800,()=>{const n=P.ok.filter(Boolean).length;fpResult(`Au port : ${n} repères sur 4\nretrouvés du premier coup`);
-     fpHint((n>=3?'Je n’avais ni carte ni rouleau. Les repères étaient dans ma tête, et ils m’ont ramenée. Le rouleau garde ; ce qu’on retient éclaire.':'J’ai hésité, mais les repères sont revenus. Le rouleau garde ; ce qu’on retient éclaire.')+' Toucher pour continuer.');fpWait(()=>fpFinish())})}}
-  else{miss++;P.shake=performance.now();sndTone(196,.5,.1);
-   if(miss>=2){const g=marks[k];g.visible=true;g.userData.blink=performance.now();fpHint('Le bateau frôle les rochers… « Là, regarde : '+LM[k].n+'. »');fpAfter(1300,()=>{if(P.k===k)g.visible=false})}
-   else fpHint('Le bateau frôle les rochers. Ce n’était pas là. Toucher l’endroit où était '+LM[k].n+'.')}};
+ P.go=(st)=>{if(st==='look'){fpHint('Papa disait : « L’aède suivait son chemin, dans l’ordre. Un marin, lui, doit retrouver chaque repère, dans n’importe quel ordre. La nuit, la carte reste à la bibliothèque. » Toucher pour écouter l’entrée du port.');
+  fpWait(()=>{FPT.st='show';P.t0=performance.now();P.seen=-1})}};
+ const ask=()=>{const k=P.order[P.q];fpHint('Papa : « Où était '+LM[k].n+' ? » Toucher l’endroit, dans le noir.')};
+ P.tap=(st,h)=>{if(st!=='night'||h.obj==null)return;const k=P.order[P.q],g=marks[h.obj];
+  if(h.obj===k){P.got.push(P.miss===0);P.miss=0;g.visible=true;g.scale.setScalar(.01);g.userData.pop=performance.now();sndTone([523,587,659,698,784][P.q],1.2,.12);
+   fpPut(g.userData.lab,.13,new THREE.Vector3(g.position.x,seaY+.42,g.position.z));P.q++;
+   if(P.q<5)fpAfter(900,ask);else{FPT.st='end';fpHint('Le phare brille de toutes ses fenêtres. Le bateau rentre au port.');fpAfter(2200,()=>{const n=P.got.filter(Boolean).length;fpResult(`Au port : ${n} repères sur 5\nretrouvés du premier coup`);
+     fpHint((n>=4?'Dans le désordre, dans le noir, sans carte : les repères étaient dans ma tête, chacun à sa place. Le rouleau garde ; ce qu’on retient éclaire.':'J’ai hésité, mais chaque repère a retrouvé sa place. Le rouleau garde ; ce qu’on retient éclaire.')+' Toucher pour continuer.');fpWait(()=>fpFinish())})}}
+  else{P.miss++;P.shake=performance.now();sndTone(196,.5,.1);const gk=marks[k];
+   if(P.miss>=2){gk.visible=true;gk.userData.blink=performance.now();fpHint('Le bateau frôle les rochers… « Là, regarde : '+LM[k].n+'. »');fpAfter(1400,()=>{if(P.order[P.q]===k)gk.visible=false})}
+   else fpHint('Le bateau frôle les rochers. Ce n’était pas là. « Où était '+LM[k].n+' ? »')}};
  P.tick=(now,T,dt)=>{
-  // au couchant : les repères s'allument un par un, avec leur nom
-  if(FPT.st==='show'){const el=now-P.t0-500,i=Math.floor(el/1700);if(el>0&&i<4&&i!==P.seen){P.seen=i;const g=marks[i];g.userData.blink=now;fpClearStage();fpPut(g.userData.lab,.12,new THREE.Vector3(g.position.x,seaY+.42,g.position.z));sndPaper(.25,.2);
-     fpHint('« '+(i+1)+'. '+LM[i].n.replace(/^./,c=>c.toUpperCase())+'. »')}
-   if(i>=4&&P.seen!==9){P.seen=9;fpClearStage();FPT.nightT=1;fpHint('Puis la nuit tombait. Plus de repères : seulement la lumière du phare.');
-    fpAfter(2600,()=>{marks.forEach(g=>g.visible=false);FPT.st='night';fpHint('Toucher l’endroit où était '+LM[0].n+'.')})}}
-  marks.forEach(g=>{const b=g.userData.blink?Math.max(0,1-(now-g.userData.blink)/1200):0;const pu=g.userData.pop?clamp((now-g.userData.pop)/450):1;if(g.visible)g.scale.setScalar(Math.max(.01,pu<1?pu+Math.sin(pu*Math.PI)*.2:1)*(1+.15*b))});
-  // le bateau avance d'un repère à l'autre ; il tangue un peu, et tremble quand il frôle les rochers
-  const tgt=ROUTE[Math.min(P.k,4)],sh=P.shake?Math.max(0,1-(now-P.shake)/500):0;EYE.lerp(tgt,1-Math.pow(.3,dt));EYE.y=tgt.y+Math.sin(T*1.3)*.012+Math.sin(sh*40)*.02*sh;
-  wins.forEach((g,i)=>{g.material.opacity=i<P.k?.95:0;g.scale.setScalar(.22+.03*Math.sin(T*3+i))});
-  if(BEAM.m){if(!P.beamO)P.beamO=BEAM.m.children.map(m=>m.material.opacity);BEAM.m.children.forEach((m,i)=>m.material.opacity=P.beamO[i]*(1+(FPT.night||0)*(1+P.k*.6)))}};
- P.auto=(st)=>{if(st==='night')fpTap({obj:P.k})}}
+  if(FPT.st==='show'){const el=now-P.t0-400,i=Math.floor(el/3600);if(el>0&&i<5&&i!==P.seen){P.seen=i;const g=marks[i];g.userData.blink=now;fpClearStage();fpPut(g.userData.lab,.13,new THREE.Vector3(g.position.x,seaY+.42,g.position.z));sndPaper(.25,.2);
+     fpHint('Papa : « '+LM[i].t+' »')}
+   if(i>=5&&P.seen!==9){P.seen=9;fpClearStage();FPT.nightT=1;fpHint('Puis la nuit tombait. Plus de repères : seulement la lumière du phare.');
+    fpAfter(2800,()=>{marks.forEach(g=>g.visible=false);FPT.st='night';ask()})}}
+  marks.forEach(g=>{const b=g.userData.blink?Math.max(0,1-(now-g.userData.blink)/1400):0;const pu=g.userData.pop?clamp((now-g.userData.pop)/450):1;if(g.visible)g.scale.setScalar(Math.max(.01,pu<1?pu+Math.sin(pu*Math.PI)*.2:1)*(1+.18*b))});
+  const sh=P.shake?Math.max(0,1-(now-P.shake)/500):0,tgt=FPT.st==='end'||FPT.st==='mem'?PORT:new THREE.Vector3(0,.5,-2.75);EYE.x+=(tgt.x-EYE.x)*(1-Math.pow(.4,dt));EYE.z+=(tgt.z-EYE.z)*(1-Math.pow(.4,dt));EYE.y=tgt.y+Math.sin(T*1.3)*.012+Math.sin(sh*40)*.02*sh;
+  wins.forEach((g,i)=>{g.material.opacity=i<P.got.length?.95:0;g.scale.setScalar(.22+.03*Math.sin(T*3+i))});
+  if(BEAM.m){if(!P.beamO)P.beamO=BEAM.m.children.map(m=>m.material.opacity);BEAM.m.children.forEach((m,i)=>m.material.opacity=P.beamO[i]*(1+(FPT.night||0)*(1+P.got.length*.5)))}};
+ P.auto=(st)=>{if(st==='night')fpTap({obj:P.order[P.q]})}}
 
 /* ===== 4. Aujourd'hui : au bureau, devant la nouvelle bibliothèque d'Alexandrie =====
    Un bureau de papier, un vieux terminal en carton à l'écran bombé, et le carnet de Papa ouvert à côté.
@@ -137,17 +136,17 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
   DESK.add(at(mesh(new THREE.BoxGeometry(.16,.008,.06),beige),0,.174,.1)); // le clavier
   for(let r=0;r<3;r++)for(let c=0;c<9;c++)DESK.add(at(mesh(new THREE.BoxGeometry(.012,.005,.012),cream,false,false),-.064+c*.016,.18,.082+r*.016));
   // le carnet de Papa, ouvert à droite du terminal
-  pap=new THREE.Mesh(new THREE.PlaneGeometry(.17,.17),new THREE.MeshStandardMaterial({map:tex,roughness:.95}));pap.rotation.x=-Math.PI/2+.8;pap.rotation.z=-.06;pap.position.set(.22,.225,.05);DESK.add(pap);
-  {const bk=at(mesh(new THREE.BoxGeometry(.18,.008,.18),kraft('#7a4a22')),.22,.221,.045);bk.rotation.x=.8;DESK.add(bk);const st=at(mesh(new THREE.BoxGeometry(.1,.05,.012),kraft('#5a3418')),.22,.195,-.02);st.rotation.x=.8;DESK.add(st)}
+  pap=new THREE.Mesh(new THREE.PlaneGeometry(.17,.17),new THREE.MeshStandardMaterial({map:tex,roughness:.95}));pap.position.set(.22,.268,.05);DESK.add(pap);
+  {const bk=at(mesh(new THREE.BoxGeometry(.182,.182,.008),kraft('#7a4a22')),.22,.268,.044);DESK.add(bk);const st=at(mesh(new THREE.BoxGeometry(.012,.09,.06),kraft('#5a3418')),.22,.215,.012);DESK.add(st)}
   {const lp=new THREE.Group();lp.add(at(mesh(new THREE.CylinderGeometry(.004,.004,.12,6),dark),0,.06,0));const sh=mesh(new THREE.ConeGeometry(.03,.035,12,1,true),kraft('#c8463a'));sh.position.y=.12;lp.add(sh);lp.position.set(-.19,.17,-.04);DESK.add(lp);
    const gl=fpGlow(DESK,new THREE.Vector3(-.17,.24,-.02),.18);gl.material.opacity=.5}
-  DESK.visible=true};
+  DESK.visible=false};
  // quelle surface montre le jeu : l'écran de la machine, ou le papier (carnet, rangement, test)
  const surf=()=>M&&M.surf?M.surf():'screen';
  let hid=[];
- P.enter=()=>{P.back=P.backT=0;const c=DESK.localToWorld(new THREE.Vector3(0,0,.2));hid=deco.children.filter(o=>o.visible&&o!==THEA&&Math.hypot(o.position.x-c.x,o.position.z-c.z)<.75);hid.forEach(o=>o.visible=false);M=mkIA();showHint(M.hint);gaze=surf()==='paper'?1:0};
+ P.enter=()=>{DESK.visible=true;P.back=P.backT=0;const c=DESK.localToWorld(new THREE.Vector3(0,0,.2));hid=deco.children.filter(o=>o.visible&&o!==THEA&&Math.hypot(o.position.x-c.x,o.position.z-c.z)<.75);hid.forEach(o=>o.visible=false);M=mkIA();showHint(M.hint);gaze=surf()==='paper'?1:0};
  P.go=(st)=>{};
- P.leave=()=>{M=null;hid.forEach(o=>o.visible=true);hid=[]};
+ P.leave=()=>{M=null;DESK.visible=false;hid.forEach(o=>o.visible=true);hid=[]};
  P.toMem=()=>{P.backT=1};
  P.pick=(e)=>{const s=surf()==='paper'?pap:scr,h=fpRay.intersectObject(s,false)[0];if(!h||!h.uv)return{};
   const cr=s===scr?[66,66,702,704]:[40,40,728,728];return{uv:[cr[0]+h.uv.x*(cr[2]-cr[0]),cr[1]+(1-h.uv.y)*(cr[3]-cr[1])]}};
@@ -156,7 +155,7 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
   const sp=surf(),cr=sp==='paper'?[40,40,728,728]:[66,66,702,704];tex.repeat.set((cr[2]-cr[0])/768,(cr[3]-cr[1])/768);tex.offset.set(cr[0]/768,1-cr[3]/768);
   scr.material.color.setScalar(sp==='paper'?.12:1);pap.material.color.setScalar(sp==='paper'?1:.0);pap.visible=sp==='paper';
   // le regard glisse de l'écran au carnet
-  gaze+=((sp==='paper'?1:0)-gaze)*(1-Math.pow(.1,dt));P.back=(P.back||0)+((P.backT||0)-(P.back||0))*(1-Math.pow(.2,dt));const bk=P.back;P.look.set(.22*gaze,.245-.02*gaze,.05*gaze);P.eye.set(.22*gaze,.29+.05*gaze+.12*bk,.235+.04*gaze+.45*bk);
+  gaze+=((sp==='paper'?1:0)-gaze)*(1-Math.pow(.1,dt));P.back=(P.back||0)+((P.backT||0)-(P.back||0))*(1-Math.pow(.2,dt));const bk=P.back;P.look.set(.22*gaze,.245+.023*gaze,.05*gaze);P.eye.set(.22*gaze,.29-.02*gaze+.12*bk,.235+.02*gaze+.45*bk);
   if(M.done&&FPT.st==='ia'){FPT.st='fin';fpAfter(300,()=>fpFinish())}};
  P.getM=()=>M;
  P.auto=(st)=>{if(st==='ia'&&M&&!M.done)M.solve()}
