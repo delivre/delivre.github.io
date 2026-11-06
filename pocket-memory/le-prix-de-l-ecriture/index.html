@@ -1033,6 +1033,14 @@ let pharosFire,pharosLight;const BEAM={};
  g.add(at(mesh(new THREE.BoxGeometry(.6,.85,.6),M.marbleP),0,.5,0));g.add(at(mesh(new THREE.BoxGeometry(.66,.06,.66),M.gold),0,.95,0));
  g.add(at(mesh(new THREE.CylinderGeometry(.22,.26,.55,8),M.marbleP),0,1.26,0));g.add(at(mesh(new THREE.CylinderGeometry(.27,.27,.05,8),M.gold),0,1.55,0));
  g.add(at(mesh(new THREE.CylinderGeometry(.14,.17,.3,16),M.marbleP),0,1.72,0));
+ // détails du phare (vus de près, à la première personne) : assises de pierre, fenêtres éclairées, tritons aux angles, statue au sommet
+ {const gr=new THREE.MeshStandardMaterial({color:new THREE.Color('#cbbfa6').convertSRGBToLinear(),roughness:.95}),win=new THREE.MeshStandardMaterial({color:new THREE.Color('#3a2a30').convertSRGBToLinear(),emissive:new THREE.Color('#ffb060'),emissiveIntensity:.45,roughness:.9});
+  [.17,.29,.41,.53,.65,.77].forEach(y=>g.add(at(mesh(new THREE.BoxGeometry(.606,.008,.606),gr,false,false),0,y+.075,0)));
+  for(let f=0;f<4;f++){const a=f*Math.PI/2;for(let r=0;r<3;r++)for(let c=-1;c<=1;c+=2){const w=mesh(new THREE.BoxGeometry(.045,.075,.012),win,false,false);w.position.set(Math.sin(a)*.302+Math.cos(a)*c*.12,.34+r*.2,Math.cos(a)*.302-Math.sin(a)*c*.12);w.rotation.y=a;g.add(w)}}
+  {const d=mesh(new THREE.BoxGeometry(.12,.16,.012),win,false,false);d.position.set(0,.16,.302);g.add(d)}
+  for(let k=0;k<8;k++){const a=k*Math.PI/4+Math.PI/8,w=mesh(new THREE.BoxGeometry(.04,.07,.012),win,false,false);w.position.set(Math.sin(a)*.235,1.3,Math.cos(a)*.235);w.rotation.y=a;g.add(w)}
+  [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([x,z])=>{const t=mesh(new THREE.ConeGeometry(.035,.12,8),M.gold);t.position.set(x*.29,1.04,z*.29);g.add(t)});
+  {const st=new THREE.Group();st.add(at(mesh(new THREE.CylinderGeometry(.02,.03,.1,8),M.gold),0,0,0));st.add(at(mesh(new THREE.SphereGeometry(.025,10,8),M.gold),0,.07,0));st.position.y=2.29;g.add(st)}}
  pharosFire=mesh(new THREE.ConeGeometry(.1,.22,12),new THREE.MeshBasicMaterial({color:'#ffb347'}),false,false);pharosFire.position.y=1.98;g.add(pharosFire);if(PAPER){// un faisceau qui s'efface en douceur : fort près de la lanterne, rien au bout, sans bord net
  const am=canvasTex(64,256,(x,W,H)=>{const gr=x.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#fff');gr.addColorStop(.25,'#777');gr.addColorStop(.6,'#222');gr.addColorStop(1,'#000');x.fillStyle=gr;x.fillRect(0,0,W,H)});am.encoding=THREE.LinearEncoding;
  const bmG=new THREE.Group();[[.32,.075],[.6,.035]].forEach(([r,o])=>{const bg=new THREE.ConeGeometry(r,2.6,24,1,true);bg.translate(0,-1.3,0);bg.rotateZ(Math.PI/2);bmG.add(new THREE.Mesh(bg,new THREE.MeshBasicMaterial({color:'#ffd9a0',alphaMap:am,transparent:true,opacity:o,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide})))});bmG.position.y=1.99;g.add(bmG);BEAM.m=bmG}
@@ -2064,7 +2072,12 @@ const fpHint=(t)=>showHint(t);
 const fpAfter=(ms,fn)=>{const id=FPT.gen;setTimeout(()=>{if(FPT.gen===id&&FPT.on)fn()},AUTO?ms*.5:ms)};
 function fpGo(st){FPT.st=st;FPT.t0=performance.now();FPT.auto=0;FPT.P.go(st)}
 // fin de l'activité : on reste dans le lieu, le souvenir vient ici
-function fpFinish(){FPT.st='mem';FPT.wait=false;fpSetHand([]);fpClearStage();(FPT.P.sites||[]).forEach(d=>d.visible=false);FPT.P.toMem&&FPT.P.toMem();const cb=FPT.cb;FPT.cb=null;cb&&cb()}
+function fpFinish(){fpResClear();FPT.st='mem';FPT.wait=false;fpSetHand([]);fpClearStage();(FPT.P.sites||[]).forEach(d=>d.visible=false);FPT.P.toMem&&FPT.P.toMem();const cb=FPT.cb;FPT.cb=null;cb&&cb()}
+// le résultat : une grande étiquette tenue en haut de la vue, toujours lisible
+let fpRes=null;function fpResult(text){fpResClear();fpRes=fpCard(fpTag(text,{w:680,h:text.includes('\n')?210:140,fs:48,col:'#22306e'}),.1,{noShadow:true,ro:23});fpRes.material.depthTest=false;fpRes.userData.t0=performance.now();scene.add(fpRes)}
+function fpResClear(){if(fpRes){scene.remove(fpRes);fpRes=null}}
+function fpResTick(){if(!fpRes)return;const fw=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion),vh=2*Math.tan(camera.fov*Math.PI/360)*.3,vw=vh*camera.aspect,u=clamp((performance.now()-fpRes.userData.t0)/450);
+  fpRes.position.copy(camera.position).addScaledVector(fw,.3).addScaledVector(up,vh*.3);fpRes.quaternion.copy(camera.quaternion);fpRes.rotateZ(-.02);fpRes.scale.setScalar(Math.min(1.6,vw*.86/fpRes.geometry.parameters.width)*(u<1?u+Math.sin(u*Math.PI)*.15:1))}
 // attendre un toucher pour continuer
 function fpWait(fn){FPT.wait=true;FPT.next=fn}
 FPT.start=(n,cb)=>{const P=FP_PLACES[n];if(!P){cb&&cb();return}FPT.P=P;P.init&&!P.ready&&(P.init(),P.ready=1);P.g.add(fpG);ZH.el.classList.remove('on');FPT.cb=cb;DIO.host=FPT.host;FPT.on=true;FPT.kT=1;FPT.gen++;fpG.visible=true;FPT.yaw=FPT.yawT=0;fpCurtKT=0;fpClearStage();
@@ -2113,7 +2126,7 @@ function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-
   const now=performance.now(),T=now/1000;fpFlyTick(now);
   fpStage.forEach(p=>{const u=clamp((now-p.userData.pop)/450);if(!FPT.fly.some(f=>f.p===p))p.scale.setScalar(Math.max(.001,u<1?u+Math.sin(u*Math.PI)*.25:1))});
   if(FPT.on&&FPT.st&&P.tick)P.tick(now,T,dt);
-  fpHandTick();fpAnchorTick();
+  fpHandTick();fpAnchorTick();fpResTick();
   if(AUTO&&FPT.on&&FPT.k>.95&&!FPT.fly.length&&FPT.st!=='mem'&&FPT.st!=='out'){FPT.auto+=dt;if(FPT.auto>1.2){FPT.auto=0;if(FPT.wait)fpTap();else P.auto&&P.auto(FPT.st)}}}
 
 /* ===== 1. le théâtre : assis en haut des gradins ===== */
@@ -2152,7 +2165,7 @@ function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-
   if(st==='recall'){if(h.hand&&!h.hand.used&&!h.dragged){FPT.sel=h.hand;sndPaper(.2,.15);return}
     const o=h.card||FPT.sel;if(h.site==null||!o||P.ans.indexOf(h.site)>=0)return;FPT.sel=null;P.ans[o.i]=h.site;P.sites[h.site].visible=false;
     fpFly(o,LOCI[h.site],.12,()=>{if(P.ans.every(v=>v>=0)&&!P.scored){P.scored=1;const sc=P.ans.filter((p,k)=>p===k).length;
-      fpPut(fpTag(`Une simple liste : ${P.scoreA} sur 4\nHistoire + lieux : ${sc} sur 4`,{w:620,h:200,fs:46,col:'#22306e'}),.17,new THREE.Vector3(0,.045,-.3));sndTone(784,1.4,.08);sndTone(1175,1.4,.04,.2);
+      fpResult(`Une simple liste : ${P.scoreA} sur 4\nHistoire + lieux : ${sc} sur 4`);sndTone(784,1.4,.08);sndTone(1175,1.4,.04,.2);
       fpHint((sc>P.scoreA?'« Tu vois ? Une histoire ancrée dans des lieux : tout revient, dans l’ordre. Les aèdes faisaient pareil… pour 16 000 vers. »':sc===P.scoreA?'« Autant l’un que l’autre, pour quatre images. Mais pour 16 000 vers, une liste ne tient pas : il faut une histoire et des lieux. »':'« Ce soir, la liste a mieux marché. Avec l’habitude, l’histoire et les lieux gagnent : c’est ainsi que les aèdes gardaient 16 000 vers. »')+' Toucher pour continuer.');
       fpWait(()=>{P.scored=0;fpFinish()})}});return}};
  P.tick=(now,T)=>{props.forEach(g=>{if(g.userData.fl)g.userData.fl.scale.set(1,1+.25*Math.sin(now/90),1)});
@@ -2187,51 +2200,51 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
  const top=(j)=>pil[j].position.clone().add(new THREE.Vector3(0,.52,0));
  P.light=(j,dur=1)=>{T0[j]=performance.now();sndTone(PIL_NOTES[j],1.1*dur,.15);const b=BEASTS[B4[pil[j].userData.k%4]][1];const c=fpPut(b,.15,top(j));fpAfter(1000,()=>fpUnput(c))};
  P.show=()=>{FPT.st='show';P.inp=0;P.seq.slice(0,P.len).forEach((j,k)=>fpAfter(600+k*900,()=>P.light(j)));
-  fpAfter(600+P.len*900,()=>{FPT.st='input';fpHint(P.len===3?'« À toi de rechanter l’histoire : touche les pierres dans le même ordre. »':'« L’histoire s’allonge. Rechante-la. »')})};
- P.go=(st)=>{if(st==='intro')fpHint('Il y a 11 600 ans, des chasseurs dressaient ici des piliers géants, gravés d’animaux. Papa disait qu’ils chantaient une histoire. Toucher une pierre pour l’écouter.')};
+  fpAfter(600+P.len*900,()=>{FPT.st='input';fpHint(P.len===3?'« À toi de rechanter : touche les pierres dans le même ordre. »':'« Le chant s’allonge. Rechante-le. »')})};
+ P.go=(st)=>{if(st==='intro')fpHint('Il y a 11 600 ans, des chasseurs dressaient ici des piliers géants, gravés d’animaux. Papa disait qu’ils gardaient un chant. Toucher une pierre pour l’écouter.')};
  P.tap=(st,h)=>{
   if(st==='intro'&&h.obj!=null){P.show();return}
   if(st==='input'&&h.obj!=null){const j=h.obj;P.light(j,.8);
    if(j===P.seq[P.inp]){P.inp++;if(P.inp>=P.len){if(P.len===3){P.len=4;FPT.st='wait';fpHint('« Bien ! Écoute la suite… »');fpAfter(1300,()=>P.show())}
-     else{FPT.st='wait';fpHint('« Tu connais l’histoire des pierres. »');fpAfter(1700,()=>{fpCurtKT=1;fpHint('Puis Papa éteignait la lumière…');fpAfter(1200,()=>{pil.forEach(p=>p.visible=false);P.sites.forEach(d=>{d.visible=true;d.material.emissiveIntensity=.25});P.inp=0;P.got=[];fpCurtKT=0;
-       fpAfter(500,()=>{FPT.st='ask';fpHint('« Les pierres ont disparu. » Toucher les cercles où elles étaient, dans l’ordre de l’histoire.')})})})}}}
+     else{FPT.st='wait';fpHint('« Tu connais le chant des pierres. »');fpAfter(1700,()=>{fpCurtKT=1;fpHint('Puis Papa éteignait la lumière…');fpAfter(1200,()=>{pil.forEach(p=>p.visible=false);P.sites.forEach(d=>{d.visible=true;d.material.emissiveIntensity=.25});P.inp=0;P.got=[];fpCurtKT=0;
+       fpAfter(500,()=>{FPT.st='ask';fpHint('« Les pierres ont disparu. » Toucher les cercles où elles étaient, dans l’ordre du chant.')})})})}}}
    else{FPT.st='wait';fpHint('« Presque. Écoute encore. »');fpAfter(1200,()=>P.show())}return}
   if(st==='ask'&&h.site!=null){const s=h.site;if(P.got.some(o=>o.s===s))return;const ok=s===P.seq[P.inp];P.got.push({s,ok});sndTone(PIL_NOTES[s],.9,.13);
    fpPut(fpTag(String(P.inp+1),{w:120,h:120,fs:70,col:ok?'#2a6a2a':'#a8582a'}),.14,P.sites[s].position.clone().add(new THREE.Vector3(0,.01,0)));P.sites[s].visible=false;P.inp++;
-   if(P.inp>=4){FPT.st='end';const n=P.got.filter(o=>o.ok).length;fpAfter(700,()=>{pil.forEach(p=>p.visible=true);fpPut(fpTag(`${n} sur 4, de mémoire`,{w:520,h:140,fs:52,col:'#22306e'}),.12,new THREE.Vector3(.24,.228,-.37));
+   if(P.inp>=4){FPT.st='end';const n=P.got.filter(o=>o.ok).length;fpAfter(700,()=>{pil.forEach(p=>p.visible=true);fpResult(`${n} sur 4, de mémoire`);
      fpHint((n>=3?'« Tu as revu les pierres dans ta tête, n’est-ce pas ? Le chant était là où on l’avait laissé. C’est ça, un palais de mémoire. »':'« Les places t’ont déjà aidée. Avec un peu d’habitude, on retrouve tout un chant comme ça : c’est un palais de mémoire. »')+' Toucher pour continuer.');fpWait(()=>fpFinish())})}return}};
  P.tick=(now,T)=>{glows.forEach((g,j)=>{const idle=FPT.st==='intro'?.18+.12*Math.sin(T*3+j):0;g.material.opacity=Math.max(idle,Math.max(0,1-(now-T0[j])/900)*.95);g.visible=pil[j].visible})};
  P.auto=(st)=>{if(st==='intro')fpTap({obj:0});else if(st==='input')fpTap({obj:P.seq[P.inp]});else if(st==='ask')fpTap({site:P.seq[P.inp]})}}
 
 /* ===== 2. Thèbes : debout dans la cour du palais, face au roi Thamus (à gauche) et à Thot (à droite) =====
    Les offrandes sont posées par terre devant nous ; le papyrus de Thot se lit en grand, puis se roule à chaque offrande. */
-{const P={first:'look',face:0,floorY:0,eye:new THREE.Vector3(0,.74,2.2),look:new THREE.Vector3(0,.14,.85),hf:54,memUp:.3,arc:.12};FP_PLACES[2]=P;
+{const P={first:'look',face:0,floorY:0,eye:new THREE.Vector3(0,1.2,1.85),look:new THREE.Vector3(0,0,.95),hf:60,memUp:.6,arc:.12};FP_PLACES[2]=P;
  const N=5;let deco,offs=[],hud=null,roll=null;
  // une carte « tenue » devant la caméra (le papyrus ouvert, ou roulé dans un coin)
  const mkHud=(c,h)=>{const m=fpCard(c,h,{noShadow:true,ro:22});m.material.depthTest=false;m.visible=false;scene.add(m);return m};
  P.init=()=>{P.g=PALA;deco=new THREE.Group();deco.visible=false;PALA.add(deco)};
  P.enter=()=>{deco.visible=true;const NO=OFFER.length,ids=[...Array(NO).keys()];P.list=[...ids].sort(()=>Math.random()-.5).slice(0,N);P.got=0;P.err=0;P.reads=1;P.open=true;
   const order=[...ids].sort(()=>Math.random()-.5);offs.forEach(o=>deco.remove(o));
-  offs=order.map((k,i)=>{const r=Math.floor(i/4),c=i%4,p=fpCard(OFFER[k].s,.13);p.position.set(-.42+c*.28+(r%2)*.06,.07,1.55-r*.21);p.userData={obj:i,k,sel:false};deco.add(p);return p});
+  offs=order.map((k,i)=>{const r=Math.floor(i/4),c=i%4,p=fpCard(OFFER[k].s,.21);p.position.set(-.38+c*.25+(r%2)*.05,.07,1.36-r*.22);p.rotation.x=-.95;p.userData={obj:i,k,sel:false};deco.add(p);return p});
   if(!hud){hud=mkHud(papyrusSheet(P.list),.2);roll=mkHud(kidScroll,.06);roll.userData.obj='scroll'}else{scene.remove(hud);hud=mkHud(papyrusSheet(P.list),.2)}};
  P.leave=()=>{deco.visible=false;hud.visible=roll.visible=false};
- P.toMem=()=>{hud.visible=roll.visible=false};
+ P.toMem=()=>{hud.visible=roll.visible=false;deco.visible=false};
  P.objs=()=>FPT.st==='task'?[...offs.filter(o=>!o.userData.sel),...(roll.visible?[roll]:[])]:[];
  P.go=(st)=>{if(st==='look'){fpHint('Papa jouait à Thot : « Voici la liste des offrandes. Regarde-la bien. » Toucher pour commencer.');fpWait(()=>{FPT.st='task';P.open=false;fpHint('« Maintenant, apporte-les au roi. Et si tu as un doute, tu peux relire la liste. » Toucher une offrande pour l’apporter.')})}};
- const kingAt=(n)=>new THREE.Vector3(-.36+(n%3)*.09,.02,.86+Math.floor(n/3)*.06);
+ const kingAt=(n)=>new THREE.Vector3(-.4+(n%3)*.08,.02,.76+Math.floor(n/3)*.05);
  P.tap=(st,h)=>{if(st!=='task')return;
   if(h.obj==='scroll'){P.open=true;P.reads++;sndPaper(.35,.25);return}
   if(h.obj==null)return;const o=offs[h.obj];if(!o||o.userData.sel)return;
   if(P.list.includes(o.userData.k)){o.userData.sel=true;P.open=false;const w=o.getWorldPosition(new THREE.Vector3());o.visible=false;fpFly(null,kingAt(P.got),.09,null,{c:OFFER[o.userData.k].s,w});P.got++;
     if(P.got===1)fpHint('Le papyrus se roulait à chaque offrande. Le relire ? Il suffisait de le toucher, en bas.');
     if(P.got===N){FPT.st='burn';P.open=true;P.burnT=performance.now();fpHint('Puis Thamus prenait le papyrus… et le jetait au vent.');
-     fpAfter(1700,()=>{FPT.st='result';fpPut(fpTag((P.err?`${N} offrandes · ${P.err===1?'1 erreur':P.err+' erreurs'}`:`${N} offrandes, sans erreur`)+'\n'+(P.reads<2?'lu une seule fois':`relu ${P.reads-1} fois`),{w:600,h:190,fs:46,col:'#7a2a08'}),.16,new THREE.Vector3(0,.01,1.72));
+     fpAfter(1700,()=>{FPT.st='result';fpResult((P.err?`${N} offrandes · ${P.err===1?'1 erreur':P.err+' erreurs'}`:`${N} offrandes, sans erreur`)+'\n'+(P.reads<2?'lu une seule fois':`relu ${P.reads-1} fois`));
       fpHint((P.reads<=1&&!P.err?'« Tu ne l’as lu qu’une fois : tu t’es forcée à retenir. Mais qui fait cet effort, quand la liste est toujours là ? »':P.reads<=1?'« Une seule lecture, et presque tout de mémoire. Les erreurs montrent l’effort : c’est lui qui fait retenir. »':'« Tu l’as relu '+(P.reads-1)+' fois : la liste faisait l’effort à ta place. » Exactement la crainte de Thamus.')+' Toucher pour continuer.');fpWait(()=>fpFinish())})}}
   else{P.err++;o.userData.shake=performance.now();sndTone(330,.4,.08);fpHint('Thamus fronçait les sourcils : ce n’était pas sur la liste. « Tu peux la relire. »')}};
  P.tick=(now)=>{const fw=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion),rt=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
   const vh=2*Math.tan(camera.fov*Math.PI/360)*.3,vw=vh*camera.aspect;
   const burn=FPT.st==='burn'?clamp((now-P.burnT)/1200):0,showHud=(FPT.st==='look'||(FPT.st==='task'&&P.open)||FPT.st==='burn')&&burn<1;
-  hud.visible=showHud&&FPT.k>.9;if(hud.visible){const s=Math.min(1,vw*.8/hud.geometry.parameters.width);hud.position.copy(camera.position).addScaledVector(fw,.3).addScaledVector(up,vh*.17+burn*.1).addScaledVector(rt,-burn*vw*.8);hud.quaternion.copy(camera.quaternion);hud.rotateZ(-.03-burn*.9);hud.scale.setScalar(s);hud.material.opacity=1-burn}
+  hud.visible=showHud&&FPT.k>.9;if(hud.visible){const s=Math.min(vw*.62/hud.geometry.parameters.width,vh*.42/hud.geometry.parameters.height);hud.position.copy(camera.position).addScaledVector(fw,.3).addScaledVector(up,vh*.27+burn*.1).addScaledVector(rt,-burn*vw*.8);hud.quaternion.copy(camera.quaternion);hud.rotateZ(-.03-burn*.9);hud.scale.setScalar(s);hud.material.opacity=1-burn}
   roll.visible=FPT.st==='task'&&!P.open&&FPT.k>.9;if(roll.visible){roll.position.copy(camera.position).addScaledVector(fw,.3).addScaledVector(up,-vh*.2).addScaledVector(rt,-vw*.33);roll.quaternion.copy(camera.quaternion);roll.scale.setScalar(1+.06*Math.sin(now/300))}
   offs.forEach(o=>{const sh=o.userData.shake?Math.max(0,1-(now-o.userData.shake)/500):0;o.rotation.z=Math.sin(sh*30)*.15*sh})};
  P.auto=(st)=>{if(st==='task'){const o=offs.find(o=>!o.userData.sel&&P.list.includes(o.userData.k));if(o)fpTap({obj:o.userData.obj})}}}
@@ -2251,7 +2264,7 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
   fpHint((P.q===0?'« Si tu te perds, allume tes phares », disait Papa. ':'')+q+' Chercher de mémoire, ou relire le rouleau ?')};
  P.go=(st)=>{if(st==='q')P.ask()};
  P.next=()=>{P.q++;fpSetHand([]);if(P.q>=3){FPT.st='end';const b=P.lamps.filter(v=>v===2).length;
-   fpPut(fpTag(`${b} sur 3 retrouvées de mémoire\nLe rouleau garde. Ce qu’on retient éclaire.`,{w:640,h:190,fs:42,col:'#22306e'}),.17,new THREE.Vector3(-.2,.02,-1.2));
+   fpResult(`${b} sur 3 retrouvées de mémoire\nLe rouleau garde. Ce qu’on retient éclaire.`);
    fpHint((b===3?'Trois lampes vives : le phare éclaire loin. Le rouleau garde ; c’est ce qu’on retient qui éclaire.':b===0?'Le rouleau avait toutes les réponses… mais le phare brille à peine. Ce qu’on n’a pas retenu n’éclaire pas.':'Le rouleau garde les réponses. Mais seules celles que je portais en moi brillent vraiment.')+' Toucher pour continuer.');fpWait(()=>fpFinish());return}
   fpAfter(400,()=>P.ask())};
  P.tap=(st,h)=>{if(st!=='q')return;
@@ -2502,7 +2515,7 @@ function step(){while(qi<Q.length){const s=Q[qi++];
   if(s.cam){camMode=s.cam;continue}
   if(s.fn){s.fn();continue}
   if(s.mem){Object.assign(TAB,{need:false,rev:false,auto:0,p:0});SCR.kind='mem';SCR.id=s.mem;SCR.ta=1;SCR.t0=performance.now();JR.items=[];JR.note=null;sndPaper(.6,.5);SCR.dio=DIO.ok&&!!POP[s.mem];if(SCR.dio){DIO.start(s.mem,()=>step());return}continue}
-  if(s.note&&SCR.dio){if(DIOHID[SCR.id]&&DIO.hid&&!DIO.found){DIO.needFind(s.note);waitTap=false;return}dioNote.textContent=s.note;dioNote.style.opacity=1;showHint('À retenir. Toucher pour continuer.');waitTap=true;return}
+  if(s.note&&SCR.dio){if(DIOHID[SCR.id]&&DIO.hid&&!DIO.found){DIO.needFind(s.note);waitTap=false;return}dioNote.textContent=s.note;dioNote.style.opacity=1;showHint('Toucher pour continuer.');waitTap=true;return}
   if(s.note&&PAPER&&SCR.kind==='mem'&&REVEAL[SCR.id]&&!TAB.rev){Object.assign(TAB,{need:true,note:s.note,auto:0,p:0});say.className='hint';sayWho.textContent='';sayTxt.textContent='Tirer la languette.';say.hidden=false;waitTap=true;return}
   if(s.note){JR.noteN=(JR.noteN||0)+1;JR.note={text:s.note,t0:performance.now()};sndPaper(.4,.3);say.className='jr';sayWho.textContent='';sayTxt.textContent='À retenir : '+s.note;say.hidden=false;waitTap=true;return}
   if(s.memoff){if(SCR.dio){SCR.dio=false;SCR.ta=0;SCR.a=0;SCR.kind=null;DIO.close(()=>step());return}SCR.ta=0;continue}
@@ -2922,7 +2935,7 @@ function dioBuild(id){while(dioBox.children.length)dioBox.remove(dioBox.children
   // le détail caché, contre une paroi : invisible de face, il se découvre en tournant
   const H=DIOHID[id],hc=hiddenCanvas(id),hb=hc&&bboxOf(hc);
   if(H&&hb){const c=cropC(hc,hb),z=D*H.d,s=sc(z),hw=(hb[2]-hb[0])/DU*H.s*s,hh=(hb[3]-hb[1])/DU*H.s*s;const wx=(H.wall<0?bx0:bx1)*s-H.wall*.04,wy=H.stand?by0*s+hh/2:(by1*H.h)*s;
-    const m=plane(c,hw,hh,0,0,0);m.position.set(wx,wy,z+ZO);m.rotation.y=H.wall<0?Math.PI/2-Math.atan2(bx0*(1-sD),D):-Math.PI/2+Math.atan2(bx1*(1-sD),D);DIO.hid={x:wx*DSB,wall:H.wall}}
+    const m=plane(c,hw,hh,0,0,0);m.position.set(wx,wy,z+ZO);m.rotation.y=H.wall<0?Math.PI/2-Math.atan2(bx0*(1-sD),D):-Math.PI/2+Math.atan2(bx1*(1-sD),D);DIO.hid={x:wx*DSB,wall:H.wall,m,r0:m.rotation.y,x0:wx,stand:!!H.stand}}
   else DIO.hid=null;
   // la boîte de carton : le cadre de l'ouverture et la coque
   const kr=document.createElement('canvas');kr.width=kr.height=256;{const x=kr.getContext('2d');x.fillStyle='#c79c66';x.fillRect(0,0,256,256);for(let i=0;i<2500;i++){x.fillStyle=Math.random()<.5?`rgba(255,240,210,${Math.random()*.12})`:`rgba(90,55,20,${Math.random()*.14})`;x.fillRect(Math.random()*256,Math.random()*256,1+Math.random()*3,1)}}
@@ -2965,12 +2978,12 @@ const dioToWorld=(x,y,z)=>dioG.localToWorld(new THREE.Vector3(x,y,z));
 function dioHandAt(t){const f=DIO.frame;if(!f)return;const k=(t*.6)%1,e=.5-.5*Math.cos(k*Math.PI*2);const p=dioToWorld(f[0]+f[2]*(-.25+.5*e),f[1]+f[3]*(-.05+.1*Math.sin(k*Math.PI*4)),.05).project(camera);const r=cv.getBoundingClientRect();dioHand.style.left=(r.left+(p.x+1)/2*r.width)+'px';dioHand.style.top=(r.top+(1-p.y)/2*r.height)+'px'}
 function dioHit(e){toNDC(e);const h=ray.intersectObject(dioDraw,false)[0];return h&&h.uv?h.uv:null}
 // ----- le déroulé -----
-DIO.start=(id,onOut)=>{DIO.id=id;DIO.seen=false;DIO.onOut=onOut;DIO.ph='sheet';DIO.t=0;DIO.need=false;DIO.found=false;DIO.strokes=0;DIO.full=0;DIO.yaw=DIO.pit=DIO.ty=DIO.tp=0;dioMaskX.clearRect(0,0,160,160);
+DIO.start=(id,onOut)=>{DIO.id=id;DIO.seen=false;DIO.hidT=0;DIO.onOut=onOut;DIO.ph='sheet';DIO.t=0;DIO.need=false;DIO.found=false;DIO.strokes=0;DIO.full=0;DIO.yaw=DIO.pit=DIO.ty=DIO.tp=0;dioMaskX.clearRect(0,0,160,160);
   dioBuild(id);if(DIO.host)DIO.host.attach(DIO.frame);dioBox.rotation.set(0,0,0);dioSetBox(0);dioBox.visible=false;dioG.visible=true;dioStar.material.opacity=0;dioNote.style.opacity=0;dioDrawPaint(0,0);
   showHint('Crayonner le souvenir du bout du doigt.')};
 DIO.needFind=(text)=>{DIO.need=true;DIO.lesson=text;if(!DIO.seen)showHint('Tourner doucement la boîte du doigt : quelque chose s’y cache.')};
 // où l'étoile va se poser dans la constellation du couvercle
-function dioGoal(){const st=STARS[lit];DIO.goal=st?[(st[0]/MS-.5)*SCRW/dioG.scale.x,(.5-st[1]/MS)*SCRW/dioG.scale.x]:null}
+function dioGoal(){const st=STARS[Math.min(lit,STARS.length-1)];DIO.goal=st?[(st[0]/MS-.5)*SCRW/dioG.scale.x,(.5-st[1]/MS)*SCRW/dioG.scale.x]:null}
 DIO.close=(onBack)=>{if(!DIO.ph){onBack&&onBack();return}DIO.onBack=onBack;dioGoal();DIO.ph='back';DIO.t=0;dioNote.style.opacity=0;hideSay()};
 DIO.down=(e)=>{if(!DIO.ph)return false;if(DIO.ph==='draw'){const uv=dioHit(e);DIO.drag={draw:true,uv};if(uv)dioBrush(uv.x,uv.y);DIO.strokes++;dioPen.style.left=e.clientX+'px';dioPen.style.top=e.clientY+'px';dioPen.style.opacity=1;return true}
   if(DIO.ph==='out'){DIO.drag={x:e.clientX,y:e.clientY,ty:DIO.ty,tp:DIO.tp,moved:false};DIO.touched=true;return true}return DIO.ph!=='sheet'||true};
@@ -2987,7 +3000,9 @@ function dioTick(dt,T){if(!DIO.ph)return;DIO.t+=dt;const t=DIO.t;
     if(AUTO&&DIO.need&&!DIO.found&&t>1.5&&DIO.hid)DIO.ty=.5*DIO.hid.wall;
     // trouvé en avance (pendant qu'Alice parle) : on s'en souvient, la phrase viendra à son heure
     if(DIO.touched&&DIO.hid&&DIO.yaw*DIO.hid.wall>.3)DIO.seen=true;
-    if(DIO.need&&!DIO.found&&DIO.hid&&(DIO.seen||DIO.yaw*DIO.hid.wall>.3)){DIO.found=true;DIO.need=false;dioNote.textContent=DIO.lesson;dioNote.style.opacity=1;sndPaper(.4,.3);sndTone(523,1.2,.05);showHint('À retenir. Toucher pour continuer.');waitTap=true}}
+    if(DIO.need&&!DIO.found&&DIO.hid&&(DIO.seen||DIO.yaw*DIO.hid.wall>.3)){DIO.found=true;DIO.need=false;DIO.hidT=performance.now();dioNote.textContent=DIO.lesson;dioNote.style.opacity=1;sndPaper(.4,.3);sndTone(523,1.2,.05);showHint('Toucher pour continuer.');waitTap=true}
+    // le détail trouvé se décolle de la paroi et se tourne vers nous, pour qu'on puisse le lire
+    if(DIO.hidT&&DIO.hid&&!DIO.hid.stand){const k=dsm((performance.now()-DIO.hidT)/800),h=DIO.hid;h.m.rotation.y=h.r0*(1-.6*k);h.m.position.x=h.x0-h.wall*.35*k;h.m.scale.setScalar(1+.3*k)}}
   else if(DIO.ph==='back'){const k=1-dsm(t/1.6),o=dioSetBox(k);DIO.ty*=Math.pow(.2,dt);DIO.tp*=Math.pow(.2,dt);dioDrawPaint(1,1-o);dioSheet.material.opacity=1-o;if(t>1.7){DIO.ph='star';DIO.t=0;dioBox.visible=false;DIO.sl=1;if(DIO.host){DIO.host.detach();DIO.host=null;dioGoal();DIO.sl=1.9}}}
   else if(DIO.ph==='star'){const sl=DIO.sl||1,k=dsm(t/(1.6*sl)),f=DIO.frame;dioDrawPaint(1,1-k);dioSheet.material.opacity=1-k;dioStar.material.opacity=Math.min(1,k*2)*(1-dsm((t-1.6*sl)/.5));const g=DIO.goal||[f[0]+f[2]*.25,f[1]+f[3]*.38];dioStar.position.set(lerp(f[0],g[0],k),lerp(f[1],g[1],k)+Math.sin(k*Math.PI)*.5,.06);dioStar.scale.setScalar(1.8-1.3*k);
     if(t>2.1*sl){DIO.ph=null;dioG.visible=false;const cb=DIO.onBack;DIO.onBack=null;cb&&cb()}}

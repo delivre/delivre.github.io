@@ -54,7 +54,12 @@ const fpHint=(t)=>showHint(t);
 const fpAfter=(ms,fn)=>{const id=FPT.gen;setTimeout(()=>{if(FPT.gen===id&&FPT.on)fn()},AUTO?ms*.5:ms)};
 function fpGo(st){FPT.st=st;FPT.t0=performance.now();FPT.auto=0;FPT.P.go(st)}
 // fin de l'activité : on reste dans le lieu, le souvenir vient ici
-function fpFinish(){FPT.st='mem';FPT.wait=false;fpSetHand([]);fpClearStage();(FPT.P.sites||[]).forEach(d=>d.visible=false);FPT.P.toMem&&FPT.P.toMem();const cb=FPT.cb;FPT.cb=null;cb&&cb()}
+function fpFinish(){fpResClear();FPT.st='mem';FPT.wait=false;fpSetHand([]);fpClearStage();(FPT.P.sites||[]).forEach(d=>d.visible=false);FPT.P.toMem&&FPT.P.toMem();const cb=FPT.cb;FPT.cb=null;cb&&cb()}
+// le résultat : une grande étiquette tenue en haut de la vue, toujours lisible
+let fpRes=null;function fpResult(text){fpResClear();fpRes=fpCard(fpTag(text,{w:680,h:text.includes('\n')?210:140,fs:48,col:'#22306e'}),.1,{noShadow:true,ro:23});fpRes.material.depthTest=false;fpRes.userData.t0=performance.now();scene.add(fpRes)}
+function fpResClear(){if(fpRes){scene.remove(fpRes);fpRes=null}}
+function fpResTick(){if(!fpRes)return;const fw=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion),vh=2*Math.tan(camera.fov*Math.PI/360)*.3,vw=vh*camera.aspect,u=clamp((performance.now()-fpRes.userData.t0)/450);
+  fpRes.position.copy(camera.position).addScaledVector(fw,.3).addScaledVector(up,vh*.3);fpRes.quaternion.copy(camera.quaternion);fpRes.rotateZ(-.02);fpRes.scale.setScalar(Math.min(1.6,vw*.86/fpRes.geometry.parameters.width)*(u<1?u+Math.sin(u*Math.PI)*.15:1))}
 // attendre un toucher pour continuer
 function fpWait(fn){FPT.wait=true;FPT.next=fn}
 FPT.start=(n,cb)=>{const P=FP_PLACES[n];if(!P){cb&&cb();return}FPT.P=P;P.init&&!P.ready&&(P.init(),P.ready=1);P.g.add(fpG);ZH.el.classList.remove('on');FPT.cb=cb;DIO.host=FPT.host;FPT.on=true;FPT.kT=1;FPT.gen++;fpG.visible=true;FPT.yaw=FPT.yawT=0;fpCurtKT=0;fpClearStage();
@@ -103,7 +108,7 @@ function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-
   const now=performance.now(),T=now/1000;fpFlyTick(now);
   fpStage.forEach(p=>{const u=clamp((now-p.userData.pop)/450);if(!FPT.fly.some(f=>f.p===p))p.scale.setScalar(Math.max(.001,u<1?u+Math.sin(u*Math.PI)*.25:1))});
   if(FPT.on&&FPT.st&&P.tick)P.tick(now,T,dt);
-  fpHandTick();fpAnchorTick();
+  fpHandTick();fpAnchorTick();fpResTick();
   if(AUTO&&FPT.on&&FPT.k>.95&&!FPT.fly.length&&FPT.st!=='mem'&&FPT.st!=='out'){FPT.auto+=dt;if(FPT.auto>1.2){FPT.auto=0;if(FPT.wait)fpTap();else P.auto&&P.auto(FPT.st)}}}
 
 /* ===== 1. le théâtre : assis en haut des gradins ===== */
@@ -142,7 +147,7 @@ function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-
   if(st==='recall'){if(h.hand&&!h.hand.used&&!h.dragged){FPT.sel=h.hand;sndPaper(.2,.15);return}
     const o=h.card||FPT.sel;if(h.site==null||!o||P.ans.indexOf(h.site)>=0)return;FPT.sel=null;P.ans[o.i]=h.site;P.sites[h.site].visible=false;
     fpFly(o,LOCI[h.site],.12,()=>{if(P.ans.every(v=>v>=0)&&!P.scored){P.scored=1;const sc=P.ans.filter((p,k)=>p===k).length;
-      fpPut(fpTag(`Une simple liste : ${P.scoreA} sur 4\nHistoire + lieux : ${sc} sur 4`,{w:620,h:200,fs:46,col:'#22306e'}),.17,new THREE.Vector3(0,.045,-.3));sndTone(784,1.4,.08);sndTone(1175,1.4,.04,.2);
+      fpResult(`Une simple liste : ${P.scoreA} sur 4\nHistoire + lieux : ${sc} sur 4`);sndTone(784,1.4,.08);sndTone(1175,1.4,.04,.2);
       fpHint((sc>P.scoreA?'« Tu vois ? Une histoire ancrée dans des lieux : tout revient, dans l’ordre. Les aèdes faisaient pareil… pour 16 000 vers. »':sc===P.scoreA?'« Autant l’un que l’autre, pour quatre images. Mais pour 16 000 vers, une liste ne tient pas : il faut une histoire et des lieux. »':'« Ce soir, la liste a mieux marché. Avec l’habitude, l’histoire et les lieux gagnent : c’est ainsi que les aèdes gardaient 16 000 vers. »')+' Toucher pour continuer.');
       fpWait(()=>{P.scored=0;fpFinish()})}});return}};
  P.tick=(now,T)=>{props.forEach(g=>{if(g.userData.fl)g.userData.fl.scale.set(1,1+.25*Math.sin(now/90),1)});

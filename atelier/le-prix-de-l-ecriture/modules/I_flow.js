@@ -160,7 +160,7 @@ function step(){while(qi<Q.length){const s=Q[qi++];
   if(s.cam){camMode=s.cam;continue}
   if(s.fn){s.fn();continue}
   if(s.mem){Object.assign(TAB,{need:false,rev:false,auto:0,p:0});SCR.kind='mem';SCR.id=s.mem;SCR.ta=1;SCR.t0=performance.now();JR.items=[];JR.note=null;sndPaper(.6,.5);SCR.dio=DIO.ok&&!!POP[s.mem];if(SCR.dio){DIO.start(s.mem,()=>step());return}continue}
-  if(s.note&&SCR.dio){if(DIOHID[SCR.id]&&DIO.hid&&!DIO.found){DIO.needFind(s.note);waitTap=false;return}dioNote.textContent=s.note;dioNote.style.opacity=1;showHint('À retenir. Toucher pour continuer.');waitTap=true;return}
+  if(s.note&&SCR.dio){if(DIOHID[SCR.id]&&DIO.hid&&!DIO.found){DIO.needFind(s.note);waitTap=false;return}dioNote.textContent=s.note;dioNote.style.opacity=1;showHint('Toucher pour continuer.');waitTap=true;return}
   if(s.note&&PAPER&&SCR.kind==='mem'&&REVEAL[SCR.id]&&!TAB.rev){Object.assign(TAB,{need:true,note:s.note,auto:0,p:0});say.className='hint';sayWho.textContent='';sayTxt.textContent='Tirer la languette.';say.hidden=false;waitTap=true;return}
   if(s.note){JR.noteN=(JR.noteN||0)+1;JR.note={text:s.note,t0:performance.now()};sndPaper(.4,.3);say.className='jr';sayWho.textContent='';sayTxt.textContent='À retenir : '+s.note;say.hidden=false;waitTap=true;return}
   if(s.memoff){if(SCR.dio){SCR.dio=false;SCR.ta=0;SCR.a=0;SCR.kind=null;DIO.close(()=>step());return}SCR.ta=0;continue}
