@@ -93,10 +93,12 @@ FPT.host={attach(fr){fpAnchor.add(dioG);dioG.rotation.set(0,0,0);dioG.position.s
 function fpAnchorTick(){if(dioG.parent!==fpAnchor||!FPT.anc)return;const a=FPT.anc,fw=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion),rt=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
   fpAnchor.quaternion.copy(camera.quaternion);fpAnchor.position.copy(camera.position).addScaledVector(fw,FPT.anchorD).addScaledVector(rt,-a.fx*a.sc).addScaledVector(up,-a.fy*a.sc+a.vh*.06)}
 FPT.exit=()=>{FPT.st='out';FPT.nightT=0;camMode='lid';FPT.kT=0;DIO.host=null;const P=FPT.P;fpAfter(1900,()=>{FPT.on=false;fpG.visible=false;fpClearStage();(P.sites||[]).forEach(d=>d.visible=false);P.leave&&P.leave()})};
+// le fil rouge et ses punaises : énormes à hauteur de personnage, on les cache dans le lieu
+let fpThOn=true;function fpThread(on){if(on===fpThOn||typeof THREAD==='undefined')return;fpThOn=on;THREAD.pins.forEach(g=>g.traverse(o=>{if(o.material)[].concat(o.material).forEach(m=>m.visible=on)}));THREAD.segs.forEach(sg=>[].concat(sg.m.material).forEach(m=>m.visible=on))}
 // la caméra : on plonge de la vue de la carte jusque dans le lieu (en arc, sans raser la maquette), et on en ressort
 const fpPos=new THREE.Vector3(),fpLk=new THREE.Vector3(),fpQa=new THREE.Quaternion(),fpQb=new THREE.Quaternion(),fpM=new THREE.Matrix4();
 function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-FPT.kT)<.002)FPT.k=FPT.kT;const k=FPT.k;
-  if(k<.001){if(camera.userData.fpFov){camera.fov=camera.userData.fpFov;camera.near=.1;camera.updateProjectionMatrix();camera.userData.fpFov=0;fpSky.visible=false;fig.visible=true}return}
+  if(k<.001){fpThread(true);if(camera.userData.fpFov){camera.fov=camera.userData.fpFov;camera.near=.1;camera.updateProjectionMatrix();camera.userData.fpFov=0;fpSky.visible=false;fig.visible=true}return}
   const P=FPT.P;if(!camera.userData.fpFov)camera.userData.fpFov=camera.fov;const f0=camera.userData.fpFov;
   if(DIO.ph)FPT.yawT=0;FPT.yaw+=(FPT.yawT-FPT.yaw)*.12;FPT.up2=(FPT.up2||0)+(((FPT.st==='mem'&&DIO.ph)?1:0)-(FPT.up2||0))*.05;FPT.dn=(FPT.dn||0)+(((P.downIn||[]).includes(FPT.st)?1:0)-(FPT.dn||0))*.05;const e=k*k*(3-2*k);
   fpPos.copy(P.eye);P.g.localToWorld(fpPos);const lk=P.look.clone().add(new THREE.Vector3(0,(P.memUp||.3)*FPT.up2-(P.down||0)*FPT.dn,0)).sub(P.eye).applyAxisAngle(new THREE.Vector3(0,1,0),FPT.yaw).add(P.eye);fpLk.copy(lk);P.g.localToWorld(fpLk);
@@ -104,7 +106,7 @@ function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-
   const p0=camera.position.clone(),pe=Math.pow(e,.7);camera.position.lerpVectors(p0,fpPos,pe);camera.position.y+=Math.sin(pe*Math.PI)*2.6;
   camera.quaternion.copy(fpQa).slerp(fpQb,e);
   const hf=(P.hf||48)*Math.PI/180,vf=2*Math.atan(Math.tan(hf/2)/camera.aspect)*180/Math.PI,fpf=clamp(vf,52,84);camera.fov=lerp(f0,fpf,e);camera.near=lerp(.1,.01,e);camera.updateProjectionMatrix();
-  fig.visible=k<.4;fpSky.visible=k>.01;fpSky.material.uniforms.op.value=e;fpSky.position.copy(camera.position);
+  fig.visible=k<.4;fpThread(k<.3);fpSky.visible=k>.01;fpSky.material.uniforms.op.value=e;fpSky.position.copy(camera.position);
   fpNight.style.opacity=fpCurtKT;
   {const nT=FPT.nightT||0;FPT.night=(FPT.night||0)+(nT-(FPT.night||0))*(1-Math.pow(.25,dt));const n=FPT.night;if(sun.userData.i0==null){sun.userData.i0=sun.intensity;HEMI.userData.i0=HEMI.intensity}
    sun.intensity=sun.userData.i0*(1-.88*n);HEMI.intensity=HEMI.userData.i0*(1-.55*n);fpSky.material.uniforms.nt.value=n}

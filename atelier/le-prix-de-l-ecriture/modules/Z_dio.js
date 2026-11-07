@@ -32,7 +32,7 @@ function drawHat(x,cx,cy,s){x.save();x.translate(cx,cy);x.scale(s,s);
 // où se cache le détail de chaque souvenir : sur quelle paroi, à quelle profondeur, à quelle hauteur
 // les souvenirs qui se passent dehors : parois de ciel
 const DIOSKY={echo:'couchant',phare:'couchant'};
-const DIOHID={maman:{wall:-1,d:.45,h:.36,s:.75},echo:{wall:1,d:.55,h:-.05,s:.95,stand:true},papa:{wall:1,d:.5,h:.2,s:.9},phare:{wall:-1,d:.5,h:0,s:.9},ia:{wall:1,d:.45,h:.25,s:.9}};
+const DIOHID={maman:{wall:-1,d:.45,h:.36,s:.75},echo:{wall:1,d:.55,h:-.05,s:.95,stand:true},papa:{wall:1,d:.45,h:.12,s:1.45},phare:{wall:-1,d:.5,h:0,s:.9},ia:{wall:1,d:.55,h:.2,s:.8}};
 const bboxOf=(c)=>{const W=c.width,H=c.height,d=c.getContext('2d').getImageData(0,0,W,H).data;let x0=W,y0=H,x1=-1,y1=-1;for(let y=0;y<H;y+=2)for(let x=0;x<W;x+=2){if(d[(y*W+x)*4+3]>8){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}return x1<0?null:[Math.max(0,x0-2),Math.max(0,y0-2),Math.min(W,x1+3),Math.min(H,y1+3)]};
 const cropC=(c,b)=>{const o=document.createElement('canvas');o.width=b[2]-b[0];o.height=b[3]-b[1];o.getContext('2d').drawImage(c,-b[0],-b[1]);return o};
 function hiddenCanvas(id){if(id==='maman'){const c=document.createElement('canvas');c.width=c.height=260;drawHat(c.getContext('2d'),130,140,1.1);return c}
@@ -94,7 +94,7 @@ function dioBuild(id){while(dioBox.children.length)dioBox.remove(dioBox.children
   quad([Pp(bx0,by0,D,sD),Pp(bx0,by0,0,1),Pp(bx1,by0,0,1),Pp(bx1,by0,D,sD)],dioBasic({map:dioTex(fl),color:0xc9b08f}));
   // le détail caché, contre une paroi : invisible de face, il se découvre en tournant
   const H=DIOHID[id],hc=hiddenCanvas(id),hb=hc&&bboxOf(hc);
-  if(H&&hb){const c=cropC(hc,hb),z=D*H.d,s=sc(z),hw=(hb[2]-hb[0])/DU*H.s*s,hh=(hb[3]-hb[1])/DU*H.s*s;const wx=(H.wall<0?bx0:bx1)*s-H.wall*.04,wy=H.stand?by0*s+hh/2:(by1*H.h)*s;
+  if(H&&hb){const c=cropC(hc,hb),z=D*H.d,s=sc(z),hw=(hb[2]-hb[0])/DU*H.s*s,hh=(hb[3]-hb[1])/DU*H.s*s;const wx=(H.wall<0?bx0:bx1)*s-H.wall*(.04+hw*.22),wy=H.stand?by0*s+hh/2:(by1*H.h)*s;
     const m=plane(c,hw,hh,0,0,0);m.position.set(wx,wy,z+ZO);m.rotation.y=H.wall<0?Math.PI/2-Math.atan2(bx0*(1-sD),D):-Math.PI/2+Math.atan2(bx1*(1-sD),D);DIO.hid={x:wx*DSB,wall:H.wall,m,r0:m.rotation.y,x0:wx,stand:!!H.stand}}
   else DIO.hid=null;
   // la boîte de carton : le cadre de l'ouverture et la coque
@@ -160,9 +160,7 @@ function dioTick(dt,T){if(!DIO.ph)return;DIO.t+=dt;const t=DIO.t;
     if(AUTO&&DIO.need&&!DIO.found&&t>1.5&&DIO.hid)DIO.ty=.5*DIO.hid.wall;
     // trouvé en avance (pendant qu'Alice parle) : on s'en souvient, la phrase viendra à son heure
     if(DIO.touched&&DIO.hid&&DIO.yaw*DIO.hid.wall>.3)DIO.seen=true;
-    if(DIO.need&&!DIO.found&&DIO.hid&&(DIO.seen||DIO.yaw*DIO.hid.wall>.3)){DIO.found=true;DIO.need=false;DIO.hidT=performance.now();dioNote.textContent=DIO.lesson;dioNote.style.opacity=1;sndPaper(.4,.3);sndTone(523,1.2,.05);showHint('Toucher pour continuer.');waitTap=true}
-    // le détail trouvé se décolle de la paroi et se tourne vers nous, pour qu'on puisse le lire
-    if(DIO.hidT&&DIO.hid&&!DIO.hid.stand){const k=dsm((performance.now()-DIO.hidT)/800),h=DIO.hid;h.m.rotation.y=h.r0*(1-.6*k);h.m.position.x=h.x0-h.wall*.35*k;h.m.scale.setScalar(1+.3*k)}}
+    if(DIO.need&&!DIO.found&&DIO.hid&&(DIO.seen||DIO.yaw*DIO.hid.wall>.3)){DIO.found=true;DIO.need=false;DIO.hidT=performance.now();dioNote.textContent=DIO.lesson;dioNote.style.opacity=1;sndPaper(.4,.3);sndTone(523,1.2,.05);showHint('Toucher pour continuer.');waitTap=true}}
   else if(DIO.ph==='back'){const k=1-dsm(t/1.6),o=dioSetBox(k);DIO.ty*=Math.pow(.2,dt);DIO.tp*=Math.pow(.2,dt);dioDrawPaint(1,1-o);dioSheet.material.opacity=1-o;if(t>1.7){DIO.ph='star';DIO.t=0;dioBox.visible=false;DIO.sl=1;if(DIO.host){DIO.host.detach();DIO.host=null;dioGoal();DIO.sl=1.9}}}
   else if(DIO.ph==='star'){const sl=DIO.sl||1,k=dsm(t/(1.6*sl)),f=DIO.frame;dioDrawPaint(1,1-k);dioSheet.material.opacity=1-k;dioStar.material.opacity=Math.min(1,k*2)*(1-dsm((t-1.6*sl)/.5));const g=DIO.goal||[f[0]+f[2]*.25,f[1]+f[3]*.38];dioStar.position.set(lerp(f[0],g[0],k),lerp(f[1],g[1],k)+Math.sin(k*Math.PI)*.5,.06);dioStar.scale.setScalar(1.8-1.3*k);
     if(t>2.1*sl){DIO.ph=null;dioG.visible=false;const cb=DIO.onBack;DIO.onBack=null;cb&&cb()}}

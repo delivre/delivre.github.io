@@ -100,7 +100,7 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
  const ask=()=>{const k=P.order[P.q];fpHint('Papa : « Où était '+LM[k].n+' ? » Toucher l’endroit, dans le noir.')};
  P.tap=(st,h)=>{if(st!=='night'||h.obj==null)return;const k=P.order[P.q],g=marks[h.obj];
   if(h.obj===k){P.got.push(P.miss===0);P.miss=0;g.visible=true;g.scale.setScalar(.01);g.userData.pop=performance.now();sndTone([523,587,659,698,784][P.q],1.2,.12);
-   fpPut(g.userData.lab,.13,new THREE.Vector3(g.position.x,seaY+.42,g.position.z));P.q++;
+   {const lb=fpPut(g.userData.lab,.13,new THREE.Vector3(g.position.x,seaY+.42,g.position.z));fpAfter(1300,()=>fpUnput(lb))}P.q++;
    if(P.q<5)fpAfter(900,ask);else{FPT.st='end';fpHint('Le phare brille de toutes ses fenêtres. Le bateau rentre au port.');fpAfter(2200,()=>{const n=P.got.filter(Boolean).length;fpResult(`Au port : ${n} repères sur 5\nretrouvés du premier coup`);
      fpHint((n>=4?'Dans le désordre, dans le noir, sans carte : les repères étaient dans ma tête, chacun à sa place. Le rouleau garde ; ce qu’on retient éclaire.':'J’ai hésité, mais chaque repère a retrouvé sa place. Le rouleau garde ; ce qu’on retient éclaire.')+' Toucher pour continuer.');fpWait(()=>fpFinish())})}}
   else{P.miss++;P.shake=performance.now();sndTone(196,.5,.1);const gk=marks[k];

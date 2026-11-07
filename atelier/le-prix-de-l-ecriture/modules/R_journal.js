@@ -63,8 +63,12 @@ const REVEAL=PAPER?{
    x.strokeStyle='#14102a';x.lineWidth=4;x.lineCap='round';x.beginPath();x.moveTo(-18,-40);x.quadraticCurveTo(0,-34,18,-40);x.stroke();
    x.strokeStyle='rgba(255,255,255,.18)';x.lineWidth=2;x.beginPath();x.moveTo(-34,-30);x.quadraticCurveTo(-38,-10,-36,2);x.stroke();
    x.restore()},{border:5,outline:0}),
- papa:()=>cut(x=>{x.save();x.translate(250,270);x.rotate(-.08);x.scale(1.75,1.75);fp(x,'#f6eedb',c=>{c.moveTo(-70,0);c.lineTo(0,6);c.lineTo(70,0);c.lineTo(70,-44);c.lineTo(0,-38);c.lineTo(-70,-44);c.closePath()});x.strokeStyle='rgba(120,90,60,.6)';x.lineWidth=1.5;x.beginPath();x.moveTo(0,6);x.lineTo(0,-38);x.stroke();
-   x.font='700 34px Caveat, cursive';x.fillStyle='#22306e';x.textAlign='center';x.fillText('A',36,-8);x.textAlign='start';fp(x,'#d8463a',c=>{c.moveTo(-35,-6);c.bezierCurveTo(-52,-18,-46,-34,-35,-26);c.bezierCurveTo(-24,-34,-18,-18,-35,-6)});x.restore()},{border:5,outline:1.4}),
+ papa:()=>cut(x=>{x.save();x.translate(140,140);x.rotate(-.05);x.scale(1.15,1.15);// une pile de carnets ficelée, avec une étiquette « A » : pour Alice, plus tard
+  [['#8a5a34',0],['#3b5a9a',-22],['#a84a2a',-44]].forEach(([c,y],k)=>{fp(x,c,cc=>rrect(cc,-60+k*4,y-20,120,22,4));fp(x,'#f3ead6',cc=>cc.rect(-56+k*4,y-14,112,4))});
+  x.strokeStyle='#c8463a';x.lineWidth=4;x.beginPath();x.moveTo(0,-66);x.lineTo(0,4);x.moveTo(-62,-30);x.lineTo(62,-30);x.stroke();
+  x.beginPath();x.moveTo(0,-66);x.quadraticCurveTo(-18,-84,-8,-70);x.moveTo(0,-66);x.quadraticCurveTo(18,-84,8,-70);x.stroke();
+  fp(x,'#f6eedb',cc=>{cc.moveTo(-20,-4);cc.lineTo(20,-4);cc.lineTo(20,34);cc.lineTo(-20,34);cc.closePath()});
+  x.font='700 36px Caveat, cursive';x.fillStyle='#22306e';x.textAlign='center';x.textBaseline='middle';x.fillText('A',0,16);x.textAlign='start';x.textBaseline='alphabetic';x.restore()},{border:5,outline:1.4}),
  phare:()=>cut(x=>{const H=430;fp(x,'#1a1430',c=>{c.moveTo(186,H-2);c.lineTo(236,H-2);c.lineTo(228,H+8);c.lineTo(194,H+8);c.closePath()});fp(x,'#1a1430',c=>c.rect(209,H-34,3,32));fp(x,'#1a1430',c=>{c.moveTo(212,H-32);c.lineTo(232,H-10);c.lineTo(212,H-10);c.closePath()});fp(x,'#ffd27a',c=>c.arc(196,H-14,4,0,7))},{border:4,outline:0}),
  ia:()=>cut(x=>{x.save();x.translate(150,190);x.rotate(-.07);fp(x,'#fff3a8',c=>c.rect(-62,-50,124,104));fp(x,'rgba(240,228,190,.8)',c=>c.rect(-20,-60,40,16));x.strokeStyle='#22306e';x.lineWidth=7;x.lineCap='round';x.beginPath();x.arc(-8,-6,26,0,7);x.stroke();x.beginPath();x.moveTo(11,13);x.lineTo(36,38);x.stroke();x.font='700 34px Caveat, cursive';x.fillStyle='#22306e';x.textAlign='center';x.fillText('?',-8,6);x.textAlign='start';x.restore()},{border:4,outline:1.4})}:{};
 const REVC={};function drawReveal(c,T,id){if(!REVEAL[id])return;const R=REVC[id]||(REVC[id]=REVEAL[id]());const a=TAB.rev?1:TAB.p;if(a<=.01)return;c.save();c.globalAlpha=a;

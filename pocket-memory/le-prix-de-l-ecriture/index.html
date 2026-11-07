@@ -1498,8 +1498,12 @@ const REVEAL=PAPER?{
    x.strokeStyle='#14102a';x.lineWidth=4;x.lineCap='round';x.beginPath();x.moveTo(-18,-40);x.quadraticCurveTo(0,-34,18,-40);x.stroke();
    x.strokeStyle='rgba(255,255,255,.18)';x.lineWidth=2;x.beginPath();x.moveTo(-34,-30);x.quadraticCurveTo(-38,-10,-36,2);x.stroke();
    x.restore()},{border:5,outline:0}),
- papa:()=>cut(x=>{x.save();x.translate(250,270);x.rotate(-.08);x.scale(1.75,1.75);fp(x,'#f6eedb',c=>{c.moveTo(-70,0);c.lineTo(0,6);c.lineTo(70,0);c.lineTo(70,-44);c.lineTo(0,-38);c.lineTo(-70,-44);c.closePath()});x.strokeStyle='rgba(120,90,60,.6)';x.lineWidth=1.5;x.beginPath();x.moveTo(0,6);x.lineTo(0,-38);x.stroke();
-   x.font='700 34px Caveat, cursive';x.fillStyle='#22306e';x.textAlign='center';x.fillText('A',36,-8);x.textAlign='start';fp(x,'#d8463a',c=>{c.moveTo(-35,-6);c.bezierCurveTo(-52,-18,-46,-34,-35,-26);c.bezierCurveTo(-24,-34,-18,-18,-35,-6)});x.restore()},{border:5,outline:1.4}),
+ papa:()=>cut(x=>{x.save();x.translate(140,140);x.rotate(-.05);x.scale(1.15,1.15);// une pile de carnets ficelée, avec une étiquette « A » : pour Alice, plus tard
+  [['#8a5a34',0],['#3b5a9a',-22],['#a84a2a',-44]].forEach(([c,y],k)=>{fp(x,c,cc=>rrect(cc,-60+k*4,y-20,120,22,4));fp(x,'#f3ead6',cc=>cc.rect(-56+k*4,y-14,112,4))});
+  x.strokeStyle='#c8463a';x.lineWidth=4;x.beginPath();x.moveTo(0,-66);x.lineTo(0,4);x.moveTo(-62,-30);x.lineTo(62,-30);x.stroke();
+  x.beginPath();x.moveTo(0,-66);x.quadraticCurveTo(-18,-84,-8,-70);x.moveTo(0,-66);x.quadraticCurveTo(18,-84,8,-70);x.stroke();
+  fp(x,'#f6eedb',cc=>{cc.moveTo(-20,-4);cc.lineTo(20,-4);cc.lineTo(20,34);cc.lineTo(-20,34);cc.closePath()});
+  x.font='700 36px Caveat, cursive';x.fillStyle='#22306e';x.textAlign='center';x.textBaseline='middle';x.fillText('A',0,16);x.textAlign='start';x.textBaseline='alphabetic';x.restore()},{border:5,outline:1.4}),
  phare:()=>cut(x=>{const H=430;fp(x,'#1a1430',c=>{c.moveTo(186,H-2);c.lineTo(236,H-2);c.lineTo(228,H+8);c.lineTo(194,H+8);c.closePath()});fp(x,'#1a1430',c=>c.rect(209,H-34,3,32));fp(x,'#1a1430',c=>{c.moveTo(212,H-32);c.lineTo(232,H-10);c.lineTo(212,H-10);c.closePath()});fp(x,'#ffd27a',c=>c.arc(196,H-14,4,0,7))},{border:4,outline:0}),
  ia:()=>cut(x=>{x.save();x.translate(150,190);x.rotate(-.07);fp(x,'#fff3a8',c=>c.rect(-62,-50,124,104));fp(x,'rgba(240,228,190,.8)',c=>c.rect(-20,-60,40,16));x.strokeStyle='#22306e';x.lineWidth=7;x.lineCap='round';x.beginPath();x.arc(-8,-6,26,0,7);x.stroke();x.beginPath();x.moveTo(11,13);x.lineTo(36,38);x.stroke();x.font='700 34px Caveat, cursive';x.fillStyle='#22306e';x.textAlign='center';x.fillText('?',-8,6);x.textAlign='start';x.restore()},{border:4,outline:1.4})}:{};
 const REVC={};function drawReveal(c,T,id){if(!REVEAL[id])return;const R=REVC[id]||(REVC[id]=REVEAL[id]());const a=TAB.rev?1:TAB.p;if(a<=.01)return;c.save();c.globalAlpha=a;
@@ -2111,10 +2115,12 @@ FPT.host={attach(fr){fpAnchor.add(dioG);dioG.rotation.set(0,0,0);dioG.position.s
 function fpAnchorTick(){if(dioG.parent!==fpAnchor||!FPT.anc)return;const a=FPT.anc,fw=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion),rt=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
   fpAnchor.quaternion.copy(camera.quaternion);fpAnchor.position.copy(camera.position).addScaledVector(fw,FPT.anchorD).addScaledVector(rt,-a.fx*a.sc).addScaledVector(up,-a.fy*a.sc+a.vh*.06)}
 FPT.exit=()=>{FPT.st='out';FPT.nightT=0;camMode='lid';FPT.kT=0;DIO.host=null;const P=FPT.P;fpAfter(1900,()=>{FPT.on=false;fpG.visible=false;fpClearStage();(P.sites||[]).forEach(d=>d.visible=false);P.leave&&P.leave()})};
+// le fil rouge et ses punaises : énormes à hauteur de personnage, on les cache dans le lieu
+let fpThOn=true;function fpThread(on){if(on===fpThOn||typeof THREAD==='undefined')return;fpThOn=on;THREAD.pins.forEach(g=>g.traverse(o=>{if(o.material)[].concat(o.material).forEach(m=>m.visible=on)}));THREAD.segs.forEach(sg=>[].concat(sg.m.material).forEach(m=>m.visible=on))}
 // la caméra : on plonge de la vue de la carte jusque dans le lieu (en arc, sans raser la maquette), et on en ressort
 const fpPos=new THREE.Vector3(),fpLk=new THREE.Vector3(),fpQa=new THREE.Quaternion(),fpQb=new THREE.Quaternion(),fpM=new THREE.Matrix4();
 function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-FPT.kT)<.002)FPT.k=FPT.kT;const k=FPT.k;
-  if(k<.001){if(camera.userData.fpFov){camera.fov=camera.userData.fpFov;camera.near=.1;camera.updateProjectionMatrix();camera.userData.fpFov=0;fpSky.visible=false;fig.visible=true}return}
+  if(k<.001){fpThread(true);if(camera.userData.fpFov){camera.fov=camera.userData.fpFov;camera.near=.1;camera.updateProjectionMatrix();camera.userData.fpFov=0;fpSky.visible=false;fig.visible=true}return}
   const P=FPT.P;if(!camera.userData.fpFov)camera.userData.fpFov=camera.fov;const f0=camera.userData.fpFov;
   if(DIO.ph)FPT.yawT=0;FPT.yaw+=(FPT.yawT-FPT.yaw)*.12;FPT.up2=(FPT.up2||0)+(((FPT.st==='mem'&&DIO.ph)?1:0)-(FPT.up2||0))*.05;FPT.dn=(FPT.dn||0)+(((P.downIn||[]).includes(FPT.st)?1:0)-(FPT.dn||0))*.05;const e=k*k*(3-2*k);
   fpPos.copy(P.eye);P.g.localToWorld(fpPos);const lk=P.look.clone().add(new THREE.Vector3(0,(P.memUp||.3)*FPT.up2-(P.down||0)*FPT.dn,0)).sub(P.eye).applyAxisAngle(new THREE.Vector3(0,1,0),FPT.yaw).add(P.eye);fpLk.copy(lk);P.g.localToWorld(fpLk);
@@ -2122,7 +2128,7 @@ function fpCam(dt){FPT.k+=(FPT.kT-FPT.k)*(1-Math.pow(.12,dt));if(Math.abs(FPT.k-
   const p0=camera.position.clone(),pe=Math.pow(e,.7);camera.position.lerpVectors(p0,fpPos,pe);camera.position.y+=Math.sin(pe*Math.PI)*2.6;
   camera.quaternion.copy(fpQa).slerp(fpQb,e);
   const hf=(P.hf||48)*Math.PI/180,vf=2*Math.atan(Math.tan(hf/2)/camera.aspect)*180/Math.PI,fpf=clamp(vf,52,84);camera.fov=lerp(f0,fpf,e);camera.near=lerp(.1,.01,e);camera.updateProjectionMatrix();
-  fig.visible=k<.4;fpSky.visible=k>.01;fpSky.material.uniforms.op.value=e;fpSky.position.copy(camera.position);
+  fig.visible=k<.4;fpThread(k<.3);fpSky.visible=k>.01;fpSky.material.uniforms.op.value=e;fpSky.position.copy(camera.position);
   fpNight.style.opacity=fpCurtKT;
   {const nT=FPT.nightT||0;FPT.night=(FPT.night||0)+(nT-(FPT.night||0))*(1-Math.pow(.25,dt));const n=FPT.night;if(sun.userData.i0==null){sun.userData.i0=sun.intensity;HEMI.userData.i0=HEMI.intensity}
    sun.intensity=sun.userData.i0*(1-.88*n);HEMI.intensity=HEMI.userData.i0*(1-.55*n);fpSky.material.uniforms.nt.value=n}
@@ -2282,7 +2288,7 @@ const fpGlow=(parent,pos,s=.45)=>{const m=new THREE.SpriteMaterial({map:fpGlowTe
  const ask=()=>{const k=P.order[P.q];fpHint('Papa : « Où était '+LM[k].n+' ? » Toucher l’endroit, dans le noir.')};
  P.tap=(st,h)=>{if(st!=='night'||h.obj==null)return;const k=P.order[P.q],g=marks[h.obj];
   if(h.obj===k){P.got.push(P.miss===0);P.miss=0;g.visible=true;g.scale.setScalar(.01);g.userData.pop=performance.now();sndTone([523,587,659,698,784][P.q],1.2,.12);
-   fpPut(g.userData.lab,.13,new THREE.Vector3(g.position.x,seaY+.42,g.position.z));P.q++;
+   {const lb=fpPut(g.userData.lab,.13,new THREE.Vector3(g.position.x,seaY+.42,g.position.z));fpAfter(1300,()=>fpUnput(lb))}P.q++;
    if(P.q<5)fpAfter(900,ask);else{FPT.st='end';fpHint('Le phare brille de toutes ses fenêtres. Le bateau rentre au port.');fpAfter(2200,()=>{const n=P.got.filter(Boolean).length;fpResult(`Au port : ${n} repères sur 5\nretrouvés du premier coup`);
      fpHint((n>=4?'Dans le désordre, dans le noir, sans carte : les repères étaient dans ma tête, chacun à sa place. Le rouleau garde ; ce qu’on retient éclaire.':'J’ai hésité, mais chaque repère a retrouvé sa place. Le rouleau garde ; ce qu’on retient éclaire.')+' Toucher pour continuer.');fpWait(()=>fpFinish())})}}
   else{P.miss++;P.shake=performance.now();sndTone(196,.5,.1);const gk=marks[k];
@@ -2939,7 +2945,7 @@ function drawHat(x,cx,cy,s){x.save();x.translate(cx,cy);x.scale(s,s);
 // où se cache le détail de chaque souvenir : sur quelle paroi, à quelle profondeur, à quelle hauteur
 // les souvenirs qui se passent dehors : parois de ciel
 const DIOSKY={echo:'couchant',phare:'couchant'};
-const DIOHID={maman:{wall:-1,d:.45,h:.36,s:.75},echo:{wall:1,d:.55,h:-.05,s:.95,stand:true},papa:{wall:1,d:.5,h:.2,s:.9},phare:{wall:-1,d:.5,h:0,s:.9},ia:{wall:1,d:.45,h:.25,s:.9}};
+const DIOHID={maman:{wall:-1,d:.45,h:.36,s:.75},echo:{wall:1,d:.55,h:-.05,s:.95,stand:true},papa:{wall:1,d:.45,h:.12,s:1.45},phare:{wall:-1,d:.5,h:0,s:.9},ia:{wall:1,d:.55,h:.2,s:.8}};
 const bboxOf=(c)=>{const W=c.width,H=c.height,d=c.getContext('2d').getImageData(0,0,W,H).data;let x0=W,y0=H,x1=-1,y1=-1;for(let y=0;y<H;y+=2)for(let x=0;x<W;x+=2){if(d[(y*W+x)*4+3]>8){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}return x1<0?null:[Math.max(0,x0-2),Math.max(0,y0-2),Math.min(W,x1+3),Math.min(H,y1+3)]};
 const cropC=(c,b)=>{const o=document.createElement('canvas');o.width=b[2]-b[0];o.height=b[3]-b[1];o.getContext('2d').drawImage(c,-b[0],-b[1]);return o};
 function hiddenCanvas(id){if(id==='maman'){const c=document.createElement('canvas');c.width=c.height=260;drawHat(c.getContext('2d'),130,140,1.1);return c}
@@ -3001,7 +3007,7 @@ function dioBuild(id){while(dioBox.children.length)dioBox.remove(dioBox.children
   quad([Pp(bx0,by0,D,sD),Pp(bx0,by0,0,1),Pp(bx1,by0,0,1),Pp(bx1,by0,D,sD)],dioBasic({map:dioTex(fl),color:0xc9b08f}));
   // le détail caché, contre une paroi : invisible de face, il se découvre en tournant
   const H=DIOHID[id],hc=hiddenCanvas(id),hb=hc&&bboxOf(hc);
-  if(H&&hb){const c=cropC(hc,hb),z=D*H.d,s=sc(z),hw=(hb[2]-hb[0])/DU*H.s*s,hh=(hb[3]-hb[1])/DU*H.s*s;const wx=(H.wall<0?bx0:bx1)*s-H.wall*.04,wy=H.stand?by0*s+hh/2:(by1*H.h)*s;
+  if(H&&hb){const c=cropC(hc,hb),z=D*H.d,s=sc(z),hw=(hb[2]-hb[0])/DU*H.s*s,hh=(hb[3]-hb[1])/DU*H.s*s;const wx=(H.wall<0?bx0:bx1)*s-H.wall*(.04+hw*.22),wy=H.stand?by0*s+hh/2:(by1*H.h)*s;
     const m=plane(c,hw,hh,0,0,0);m.position.set(wx,wy,z+ZO);m.rotation.y=H.wall<0?Math.PI/2-Math.atan2(bx0*(1-sD),D):-Math.PI/2+Math.atan2(bx1*(1-sD),D);DIO.hid={x:wx*DSB,wall:H.wall,m,r0:m.rotation.y,x0:wx,stand:!!H.stand}}
   else DIO.hid=null;
   // la boîte de carton : le cadre de l'ouverture et la coque
@@ -3067,9 +3073,7 @@ function dioTick(dt,T){if(!DIO.ph)return;DIO.t+=dt;const t=DIO.t;
     if(AUTO&&DIO.need&&!DIO.found&&t>1.5&&DIO.hid)DIO.ty=.5*DIO.hid.wall;
     // trouvé en avance (pendant qu'Alice parle) : on s'en souvient, la phrase viendra à son heure
     if(DIO.touched&&DIO.hid&&DIO.yaw*DIO.hid.wall>.3)DIO.seen=true;
-    if(DIO.need&&!DIO.found&&DIO.hid&&(DIO.seen||DIO.yaw*DIO.hid.wall>.3)){DIO.found=true;DIO.need=false;DIO.hidT=performance.now();dioNote.textContent=DIO.lesson;dioNote.style.opacity=1;sndPaper(.4,.3);sndTone(523,1.2,.05);showHint('Toucher pour continuer.');waitTap=true}
-    // le détail trouvé se décolle de la paroi et se tourne vers nous, pour qu'on puisse le lire
-    if(DIO.hidT&&DIO.hid&&!DIO.hid.stand){const k=dsm((performance.now()-DIO.hidT)/800),h=DIO.hid;h.m.rotation.y=h.r0*(1-.6*k);h.m.position.x=h.x0-h.wall*.35*k;h.m.scale.setScalar(1+.3*k)}}
+    if(DIO.need&&!DIO.found&&DIO.hid&&(DIO.seen||DIO.yaw*DIO.hid.wall>.3)){DIO.found=true;DIO.need=false;DIO.hidT=performance.now();dioNote.textContent=DIO.lesson;dioNote.style.opacity=1;sndPaper(.4,.3);sndTone(523,1.2,.05);showHint('Toucher pour continuer.');waitTap=true}}
   else if(DIO.ph==='back'){const k=1-dsm(t/1.6),o=dioSetBox(k);DIO.ty*=Math.pow(.2,dt);DIO.tp*=Math.pow(.2,dt);dioDrawPaint(1,1-o);dioSheet.material.opacity=1-o;if(t>1.7){DIO.ph='star';DIO.t=0;dioBox.visible=false;DIO.sl=1;if(DIO.host){DIO.host.detach();DIO.host=null;dioGoal();DIO.sl=1.9}}}
   else if(DIO.ph==='star'){const sl=DIO.sl||1,k=dsm(t/(1.6*sl)),f=DIO.frame;dioDrawPaint(1,1-k);dioSheet.material.opacity=1-k;dioStar.material.opacity=Math.min(1,k*2)*(1-dsm((t-1.6*sl)/.5));const g=DIO.goal||[f[0]+f[2]*.25,f[1]+f[3]*.38];dioStar.position.set(lerp(f[0],g[0],k),lerp(f[1],g[1],k)+Math.sin(k*Math.PI)*.5,.06);dioStar.scale.setScalar(1.8-1.3*k);
     if(t>2.1*sl){DIO.ph=null;dioG.visible=false;const cb=DIO.onBack;DIO.onBack=null;cb&&cb()}}

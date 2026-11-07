@@ -95,7 +95,7 @@ function dioBuild(id){while(dioBox.children.length)dioBox.remove(dioBox.children
   quad([Pp(bx0,by0,D,sD),Pp(bx0,by0,0,1),Pp(bx1,by0,0,1),Pp(bx1,by0,D,sD)],dioBasic({map:dioTex(fl),color:0xc9b08f}));
   // le détail caché, contre une paroi : invisible de face, il se découvre en tournant
   const H=DIOHID[id],hc=hiddenCanvas(id),hb=hc&&bboxOf(hc);
-  if(H&&hb){const c=cropC(hc,hb),z=D*H.d,s=sc(z),hw=(hb[2]-hb[0])/DU*H.s*s,hh=(hb[3]-hb[1])/DU*H.s*s;const wx=(H.wall<0?bx0:bx1)*s-H.wall*.04,wy=H.stand?by0*s+hh/2:(by1*H.h)*s;
+  if(H&&hb){const c=cropC(hc,hb),z=D*H.d,s=sc(z),hw=(hb[2]-hb[0])/DU*H.s*s,hh=(hb[3]-hb[1])/DU*H.s*s;const wx=(H.wall<0?bx0:bx1)*s-H.wall*(.04+hw*.22),wy=H.stand?by0*s+hh/2:(by1*H.h)*s;
     const m=plane(c,hw,hh,0,0,0);m.position.set(wx,wy,z+ZO);m.rotation.y=H.wall<0?Math.PI/2-Math.atan2(bx0*(1-sD),D):-Math.PI/2+Math.atan2(bx1*(1-sD),D);DIO.hid={x:wx*DSB,wall:H.wall,m,r0:m.rotation.y,x0:wx,stand:!!H.stand}}
   else DIO.hid=null;
   // la boîte de carton : le cadre de l'ouverture et la coque
@@ -161,9 +161,7 @@ function dioTick(dt,T){if(!DIO.ph)return;DIO.t+=dt;const t=DIO.t;
     if(AUTO&&DIO.need&&!DIO.found&&t>1.5&&DIO.hid)DIO.ty=.5*DIO.hid.wall;
     // trouvé en avance (pendant qu'Alice parle) : on s'en souvient, la phrase viendra à son heure
     if(DIO.touched&&DIO.hid&&DIO.yaw*DIO.hid.wall>.3)DIO.seen=true;
-    if(DIO.need&&!DIO.found&&DIO.hid&&(DIO.seen||DIO.yaw*DIO.hid.wall>.3)){DIO.found=true;DIO.need=false;DIO.hidT=performance.now();dioNote.textContent=DIO.lesson;dioNote.style.opacity=1;sndPaper(.4,.3);sndTone(523,1.2,.05);showHint('Toucher pour continuer.');waitTap=true}
-    // le détail trouvé se décolle de la paroi et se tourne vers nous, pour qu'on puisse le lire
-    if(DIO.hidT&&DIO.hid&&!DIO.hid.stand){const k=dsm((performance.now()-DIO.hidT)/800),h=DIO.hid;h.m.rotation.y=h.r0*(1-.6*k);h.m.position.x=h.x0-h.wall*.35*k;h.m.scale.setScalar(1+.3*k)}}
+    if(DIO.need&&!DIO.found&&DIO.hid&&(DIO.seen||DIO.yaw*DIO.hid.wall>.3)){DIO.found=true;DIO.need=false;DIO.hidT=performance.now();dioNote.textContent=DIO.lesson;dioNote.style.opacity=1;sndPaper(.4,.3);sndTone(523,1.2,.05);showHint('Toucher pour continuer.');waitTap=true}}
   else if(DIO.ph==='back'){const k=1-dsm(t/1.6),o=dioSetBox(k);DIO.ty*=Math.pow(.2,dt);DIO.tp*=Math.pow(.2,dt);dioDrawPaint(1,1-o);dioSheet.material.opacity=1-o;if(t>1.7){DIO.ph='star';DIO.t=0;dioBox.visible=false;DIO.sl=1;if(DIO.host){DIO.host.detach();DIO.host=null;dioGoal();DIO.sl=1.9}}}
   else if(DIO.ph==='star'){const sl=DIO.sl||1,k=dsm(t/(1.6*sl)),f=DIO.frame;dioDrawPaint(1,1-k);dioSheet.material.opacity=1-k;dioStar.material.opacity=Math.min(1,k*2)*(1-dsm((t-1.6*sl)/.5));const g=DIO.goal||[f[0]+f[2]*.25,f[1]+f[3]*.38];dioStar.position.set(lerp(f[0],g[0],k),lerp(f[1],g[1],k)+Math.sin(k*Math.PI)*.5,.06);dioStar.scale.setScalar(1.8-1.3*k);
     if(t>2.1*sl){DIO.ph=null;dioG.visible=false;const cb=DIO.onBack;DIO.onBack=null;cb&&cb()}}
